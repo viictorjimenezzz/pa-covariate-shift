@@ -1,0 +1,8 @@
+defaults:
+  - classifier: robust
+
+classifier:
+  params:
+    dataset: cifar10
+    threat_model: Linf
+    checkpoint_dir: ${paths.data_dir}/adv/model_checkpoints
