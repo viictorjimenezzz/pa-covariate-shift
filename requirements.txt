@@ -7,10 +7,11 @@ torchmetrics>=0.11.4
 # --------- hydra --------- #
 hydra-core==1.3.2
 hydra-colorlog==1.2.0
-hydra-optuna-sweeper==1.2.0
+hydra-submitit-launcher
+# hydra-optuna-sweeper==1.2.0
 
 # --------- loggers --------- #
-# wandb
+wandb
 # neptune-client
 # mlflow
 # comet-ml
@@ -22,3 +23,8 @@ pre-commit      # hooks for applying linters on commit
 rich            # beautiful text formatting in terminal
 pytest          # tests
 # sh            # for running bash commands in some tests (linux/macos only)
+
+# ------ adversarial ------- #
+secml
+foolbox
+robustbench @ git+https://github.com/RobustBench/robustbench@master
