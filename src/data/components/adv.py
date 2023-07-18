@@ -1,3 +1,5 @@
+from abc import ABCMeta
+
 import os
 import os.path as osp
 
@@ -6,50 +8,48 @@ from torch.utils.data import TensorDataset, random_split
 
 from secml.array import CArray
 from secml.ml.classifiers import CClassifierPyTorch
-from secml.adv.attacks.evasion.foolbox.fb_attacks.fb_ddn_attack import CFoolboxL2DDN
-from secml.adv.attacks.evasion.foolbox.fb_attacks.fb_pgd_attack import CFoolboxPGD
+from secml.adv.attacks.evasion import CAttackEvasion
+from secml.adv.attacks.evasion.foolbox.fb_attacks.fb_ddn_attack import (
+    CFoolboxL2DDN,
+)
+from secml.adv.attacks.evasion.foolbox.fb_attacks.fb_pgd_attack import (
+    CFoolboxPGD,
+)
+
 from secml.adv.attacks.evasion import CAttackEvasionFoolbox
 from foolbox.attacks import LInfFMNAttack
 from foolbox.attacks.basic_iterative_method import LinfBasicIterativeAttack
-from secml.data.loader import CDataLoaderMNIST
+from secml.data.loader import CDataLoaderCIFAR10
 from secml.ml.peval.metrics import CMetricAccuracy
-from src.data.components import PairDataset
+
+from src.data.utils import carray2tensor
 
 
 class AdversarialCIFAR10Dataset(TensorDataset):
-    """ Generate adversarially crafted CIFAR10 data, for an image classification 
-        problem.
+    """Generate adversarially crafted CIFAR10 data, for an image
+    classification problem.
     """
-    dset_name: "cifar10"
+
+    dset_name: str = "cifar10"
+    dset: ABCMeta = CDataLoaderCIFAR10
+    dset_shape: tuple = (3, 32, 32)
 
     def __init__(
-            self,
-            data_dir: osp.join(".", "data", "datasets"),
-            classifier: CClassifierPyTorch,
-            poison_ratio: float = 1.,
-            cache: bool = False,
-            cache_dir: str = osp.join(".", "data", "datasets"),
-            attack_type: str = "PGD",
-            verbose: bool = False,
-            model_name: str = "Standard",
-            **kwargs,
+        self,
+        attack: CAttackEvasion,
+        classifier: CClassifierPyTorch,
+        data_dir: str = osp.join(".", "data", "datasets"),
+        checkpoint_fname: str = "checkpoint.pt",
+        adversarial_ratio: float = 1.0,
+        verbose: bool = False,
+        cache: bool = False,
     ):
+        _, ts = self.dset().load(val_size=0)
+        X, Y = ts.X / 255.0, ts.Y
 
-        _, ts = CDataLoaderCIFAR10().load(val_size=0)
-        ts.X /= 255.0
-        dset1 = TensorDataset(
-            torch.from_numpy(ts.X.tondarray()).to(torch.float32),
-            torch.from_numpy(ts.Y.tondarray()).to(torch.float32),
-        )
+        self.attacked_classifier = classifier
 
-        self.classifier = classifier
-        config = "_".join(f"{k}={v}" for k, v in sorted(kwargs.items()))
-        
-        fname = osp.join(
-            cache_dir,
-            f"adv_{dset_name}_model{model_name}_{attack_type}_{config}.pth"
-        )
-
+        fname = osp.join(data_dir, checkpoint_fname)
         if cache and osp.exists(fname):
             if verbose:
                 print(
@@ -61,74 +61,33 @@ class AdversarialCIFAR10Dataset(TensorDataset):
             if verbose:
                 print("Attack started...")
 
-            attack = self.get_attack(attack_type)
-            adv_Y, adv_scores, adv_ds, adv_f_obj = attack.run(X, Y)
+            adv_Y_pred, adv_scores, adv_ds, adv_f_obj = attack.run(X, Y)
 
             if verbose:
                 print(
                     f"Attack complete! Adversarial {self.dset_name} dataset "
-                    "stored in ", fname
+                    "stored in ",
+                    fname,
                 )
-            adv_X = self.carray2tensor(adv_ds.X, torch.float32)
+            adv_X = carray2tensor(adv_ds.X, torch.float32)
             if cache:
-                os.makedirs(cache_dir, exist_ok=True)
+                os.makedirs(data_dir, exist_ok=True)
                 torch.save(adv_X.to("cpu"), fname)
 
-        if poison_ratio != 1.:  # TODO: specify samples to be corrupted
-            dset_size = X.shape[0]  
-            split = int(poison_ratio * dset_size)
+        if adversarial_ratio != 1.0:  # TODO: specify samples to be corrupted
+            dset_size = X.shape[0]
+            split = int(adversarial_ratio * dset_size)
 
             _, unpoison_ids = random_split(
-                list(range(dset_size)),
-                lengths=(split, dset_size - split)
+                list(range(dset_size)), lengths=(split, dset_size - split)
             )
-            
-            adv_X[unpoison_ids] = self.carray2tensor(
-                X,
-                torch.float32
-            )[unpoison_ids]
 
-        Y = self.carray2tensor(Y, torch.long)
+            adv_X[unpoison_ids] = carray2tensor(X, torch.float32)[unpoison_ids]
+
+        adv_X = adv_X.reshape(-1, *self.dset_shape)
+        Y = carray2tensor(Y, torch.long)
 
         super().__init__(adv_X, Y)
-
-    def get_attack(self, attack_type):
-        if attack_type == "PGD":
-            attack = CFoolboxPGD(
-                classifier=classifier,
-                abs_stepsize=None,
-                **kwargs,
-            )
-        elif attack_type == "BIM":
-            attack = CAttackEvasionFoolbox(
-                classifier=classifier,
-                fb_attack_class=LinfBasicIterativeAttack,
-                **kwargs
-            )
-        elif attack_type == "FMN":
-            attack = CAttackEvasionFoolbox(
-                classifier=classifier,
-                y_target=None,
-                fb_attack_class=LInfFMNAttack,
-                **kwargs
-            )
-        elif attack_type == "L2DDN":
-            attack = CFoolboxL2DDN(
-                classifier=classifier,
-                abs_stepsize=None,
-                **kwargs,
-            )
-        else:
-            raise ValueError(
-                "Incorrect attack type. Can be one between 'PGD', 'BIM', "
-                "'FMN' or 'L2DNN'."
-            )
-        return attack
-
-
-    def carray2tensor(self, carr, dtype):
-        """ Converts a secml CArray to a PyTorch Tensor"""
-        return torch.from_numpy(carr.tondarray()).to(dtype)
 
     def performance_adversarial(self):
         X = CArray(self.tensors[0].to(torch.float64).numpy())
@@ -137,3 +96,41 @@ class AdversarialCIFAR10Dataset(TensorDataset):
         y_pred = self.classifier.predict(X)
         acc = metric.performance_score(y_true=Y, y_pred=y_pred)
         return acc
+
+
+def get_attack(
+    attack_type: str,
+    attacked_classifier: CClassifierPyTorch,
+    **kwargs,
+):
+    if attack_type == "PGD":
+        attack = CFoolboxPGD(
+            classifier=attacked_classifier,
+            abs_stepsize=None,
+            **kwargs,
+        )
+    elif attack_type == "BIM":
+        attack = CAttackEvasionFoolbox(
+            classifier=attacked_classifier,
+            fb_attack_class=LinfBasicIterativeAttack,
+            **kwargs,
+        )
+    elif attack_type == "FMN":
+        attack = CAttackEvasionFoolbox(
+            classifier=attacked_classifier,
+            y_target=None,
+            fb_attack_class=LInfFMNAttack,
+            **kwargs,
+        )
+    elif attack_type == "L2DDN":
+        attack = CFoolboxL2DDN(
+            classifier=attacked_classifier,
+            abs_stepsize=None,
+            **kwargs,
+        )
+    else:
+        raise ValueError(
+            "Incorrect attack type. Can be one between 'PGD', 'BIM', "
+            "'FMN' or 'L2DNN'."
+        )
+    return attack
