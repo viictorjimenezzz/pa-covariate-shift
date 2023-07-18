@@ -1,7 +1,7 @@
 from typing import Any
 
 import torch
-from lightning import LightningModule
+from pytorch_lightning import LightningModule
 from torchmetrics import MaxMetric, MeanMetric
 from torchmetrics.classification.accuracy import Accuracy
 
