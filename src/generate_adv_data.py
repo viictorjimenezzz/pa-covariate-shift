@@ -4,7 +4,7 @@ import pyrootutils
 import hydra
 from omegaconf import DictConfig
 
-import lightning as L
+from pytorch_lightning import seed_everything
 
 
 pyrootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
@@ -34,7 +34,7 @@ def main(cfg: DictConfig) -> Optional[float]:
 
     # create the data
     if cfg.get("seed"):
-        L.seed_everything(cfg.seed, workers=True)
+        seed_everything(cfg.seed, workers=True)
 
     dm = hydra.utils.instantiate(cfg.data)
     dm.setup()
