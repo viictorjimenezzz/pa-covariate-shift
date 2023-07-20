@@ -36,7 +36,7 @@ def main(cfg: DictConfig) -> Optional[float]:
     if cfg.get("seed"):
         L.seed_everything(cfg.seed, workers=True)
 
-    dm = CIFAR10DataModule(**cfg.data.adv, **cfg.model.adv)
+    dm = hydra.utils.instantiate(cfg.data)
     dm.setup()
 
 
