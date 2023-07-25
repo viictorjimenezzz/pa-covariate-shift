@@ -1,0 +1,15 @@
+# @package model
+
+defaults:
+  - cifar10.yaml
+
+_target_: src.models.cifar10_module.PosteriorAgreementModule
+
+optimizer:
+  _target_: torch.optim.SGD
+  _partial_: true
+  lr: 0.1
+  weight_decay: 0.0
+
+# initial inverse temperature of PA kernel
+beta0: 1.0

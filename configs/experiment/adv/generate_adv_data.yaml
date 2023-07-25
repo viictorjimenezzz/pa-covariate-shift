@@ -5,9 +5,9 @@
 
 defaults:
   - override /data/adv: cifar10.yaml
-  - override /data/adv/attack: null
-  - override /model/adv: cifar10.yaml
-  - override /model/adv/classifier: null
+  # - override /data/adv/attack@data.attack: null
+  # - override /model/adv: cifar10.yaml
+  # - override /model/adv/classifier@model.classifier: null
   # - override /experiment/adv/attack: ${data.adv.attack.name}.yaml
   # - override /callbacks: default.yaml
   # - override /trainer: default.yaml
@@ -18,27 +18,4 @@ defaults:
 # tags: ["mnist", "simple_dense_net"]
 
 seed: 12345
-
-# trainer:
-#   min_epochs: 10
-#   max_epochs: 10
-#   gradient_clip_val: 0.5
-
-# model:
-#   optimizer:
-#     lr: 0.002
-#   net:
-#     lin1_size: 128
-#     lin2_size: 256
-#     lin3_size: 64
-
-# data:
-#   batch_size: 64
-
-# logger:
-#   wandb:
-#     tags: ${tags}
-#     group: "mnist"
-#   aim:
-#     experiment: "mnist"
 
