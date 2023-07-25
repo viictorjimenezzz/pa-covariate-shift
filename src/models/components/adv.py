@@ -1,19 +1,17 @@
-import os.path as osp
-
 from robustbench import load_model
 
 
-def get_classifier(
-    classifier_name: str,
-    checkpoint_dir: str = osp.join("data", "model_checkpoints"),
-    **kwargs,
-):
-    classifier = load_model(
-        model_name=classifier_name,
-        model_dir=checkpoint_dir,
+def get_model(**kwargs):
+    """Load a robustbench model and store the name of the model in it."""
+    model = load_model(
         **kwargs,
+        # model_name=model_name,
+        # model_dir=model_dir,
         # dataset="cifar10",
         # threat_model="Linf",
-        # model_dir=checkpoint_dir,
+        # model_dir=model_dir,
     )
-    return classifier
+
+    model.name = kwargs["model_name"]
+
+    return model

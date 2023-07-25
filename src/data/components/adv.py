@@ -98,33 +98,30 @@ class AdversarialCIFAR10Dataset(TensorDataset):
         return acc
 
 
-def get_attack(
-    attack_type: str,
-    attacked_classifier: CClassifierPyTorch,
-    **kwargs,
-):
-    if attack_type == "PGD":
+def get_attack(attack_name: str, classifier: CClassifierPyTorch, **kwargs):
+    """Retrieve the attack and store its name."""
+    if attack_name == "PGD":
         attack = CFoolboxPGD(
-            classifier=attacked_classifier,
+            classifier=classifier,
             abs_stepsize=None,
             **kwargs,
         )
-    elif attack_type == "BIM":
+    elif attack_name == "BIM":
         attack = CAttackEvasionFoolbox(
-            classifier=attacked_classifier,
+            classifier=classifier,
             fb_attack_class=LinfBasicIterativeAttack,
             **kwargs,
         )
-    elif attack_type == "FMN":
+    elif attack_name == "FMN":
         attack = CAttackEvasionFoolbox(
-            classifier=attacked_classifier,
+            classifier=classifier,
             y_target=None,
             fb_attack_class=LInfFMNAttack,
             **kwargs,
         )
-    elif attack_type == "L2DDN":
+    elif attack_name == "L2DDN":
         attack = CFoolboxL2DDN(
-            classifier=attacked_classifier,
+            classifier=classifier,
             abs_stepsize=None,
             **kwargs,
         )
@@ -133,4 +130,11 @@ def get_attack(
             "Incorrect attack type. Can be one between 'PGD', 'BIM', "
             "'FMN' or 'L2DNN'."
         )
+    attack.name = attack_name
+    config = "_".join(f"{k}={v}" for k, v in sorted(kwargs.items()))
+    attack.info = (
+        f"model={classifier.name}_"
+        f"attack={attack_name}_"
+        f"{config}"
+    )
     return attack

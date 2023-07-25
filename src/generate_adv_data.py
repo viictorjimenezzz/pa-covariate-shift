@@ -10,7 +10,6 @@ from pytorch_lightning import seed_everything
 pyrootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 
 from src import utils
-from src.data.cifar10_datamodule import CIFAR10DataModule
 
 
 @hydra.main(
