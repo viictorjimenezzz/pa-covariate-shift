@@ -1,13 +1,27 @@
+# --------- general --------- #
+setuptools
+
+# ---------- numpy ---------- #
+numpy==1.22.4
+
+# --------- sklearn --------- #
+scikit-learn==1.1.3
+
+# ---------- plots ---------- #
+matplotlib
+seaborn
+# SciencePlots
+
 # --------- pytorch --------- #
-torch>=2.0.0
-torchvision>=0.15.0
-lightning>=2.0.0
-torchmetrics>=0.11.4
+torch==1.10.0
+torchvision>=0.11.0
+pytorch-lightning==1.9.1
+torchmetrics==0.11.0
 
 # --------- hydra --------- #
 hydra-core==1.3.2
 hydra-colorlog==1.2.0
-hydra-submitit-launcher
+hydra-submitit-launcher==1.2.0
 # hydra-optuna-sweeper==1.2.0
 
 # --------- loggers --------- #
@@ -28,3 +42,7 @@ pytest          # tests
 secml
 foolbox
 robustbench @ git+https://github.com/RobustBench/robustbench@master
+
+# ---------- fix ---------- #
+gevent  # needed to fix a problem with wandb loading
+protobuf==3.20.0  # fix pytorch_lightning imports
