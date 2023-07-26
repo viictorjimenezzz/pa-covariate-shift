@@ -24,6 +24,7 @@ def create_dataframe_from_wandb_runs(
     project (str): name of the W&B project (e.g. <entity>/<project>).
     dset (str): name of the dataset (currently used only for the fname if
         cache=True).
+    attack (str): name of the attack. Can be one of "PGD" or "FMN"
     date (str): a date in the normal date format. All runs after that date will
         be retrieved.
     afr (str): string specifying the AFR metric to be used. Can be one of
