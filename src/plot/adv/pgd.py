@@ -250,8 +250,8 @@ def afr_vs_logpa_separate(
 
 if __name__ == "__main__":
     df = create_dataframe_from_wandb_runs(
-        project="malvai/adv_pa_new",
-        dset="cifar10",
+        project="adv_pa_new",
+        attack="PGD",
         date="2023-07-26",
         afr="true",
         cache=True,
