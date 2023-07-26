@@ -14,6 +14,9 @@ defaults:
 # all parameters below will be merged with parameters from default configurations set above
 # this allows you to overwrite only specified parameters
 
+model:
+  classifier: ${data.classifier}
+
 tags: ["cifar10", "${model.classifier.model_name}", "${data.attack.attack_name}"]
 
 seed: 12345
