@@ -133,8 +133,7 @@ def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR"):
 
 if __name__ == "__main__":
     df = create_dataframe_from_wandb_runs(
-        project="malvai/adv_pa_new",
-        dset="cifar10",
+        project="adv_pa_new",
         attack="FMN",
         date="2023-07-26",
         afr="true",
