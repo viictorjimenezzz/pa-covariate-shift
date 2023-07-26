@@ -16,7 +16,7 @@ def create_dataframe_from_wandb_runs(
     date: str = None,
     afr: str = "true",
     cache: bool = False,
-):
+) -> pd.DataFrame:
     """
     Create a pandas DataFrame from the data retrieved by Weight & Biases. The
     data can be used for plotting.
