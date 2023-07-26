@@ -9,7 +9,7 @@ import seaborn as sns
 from src.plot.utils import create_dataframe_from_wandb_runs
 
 
-def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR"):
+def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR") -> None:
     """Create and store plots of Linf/Poison ratio vs comparison_metric/logPA.
     Each plot have Linf/Adversarial Ratio on the x axis and four curves on the y
     axis: comparison_metric for a weak (Standard) and robust model,logPA for a
@@ -143,7 +143,10 @@ def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR"):
             plt.close()
 
 
-def afr_vs_logpa_separate(df: pd.DataFrame, comparison_metric: str = "AFR"):
+def afr_vs_logpa_separate(
+    df: pd.DataFrame,
+    comparison_metric: str = "AFR"
+) -> None:
     """Create and store plots of Linf/Poison ratio vs comparison_metric/logPA.
     Each plot have Linf/Adversarial Ratio on the x axis and two curves on the y
     axis: comparison_metric and LogPA for a (weak/robust) model.
