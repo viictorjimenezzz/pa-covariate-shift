@@ -1,4 +1,3 @@
-from collections import defaultdict
 import os
 import os.path as osp
 from tqdm import tqdm
@@ -7,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import seaborn as sns
 
-from utils import create_dataframe_from_wandb_runs
+from src.plot.utils import create_dataframe_from_wandb_runs
 
 
 def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR"):
