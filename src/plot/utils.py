@@ -50,7 +50,7 @@ def create_dataframe_from_wandb_runs(
     runs = api.runs(project, filters)
 
     dirname = osp.join("results", "dataframes")
-    fname = osp.join(dirname, f"cifar10_afr={afr}_{date}.pkl")
+    fname = osp.join(dirname, f"cifar10_{attack}_afr={afr}_{date}.pkl")
     os.makedirs(dirname, exist_ok=True)
 
     if cache and osp.exists(fname):
