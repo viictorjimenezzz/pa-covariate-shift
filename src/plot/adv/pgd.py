@@ -22,23 +22,23 @@ def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR") -> None:
     os.makedirs(dirname, exist_ok=True)
 
     pairs = [("linf", "adversarial_ratio"), ("adversarial_ratio", "linf")]
-    for levels in tqdm(pairs, total=len(pairs)):
-        level, x_level = levels
-        level_name, x_name = (
+    for pair in tqdm(pairs, total=len(pairs)):
+        level, x_var = pair
+        level_name, x_label = (
             ("$\ell_\infty$", "Adversarial Ratio")
             if level == "linf"
             else ("Adversarial Ratio", "$\ell_\infty$")
         )
-        levels = df[level].unique()
+        pair = df[level].unique()
 
         fontname = "Times New Roman"
         font_path = fm.findfont(fm.FontProperties(family=fontname))
-        for value in tqdm(levels, total=len(levels)):
+        for value in tqdm(pair, total=len(pair)):
             # Subset the DataFrame to include only the relevant columns and rows
             level_set = df.loc[
                 df[level] == value,
                 [
-                    "attack_type",
+                    "attack_name",
                     "model_name",
                     "adversarial_ratio",
                     "linf",
@@ -58,8 +58,8 @@ def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR") -> None:
             }
 
             # Create a line plot for PGD attack type with Seaborn
-            attack_type = "PGD"
-            subset = level_set[level_set["attack_type"] == attack_type]
+            attack_name = "PGD"
+            subset = level_set[level_set["attack_name"] == attack_name]
             _, ax1 = plt.subplots(
                 figsize=(2 * 3.861, 2 * 2.7291),
             )
@@ -73,7 +73,7 @@ def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR") -> None:
             sns.lineplot(
                 data=subset,
                 ax=ax1,
-                x=x_level,
+                x=x_var,
                 y="logPA",
                 hue="model_name",
                 style="model_name",
@@ -86,7 +86,7 @@ def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR") -> None:
             sns.lineplot(
                 data=subset,
                 ax=ax2,
-                x=x_level,
+                x=x_var,
                 y="AFR",
                 hue="model_name",
                 style="model_name",
@@ -109,7 +109,7 @@ def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR") -> None:
             ax1.grid(linestyle="--")
             ax2.grid(False)
 
-            ax1.set_xlabel(x_name, fontname=fontname)
+            ax1.set_xlabel(x_label, fontname=fontname)
             ax1.set_ylabel("LogPA", fontname=fontname)
             ax2.set_ylabel(comparison_metric, fontname=fontname)
 
@@ -132,12 +132,12 @@ def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR") -> None:
             ax1.legend().remove()
 
             ax1.set_title(
-                f"{attack_type} attack, {level_name} = {value:.4f}",
+                f"{attack_name} attack, {level_name} = {value:.4f}",
                 fontname=fontname,
             )
 
             plt.tight_layout()
-            fname = osp.join(dirname, f"{attack_type}_{level}={value:.8f}.pdf")
+            fname = osp.join(dirname, f"{attack_name}_{level}={value:.8f}.pdf")
             plt.savefig(fname)
             plt.clf()
             plt.close()
@@ -170,7 +170,7 @@ def afr_vs_logpa_separate(
                 df[level] == value,
                 [
                     "name",
-                    "attack_type",
+                    "attack_name",
                     "model_name",
                     "adversarial_ratio",
                     "linf",
@@ -190,11 +190,11 @@ def afr_vs_logpa_separate(
             }
 
             # Create a line plot for PGD attack type with Seaborn
-            for attack_type in ("PGD",):
+            for attack_name in ("PGD",):
                 for model_name in ("Standard", "Engstrom2019Robustness"):
                     # import ipdb; ipdb.set_trace()
                     subset = level_set[
-                        (level_set["attack_type"] == attack_type)
+                        (level_set["attack_name"] == attack_name)
                         & (level_set["model_name"] == model_name)
                     ]
 
@@ -233,14 +233,14 @@ def afr_vs_logpa_separate(
                     ax1.legend().remove()
 
                     plt.title(
-                        f"{attack_type} attack, "
+                        f"{attack_name} attack, "
                         f"{label_dict[model_name]} model, "
                         f"{level_name} = {value:.4f}"
                     )
 
                     fname = osp.join(
                         dirname,
-                        f"{attack_type}_{label_dict[model_name]}_{level}={value:.8f}.png",
+                        f"{attack_name}_{label_dict[model_name]}_{level}={value:.8f}.png",
                     )
 
                     plt.savefig(fname)
@@ -253,7 +253,7 @@ if __name__ == "__main__":
         project="adv_pa_new",
         attack="PGD",
         date="2023-07-26",
-        afr="true",
+        afr="pred",
         cache=True,
     )
 
