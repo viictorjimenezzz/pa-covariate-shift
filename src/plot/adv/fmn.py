@@ -31,7 +31,7 @@ def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR"):
     level_set = df.loc[
         :,
         [
-            "attack_type",
+            "attack_name",
             "model_name",
             "adversarial_ratio",
             "linf",
@@ -51,8 +51,8 @@ def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR"):
     }
 
     # Create a line plot for PGD attack type with Seaborn
-    attack_type = "FMN"
-    subset = level_set[level_set["attack_type"] == attack_type]
+    attack_name = "FMN"
+    subset = level_set[level_set["attack_name"] == attack_name]
     _, ax1 = plt.subplots(figsize=(2 * 3.861, 2 * 2.7291))
     sns.set(font_scale=1.9)
     plt.rcParams["font.family"] = "serif"
@@ -122,10 +122,10 @@ def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR"):
     # sns.move_legend(ax2, "upper right")
     ax1.legend().remove()
 
-    ax1.set_title(f"{attack_type} attack", fontname=fontname)
+    ax1.set_title(f"{attack_name} attack", fontname=fontname)
 
     plt.tight_layout()
-    fname = osp.join(dirname, f"{attack_type}.pdf")
+    fname = osp.join(dirname, f"{attack_name}.pdf")
     plt.savefig(fname)
     plt.clf()
     plt.close()

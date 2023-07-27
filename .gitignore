@@ -157,3 +157,5 @@ configs/local/default.yaml
 data
 logs
 outputs
+results
+wandb
