@@ -1,6 +1,7 @@
 #!/bin/bash
 # Generates symbolic links for data, logs and outputs
 # Useful to link these folders to some remote location
+# run this script from the root folder
 set -euo pipefail 
 
 cd "$(dirname "$0")/.."

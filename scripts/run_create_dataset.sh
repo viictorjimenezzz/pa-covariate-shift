@@ -1,4 +1,5 @@
 #!/bin/bash
+# run this script from the root folder
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
