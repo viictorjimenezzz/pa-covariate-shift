@@ -77,12 +77,3 @@ def create_dataframe_from_wandb_runs(
     print(f"dataframe stored in {fname}.")
 
     return df
-
-
-if __name__ == "__main__":
-    create_dataframe_from_wandb_runs(
-        project="adv_pa_new",
-        date="",
-        afr="pred",
-        cache=True,
-    )
