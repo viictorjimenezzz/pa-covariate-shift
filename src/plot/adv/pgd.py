@@ -257,6 +257,4 @@ if __name__ == "__main__":
         cache=True,
     )
 
-    comparison_metric = "AFR"
-
-    afr_vs_logpa(df, comparison_metric)
+    afr_vs_logpa(df, "AFR")
