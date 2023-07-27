@@ -39,7 +39,8 @@ def create_dataframe_from_wandb_runs(
         )
     filters = {
         "state": "finished",
-        "tags": {"$all": ["cifar10", attack]},
+        # "tags": {"$all": ["cifar10", attack]},  # for some reason this does not work
+        "$and": [{"tags": "cifar10"}, {"tags": attack}],
     }
     if date is not None:
         filters["created_at"] = {"$gte": date}
