@@ -144,8 +144,7 @@ def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR") -> None:
 
 
 def afr_vs_logpa_separate(
-    df: pd.DataFrame,
-    comparison_metric: str = "AFR"
+    df: pd.DataFrame, comparison_metric: str = "AFR"
 ) -> None:
     """Create and store plots of Linf/Poison ratio vs comparison_metric/logPA.
     Each plot have Linf/Adversarial Ratio on the x axis and two curves on the y
@@ -249,10 +248,20 @@ def afr_vs_logpa_separate(
 
 
 if __name__ == "__main__":
+    attack = "PGD"
+    date = "2023-07-28"
+    tags = ["cifar10", "PGD", "200_steps"]
+
     df = create_dataframe_from_wandb_runs(
         project="adv_pa_new",
-        attack="PGD",
-        date="2023-07-26",
+        attack=attack,
+        filters={
+            "state": "finished",
+            "group": "adversarial",
+            # "tags": {"$all": ["cifar10", attack]},  # for some reason this does not work
+            "$and": [{"tags": tag} for tag in tags],
+            "created_at": {"$gte": date},
+        },
         afr="pred",
         cache=True,
     )

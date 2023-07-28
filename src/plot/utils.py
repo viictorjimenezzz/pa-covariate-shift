@@ -13,6 +13,7 @@ import wandb
 def create_dataframe_from_wandb_runs(
     project: str,
     attack: str,
+    filters: dict,
     date: str = None,
     afr: str = "true",
     cache: bool = False,
@@ -25,6 +26,8 @@ def create_dataframe_from_wandb_runs(
     dset (str): name of the dataset (currently used only for the fname if
         cache=True).
     attack (str): name of the attack. Can be one of "PGD" or "FMN"
+    filters (dict): a dictionary containing conditions to filter out runs. The
+        syntax is that defined by W&B, based on MongoDB.
     date (str): a date in the normal date format. All runs after that date will
         be retrieved.
     afr (str): string specifying the AFR metric to be used. Can be one of
@@ -37,14 +40,6 @@ def create_dataframe_from_wandb_runs(
         raise ValueError(
             f"'afr' must be one of 'true' or 'pred'. {afr} received instead."
         )
-    filters = {
-        "state": "finished",
-        "group": "adversarial",
-        # "tags": {"$all": ["cifar10", attack]},  # for some reason this does not work
-        "$and": [{"tags": "cifar10"}, {"tags": attack}],
-    }
-    if date is not None:
-        filters["created_at"] = {"$gte": date}
 
     api = wandb.Api(timeout=100)
     runs = api.runs(project, filters)

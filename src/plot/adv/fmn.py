@@ -132,11 +132,21 @@ def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR"):
 
 
 if __name__ == "__main__":
+    attack = "FMN"
+    date = "2023-07-28" 
+    tags = ["cifar10", "PGD", "200_steps"]
+
     df = create_dataframe_from_wandb_runs(
         project="adv_pa_new",
-        attack="FMN",
-        date="2023-07-26",
-        afr="true",
+        attack=attack,
+        filters={
+            "state": "finished",
+            "group": "adversarial",
+            # "tags": {"$all": ["cifar10", attack]},  # for some reason this does not work
+            "$and": [{"tags": tag} for tag in tags],
+            "created_at": {"$gte" : date},
+        },
+        afr="pred",
         cache=True,
     )
 
