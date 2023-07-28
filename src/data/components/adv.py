@@ -133,8 +133,8 @@ def get_attack(attack_name: str, classifier: CClassifierPyTorch, **kwargs):
     attack.name = attack_name
     config = "_".join(f"{k}={v}" for k, v in sorted(kwargs.items()))
     attack.info = (
-        f"model={classifier.name}_"
-        f"attack={attack_name}_"
-        f"{config}"
+        f"model={classifier.name}" \
+        f"_attack={attack_name}" \
+        f"_{config}" if config else ""
     )
     return attack
