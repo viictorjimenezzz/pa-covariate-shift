@@ -5,7 +5,7 @@ defaults:
   - attack: null
 
 _target_: src.data.cifar10_datamodule.CIFAR10DataModule
-batch_size: 500
+batch_size: ???
 adversarial_ratio: 1.
 data_dir: ${paths.data_dir}/adv/adv_datasets
 cache: True
