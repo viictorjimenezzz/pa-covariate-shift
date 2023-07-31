@@ -251,6 +251,7 @@ if __name__ == "__main__":
     attack = "PGD"
     date = "2023-07-28"
     tags = ["cifar10", "PGD", "200_steps"]
+    afr = "pred"
 
     df = create_dataframe_from_wandb_runs(
         project="adv_pa_new",
@@ -262,7 +263,7 @@ if __name__ == "__main__":
             "$and": [{"tags": tag} for tag in tags],
             "created_at": {"$gte": date},
         },
-        afr="pred",
+        afr=afr,
         cache=True,
     )
 
