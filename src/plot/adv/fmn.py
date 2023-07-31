@@ -34,7 +34,6 @@ def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR"):
             "attack_name",
             "model_name",
             "adversarial_ratio",
-            "linf",
             "logPA",
             comparison_metric,
         ],
