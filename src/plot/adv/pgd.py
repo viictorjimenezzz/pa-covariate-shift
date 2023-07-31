@@ -249,12 +249,13 @@ def afr_vs_logpa_separate(
 
 if __name__ == "__main__":
     attack = "PGD"
-    date = "2023-07-28"
-    tags = ["cifar10", "PGD", "200_steps"]
+    date = "2023-07-31"
+    tags = ["cifar10", "PGD", "1000_steps"]
 
     df = create_dataframe_from_wandb_runs(
         project="adv_pa_new",
         attack=attack,
+        date=date,
         filters={
             "state": "finished",
             "group": "adversarial",
