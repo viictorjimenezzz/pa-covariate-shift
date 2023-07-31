@@ -250,7 +250,7 @@ def afr_vs_logpa_separate(
 if __name__ == "__main__":
     attack = "PGD"
     date = "2023-07-28"
-    tags = ["cifar10", "PGD", "200_steps"]
+    tags = ["cifar10", attack, "200_steps"]
 
     df = create_dataframe_from_wandb_runs(
         project="adv_pa_new",
