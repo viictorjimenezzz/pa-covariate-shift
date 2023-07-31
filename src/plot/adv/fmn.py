@@ -132,8 +132,8 @@ def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR"):
 
 if __name__ == "__main__":
     attack = "FMN"
-    date = "2023-07-28" 
-    tags = ["cifar10", "PGD", "200_steps"]
+    date = "2023-07-31" 
+    tags = ["cifar10", attack, "200_steps"]
     afr = "pred"
 
     df = create_dataframe_from_wandb_runs(
