@@ -19,7 +19,7 @@ model:
   optimizer:
     _target_: torch.optim.Adam
 
-tags: ["cifar10", "${model.classifier.model_name}", "${data.attack.attack_name}"]
+tags: ["adam", "500_epochs", "1000_steps", "cifar10", "${model.classifier.model_name}", "${data.attack.attack_name}"]
 
 seed: 12345
 
