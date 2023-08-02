@@ -37,6 +37,6 @@ logger:
   wandb:
     tags: ${tags}
     project: adv_pa_new
-    group: "adversarial"
+    group: adversarial
     save_dir: ${paths.output_dir}/adv
     name: att=${data.attack.attack_name}_mod=${model.classifier.model_name}_ar=${data.adversarial_ratio}
