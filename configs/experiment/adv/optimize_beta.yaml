@@ -16,6 +16,8 @@ defaults:
 
 model:
   classifier: ${data.classifier}
+  optimizer:
+    _target_: torch.optim.Adam
 
 tags: ["cifar10", "${model.classifier.model_name}", "${data.attack.attack_name}"]
 
