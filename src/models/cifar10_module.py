@@ -54,7 +54,7 @@ class PosteriorAgreementModule(pl.LightningModule):
     def training_step(self, train_batch: Any, batch_idx: int):
         o1, o2, loss = self.model_step(train_batch)
 
-        if self.current_epoch == 0:  # ASR does not change during the epochs
+        if self.current_epoch == 0:  # AFR does not change during the epochs
             y_pred = torch.argmax(o1.data, 1)
             y_pred_adv = torch.argmax(o2.data, 1)
             y_true = train_batch["first"][1]
