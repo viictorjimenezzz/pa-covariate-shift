@@ -9,7 +9,6 @@ import torch.nn as nn
 import pytorch_lightning as pl
 
 from src.models.components.post_agr import PosteriorAgreementKernel
-from src.models.utils import AFR
 from torchmetrics.classification.accuracy import Accuracy
 
 
@@ -58,6 +57,7 @@ class PosteriorAgreementModule(pl.LightningModule):
             y_pred = torch.argmax(o1.data, 1)
             y_pred_adv = torch.argmax(o2.data, 1)
             y_true = train_batch["first"][1]
+
 
             self.afr_pred(y_pred_adv, y_pred)
             self.afr_true(y_pred_adv, y_true)
