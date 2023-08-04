@@ -19,13 +19,13 @@ model:
   optimizer:
     _target_: torch.optim.Adam
 
-tags: ["adam", "500_epochs", "1000_steps", "cifar10", "${model.classifier.model_name}", "${data.attack.attack_name}"]
+tags: ["order_by_attack", "adam", "1000_epochs", "1000_steps", "cifar10", "${model.classifier.model_name}", "${data.attack.attack_name}"]
 
 seed: 12345
 
 trainer:
-  min_epochs: 500
-  max_epochs: 500
+  min_epochs: 1000
+  max_epochs: 1000
   log_every_n_steps: 3
   devices: 1
 
