@@ -75,14 +75,19 @@ class AdversarialCIFAR10Dataset(TensorDataset):
                 torch.save(adv_X.to("cpu"), fname)
 
         if adversarial_ratio != 1.0:  # TODO: specify samples to be corrupted
+            X = carray2tensor(X, torch.float32)
+            if adversarial_ratio == 0.0:
+                adv_X = X
+
             dset_size = X.shape[0]
+
             split = int(adversarial_ratio * dset_size)
+            attack_norms = (adv_X - X).norm(p=float("inf"), dim=1)
 
-            _, unpoison_ids = random_split(
-                list(range(dset_size)), lengths=(split, dset_size - split)
-            )
+            _, unpoison_ids = attack_norms.topk(dset_size - split)
 
-            adv_X[unpoison_ids] = carray2tensor(X, torch.float32)[unpoison_ids]
+            # remove poison for the largest 1 - adversarial_ratio attacked ones
+            adv_X[unpoison_ids] = X[unpoison_ids]
 
         adv_X = adv_X.reshape(-1, *self.dset_shape)
         Y = carray2tensor(Y, torch.long)
@@ -133,8 +138,8 @@ def get_attack(attack_name: str, classifier: CClassifierPyTorch, **kwargs):
     attack.name = attack_name
     config = "_".join(f"{k}={v}" for k, v in sorted(kwargs.items()))
     attack.info = (
-        f"model={classifier.name}" \
-        f"_attack={attack_name}" \
-        f"_{config}" if config else ""
+        f"model={classifier.name}" f"_attack={attack_name}" f"_{config}"
+        if config
+        else ""
     )
     return attack
