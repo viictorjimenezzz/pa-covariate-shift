@@ -1,3 +1,6 @@
+defaults:
+  - net.yaml
+
 _target_: src.models.erm.ERMMnist
 
 n_classes: 2
@@ -13,11 +16,3 @@ scheduler:
   mode: min
   factor: 0.1
   patience: 10
-
-net:
-  _target_: src.models.components.backbone.Backbone
-  net: resnet18
-  pretrained: false
-  input_channels: 3
-  n_classes: 2  
-

@@ -1,0 +1,18 @@
+defaults:
+  - net@model.dg.classifier
+
+_target_: src.models.diagvib_pa.PosteriorAgreementModule
+
+classifier:
+  _target_: src.models.components.dg_backbone.get_lm_model
+  exp_name: ???
+  log_dir: ${paths.log_dir}
+
+optimizer:
+  _target_: torch.optim.SGD
+  _partial_: true
+  lr: 0.1
+  weight_decay: 0.0
+
+# initial inverse temperature of PA kernel
+beta0: 1.0

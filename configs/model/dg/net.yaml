@@ -1,0 +1,5 @@
+  _target_: src.models.components.backbone.Backbone
+  net: resnet18
+  pretrained: false
+  input_channels: 3
+  n_classes: 2  

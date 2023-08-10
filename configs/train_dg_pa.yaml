@@ -1,19 +1,17 @@
 # @package _global_
 
-# to execute this experiment run:
-# python train.py experiment=example
-
+# specify here default configuration
+# order of defaults determines the order in which configs override each other
 defaults:
   - _self_
   - data/dg: diagvib_pa.yaml
-  - model/dg: erm_diagvib.yaml
+  - model/dg: optimize_pa.yaml
   - callbacks: default.yaml
-  - logger: null
+  - logger: null # set logger here or use command line (e.g. `python train.py logger=tensorboard`)
   - trainer: default.yaml
   - paths: default.yaml
   - extras: default.yaml
   - hydra: default.yaml
-
 
   # experiment configs allow for version control of specific hyperparameters
   # e.g. best hyperparameters for given model and datamodule
@@ -30,7 +28,7 @@ defaults:
   - debug: null
 
 # task name, determines output directory path
-task_name: "train_dg"
+task_name: "train_pa_dg"
 
 # tags to help you identify your experiments
 # you can overwrite this in experiment configs
