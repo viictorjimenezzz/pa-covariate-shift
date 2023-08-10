@@ -154,8 +154,9 @@ configs/local/default.yaml
 .aim
 
 # project folders
-data
-logs
-outputs
-results
-wandb
+/data
+/logs
+/outputs
+/results
+/wandb
+.DS_Store
