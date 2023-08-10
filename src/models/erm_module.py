@@ -2,46 +2,63 @@ from pytorch_lightning import LightningModule
 from torch import nn, argmax, optim
 from torchmetrics import Accuracy, F1Score, Recall, Specificity, Precision
 
-from src.models.components.backbone import Backbone
 
 class ERM(LightningModule):
-
     """Vanilla ERM traning scheme for fitting a NN to the training data"""
 
-    def __init__(self,
-                 n_classes: int,
-                 net: nn.Module,
-                 optimizer: optim.Optimizer,
-                 scheduler: optim.lr_scheduler
-                 ):
+    def __init__(
+        self,
+        n_classes: int,
+        net: nn.Module,
+        optimizer: optim.Optimizer,
+        scheduler: optim.lr_scheduler,
+    ):
         super().__init__()
 
         self.model = None
         self.loss = None
 
-        self.save_hyperparameters(ignore=['net'])  # for easier retrieval from w&b and sanity checks
+        self.save_hyperparameters(
+            ignore=["net"]
+        )  # for easier retrieval from w&b and sanity checks
 
         # Metrics
         self.n_classes = int(n_classes)
 
         _task = "multiclass" if self.n_classes > 2 else "binary"
-        self.train_acc = Accuracy(task=_task,num_classes=self.n_classes, average="macro")
-        self.train_f1 = F1Score(task=_task,num_classes=self.n_classes, average="macro")
-
-        self.train_specificity = Specificity(task=_task,
-            num_classes=self.n_classes, average="macro"
+        self.train_acc = Accuracy(
+            task=_task, num_classes=self.n_classes, average="macro"
         )
-        
-        self.train_sensitivity = Recall(task=_task,num_classes=self.n_classes, average="macro")
-        self.train_precision = Precision(task=_task,num_classes=self.n_classes, average="macro")
-
-        self.val_acc = Accuracy(task=_task,num_classes=self.n_classes, average="macro")
-        self.val_f1 = F1Score(task=_task,num_classes=self.n_classes, average="macro")
-        self.val_specificity = Specificity(task=_task,
-            num_classes=self.n_classes, average="macro"
+        self.train_f1 = F1Score(
+            task=_task, num_classes=self.n_classes, average="macro"
         )
-        self.val_sensitivity = Recall(task=_task,num_classes=self.n_classes, average="macro")
-        self.val_precision = Precision(task=_task,num_classes=self.n_classes, average="macro")
+
+        self.train_specificity = Specificity(
+            task=_task, num_classes=self.n_classes, average="macro"
+        )
+
+        self.train_sensitivity = Recall(
+            task=_task, num_classes=self.n_classes, average="macro"
+        )
+        self.train_precision = Precision(
+            task=_task, num_classes=self.n_classes, average="macro"
+        )
+
+        self.val_acc = Accuracy(
+            task=_task, num_classes=self.n_classes, average="macro"
+        )
+        self.val_f1 = F1Score(
+            task=_task, num_classes=self.n_classes, average="macro"
+        )
+        self.val_specificity = Specificity(
+            task=_task, num_classes=self.n_classes, average="macro"
+        )
+        self.val_sensitivity = Recall(
+            task=_task, num_classes=self.n_classes, average="macro"
+        )
+        self.val_precision = Precision(
+            task=_task, num_classes=self.n_classes, average="macro"
+        )
 
     def training_step(self, batch, batch_idx):
         x, y = batch
@@ -50,14 +67,19 @@ class ERM(LightningModule):
         return {"logits": logits, "targets": y}
 
     def training_step_end(self, outputs):
-
         logits = outputs["logits"]
         y = outputs["targets"]
 
         loss = self.loss(input=logits, target=y)
         preds = argmax(logits, dim=1)
 
-        self.log("train/loss", loss, prog_bar=False, on_step=True, on_epoch=True)
+        self.log(
+            "train/loss",
+            loss,
+            prog_bar=False,
+            on_step=True,
+            on_epoch=True,
+        )
 
         self.train_acc(preds, y)
         self.log(
@@ -114,7 +136,6 @@ class ERM(LightningModule):
         return {"logits": logits, "targets": y}
 
     def validation_step_end(self, outputs):
-
         logits = outputs["logits"]
         y = outputs["targets"]
 
@@ -122,7 +143,7 @@ class ERM(LightningModule):
         preds = argmax(logits, dim=1)
 
         self.log("val/loss", loss, prog_bar=False, on_step=True, on_epoch=True)
-        
+
         self.val_acc(preds, y)
         self.log(
             "val/acc",
@@ -173,7 +194,7 @@ class ERM(LightningModule):
 
     def predict_step(self, predic_batch, batch_idx):
         return self.model(predic_batch)
-    
+
     def configure_optimizers(self):
         """Choose what optimizers and learning-rate schedulers to use in your optimization.
         Examples:
@@ -193,21 +214,6 @@ class ERM(LightningModule):
             }
         return {"optimizer": optimizer}
 
-    # def configure_optimizers(self):
-    #     if self.optimizer == "sdg":
-    #         optimizer = optim.SGD(
-    #             self.parameters(),
-    #             lr=self.lr,
-    #             momentum=self.momentum,
-    #             weight_decay=self.weight_decay,
-    #         )
-    #     else:
-    #         optimizer = optim.Adam(
-    #             self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay
-    #         )
-
-    #     return {"optimizer": optimizer}
-
 
 class ERMPerceptron(ERM):
     def __init__(self, lr, weight_decay, n_classes, optimizer, momentum):
@@ -218,12 +224,13 @@ class ERMPerceptron(ERM):
 
 
 class ERMMnist(ERM):
-    def __init__(self, 
-                 n_classes: int,
-                 net: nn.Module,
-                 optimizer: optim.Optimizer,
-                 scheduler: optim.lr_scheduler
-                 ):
+    def __init__(
+        self,
+        n_classes: int,
+        net: nn.Module,
+        optimizer: optim.Optimizer,
+        scheduler: optim.lr_scheduler,
+    ):
         super().__init__(n_classes, net, optimizer, scheduler)
 
         self.model = net
