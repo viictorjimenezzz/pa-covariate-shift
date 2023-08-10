@@ -1,11 +1,22 @@
+import os
+import hydra
+
+import pandas as pd
+
 import torchvision
 from torch import nn
 import torch
 
 
 class DGBackbone(nn.Module):
-    def __init__(self, n_classes, net="resnet50", pretrained=True, input_channels=3):
-        super(Backbone, self).__init__()
+    def __init__(
+        self,
+        n_classes: int,
+        net: str = "resnet50",
+        pretrained: bool = True,
+        input_channels: int = 3,
+    ):
+        super(DGBackbone, self).__init__()
 
         if "resnet" in net:
             if str(18) in net:
@@ -19,36 +30,42 @@ class DGBackbone(nn.Module):
 
             if input_channels != 3:
                 self.net.conv1 = nn.Conv2d(
-                    input_channels, 64, kernel_size=7, stride=1, padding=3, bias=False
+                    input_channels,
+                    64,
+                    kernel_size=7,
+                    stride=1,
+                    padding=3,
+                    bias=False,
                 )
-                self.net.avgpool = nn.AdaptiveAvgPool2d(
-                    output_size=(1, 1)
-                )
+                self.net.avgpool = nn.AdaptiveAvgPool2d(output_size=(1, 1))
             self.net.fc = nn.Sequential(
                 nn.Linear(self.net.fc.in_features, 500),
                 nn.BatchNorm1d(500),
                 nn.Dropout(0.2),
-                nn.Linear(500 , 256),
-                nn.Linear(256 , n_classes)
+                nn.Linear(500, 256),
+                nn.Linear(256, n_classes),
             )
 
         elif "densenet" in net:
             if str(121) in net:
-                self.net = torchvision.models.densenet121(
-                    pretrained=pretrained
-                )
+                self.net = torchvision.models.densenet121(pretrained=pretrained)
 
             if input_channels != 3:
                 self.net.features.conv0 = nn.Conv2d(
-                    1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False
+                    1,
+                    64,
+                    kernel_size=(7, 7),
+                    stride=(2, 2),
+                    padding=(3, 3),
+                    bias=False,
                 )
-            
+
             self.net.classifier = nn.Sequential(
-                nn.Linear(self.net.classifier.in_features ,500),
+                nn.Linear(self.net.classifier.in_features, 500),
                 nn.BatchNorm1d(500),
                 nn.Dropout(0.2),
-                nn.Linear(500 , 256),
-                nn.Linear(256 , n_classes)
+                nn.Linear(500, 256),
+                nn.Linear(256, n_classes),
             )
 
         elif "efficient" in net:
@@ -69,15 +86,15 @@ class DGBackbone(nn.Module):
                     padding=(1, 1),
                     bias=False,
                 )
-            
+
             self.net.classifier = nn.Sequential(
-                nn.Linear(self.net.classifier[1].in_features ,500),
+                nn.Linear(self.net.classifier[1].in_features, 500),
                 nn.BatchNorm1d(500),
                 nn.Dropout(0.2),
-                nn.Linear(500 , 256),
-                nn.Linear(256 , n_classes)
+                nn.Linear(500, 256),
+                nn.Linear(256, n_classes),
             )
-            
+
     def forward(self, x):
         h = self.net(x)
 
@@ -85,17 +102,18 @@ class DGBackbone(nn.Module):
 
 
 def get_lm_model(cfg) -> nn.Module:
-    
-    ckpt_path = os.path.join(cfg.paths.log_dir,'ckpt_exp.csv')
+    ckpt_path = os.path.join(cfg.paths.log_dir, "ckpt_exp.csv")
     df_ckpt = pd.read_csv(ckpt_path)
     print(cfg.max_beta.exp_name)
-    ckpt_path = df_ckpt[df_ckpt['experiment_name']==cfg.max_beta.exp_name].ckpt_path.values[0]
-    
+    ckpt_path = df_ckpt[
+        df_ckpt["experiment_name"] == cfg.max_beta.exp_name
+    ].ckpt_path.values[0]
+
     net = hydra.utils.instantiate(cfg.model.net)
     ckpt_lightning = torch.load(ckpt_path)
-    weights = ckpt_lightning['state_dict'].copy()
-    for key in ckpt_lightning['state_dict'].keys():
-        if 'model' in key:
+    weights = ckpt_lightning["state_dict"].copy()
+    for key in ckpt_lightning["state_dict"].keys():
+        if "model" in key:
             weights[key[6:]] = weights.pop(key)
     net.load_state_dict(weights)
 
