@@ -5,18 +5,6 @@ import os
 import pandas as pd
 import csv
 import pytorch_lightning as pl
-from src.models.components.backbone import Backbone
-import torch
-import torch.nn as nn
-from torch.utils.data import (
-    DataLoader,
-    TensorDataset,
-)
-import torch.optim as optim
-from secml.ml.peval.metrics import CMetricAccuracy
-from secml.ml.classifiers import CClassifierPyTorch
-from secml.data.loader import CDataLoaderMNIST
-
 from omegaconf import DictConfig
 import pyrootutils
 from pytorch_lightning import (
@@ -77,13 +65,17 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
     model: LightningModule = hydra.utils.instantiate(cfg.model.dg)
 
     log.info("Instantiating callbacks...")
-    callbacks: List[Callback] = utils.instantiate_callbacks(cfg.get("callbacks"))
+    callbacks: List[Callback] = utils.instantiate_callbacks(
+        cfg.get("callbacks")
+    )
 
     log.info("Instantiating loggers...")
     logger: List[Logger] = utils.instantiate_loggers(cfg.get("logger"))
 
     log.info(f"Instantiating trainer <{cfg.trainer._target_}>")
-    trainer: Trainer = hydra.utils.instantiate(cfg.trainer, callbacks=callbacks, logger=logger)
+    trainer: Trainer = hydra.utils.instantiate(
+        cfg.trainer, callbacks=callbacks, logger=logger
+    )
 
     object_dict = {
         "cfg": cfg,
@@ -101,34 +93,36 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
     # Train model
     if cfg.get("train"):
         log.info("Starting training!")
-        trainer.fit(model=model, datamodule=datamodule, ckpt_path=cfg.get("ckpt_path"))
-        
+        trainer.fit(
+            model=model, datamodule=datamodule, ckpt_path=cfg.get("ckpt_path")
+        )
+
     train_metrics = trainer.callback_metrics
     metric_dict = {**train_metrics}
-    
 
     # Store model checkpoint path
-    path_ckpt_csv = cfg.paths.log_dir + '/ckpt_exp.csv'   
+    path_ckpt_csv = cfg.paths.log_dir + "/ckpt_exp.csv"
     ckpt_path = trainer.checkpoint_callback.best_model_path
-    
+
     if os.path.exists(path_ckpt_csv) == False:
-        with open(path_ckpt_csv, 'w', newline='') as file:
+        with open(path_ckpt_csv, "w", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow(['experiment_name', 'ckpt_path'])
-            writer.writerow(['place_holder', 'place_holder'])
-    
+            writer.writerow(["experiment_name", "ckpt_path"])
+            writer.writerow(["place_holder", "place_holder"])
+
     pd_ckpt = pd.read_csv(path_ckpt_csv)
-    if logger[0].experiment.name not in pd_ckpt['experiment_name'].tolist():
-        with open(path_ckpt_csv, 'a+', newline='') as file:
+    if logger[0].experiment.name not in pd_ckpt["experiment_name"].tolist():
+        with open(path_ckpt_csv, "a+", newline="") as file:
             writer = csv.writer(file)
             writer.writerow([logger[0].experiment.name, ckpt_path])
 
     return metric_dict, object_dict
 
 
-@hydra.main(version_base="1.3", config_path="./configs", config_name="train.yaml")
+@hydra.main(
+    version_base="1.3", config_path="../configs", config_name="train_dg.yaml"
+)
 def main(cfg: DictConfig) -> Optional[float]:
-
     # train the model
     metric_dict, _ = train(cfg)
 
