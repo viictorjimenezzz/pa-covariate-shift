@@ -1,7 +1,8 @@
 defaults:
   - net.yaml
 
-_target_: src.models.erm.ERMMnist
+_target_: src.models.erm_module.ERMMnist
+
 
 n_classes: 2
 optimizer:

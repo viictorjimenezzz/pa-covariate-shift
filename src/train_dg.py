@@ -5,28 +5,36 @@ import os
 import pandas as pd
 import csv
 import pytorch_lightning as pl
-from src.models.components.backbone import Backbone
-import torch
-import torch.nn as nn
-from torch.utils.data import (
-    DataLoader,
-    TensorDataset,
-)
-import torch.optim as optim
-from secml.ml.peval.metrics import CMetricAccuracy
-from secml.ml.classifiers import CClassifierPyTorch
-from secml.data.loader import CDataLoaderMNIST
-
 from omegaconf import DictConfig
-from pytorch_lightning import Callback, LightningDataModule, LightningModule, Trainer
+import pyrootutils
+from pytorch_lightning import (
+    Callback,
+    LightningDataModule,
+    LightningModule,
+    Trainer,
+)
 from pytorch_lightning.loggers import Logger
 
-from src.data.components import PairDataset
-from src.data.components.adv import AdversarialImageDataset
-
-
+pyrootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
+# ------------------------------------------------------------------------------------ #
+# the setup_root above is equivalent to:
+# - adding project root dir to PYTHONPATH
+#       (so you don't need to force user to install project as a package)
+#       (necessary before importing any local modules e.g. `from src import utils`)
+# - setting up PROJECT_ROOT environment variable
+#       (which is used as a base for paths in "configs/paths/default.yaml")
+#       (this way all filepaths are the same no matter where you run the code)
+# - loading environment variables from ".env" in root dir
+#
+# you can remove it if you:
+# 1. either install project as a package or move entry files to project root dir
+# 2. set `root_dir` to "." in "configs/paths/default.yaml"
+#
+# more info: https://github.com/ashleve/pyrootutils
+# ------------------------------------------------------------------------------------ #
 
 from src import utils
+
 
 log = utils.get_pylogger(__name__)
 
@@ -50,20 +58,24 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
     if cfg.get("seed"):
         pl.seed_everything(cfg.seed, workers=True)
 
-    log.info(f"Instantiating datamodule <{cfg.data._target_}>")
-    datamodule: LightningDataModule = hydra.utils.instantiate(cfg.dg.data)
+    log.info(f"Instantiating datamodule <{cfg.data.dg._target_}>")
+    datamodule: LightningDataModule = hydra.utils.instantiate(cfg.data.dg)
 
-    log.info(f"Instantiating model <{cfg.model._target_}>")
-    model: LightningModule = hydra.utils.instantiate(cfg.dg.model)
+    log.info(f"Instantiating model <{cfg.model.dg._target_}>")
+    model: LightningModule = hydra.utils.instantiate(cfg.model.dg)
 
     log.info("Instantiating callbacks...")
-    callbacks: List[Callback] = utils.instantiate_callbacks(cfg.get("callbacks"))
+    callbacks: List[Callback] = utils.instantiate_callbacks(
+        cfg.get("callbacks")
+    )
 
     log.info("Instantiating loggers...")
     logger: List[Logger] = utils.instantiate_loggers(cfg.get("logger"))
 
     log.info(f"Instantiating trainer <{cfg.trainer._target_}>")
-    trainer: Trainer = hydra.utils.instantiate(cfg.trainer, callbacks=callbacks, logger=logger)
+    trainer: Trainer = hydra.utils.instantiate(
+        cfg.trainer, callbacks=callbacks, logger=logger
+    )
 
     object_dict = {
         "cfg": cfg,
@@ -81,34 +93,36 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
     # Train model
     if cfg.get("train"):
         log.info("Starting training!")
-        trainer.fit(model=model, datamodule=datamodule, ckpt_path=cfg.get("ckpt_path"))
-        
+        trainer.fit(
+            model=model, datamodule=datamodule, ckpt_path=cfg.get("ckpt_path")
+        )
+
     train_metrics = trainer.callback_metrics
     metric_dict = {**train_metrics}
-    
 
     # Store model checkpoint path
-    path_ckpt_csv = cfg.paths.log_dir + '/ckpt_exp.csv'   
+    path_ckpt_csv = cfg.paths.log_dir + "/ckpt_exp.csv"
     ckpt_path = trainer.checkpoint_callback.best_model_path
-    
+
     if os.path.exists(path_ckpt_csv) == False:
-        with open(path_ckpt_csv, 'w', newline='') as file:
+        with open(path_ckpt_csv, "w", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow(['experiment_name', 'ckpt_path'])
-            writer.writerow(['place_holder', 'place_holder'])
-    
+            writer.writerow(["experiment_name", "ckpt_path"])
+            writer.writerow(["place_holder", "place_holder"])
+
     pd_ckpt = pd.read_csv(path_ckpt_csv)
-    if logger[0].experiment.name not in pd_ckpt['experiment_name'].tolist():
-        with open(path_ckpt_csv, 'a+', newline='') as file:
+    if logger[0].experiment.name not in pd_ckpt["experiment_name"].tolist():
+        with open(path_ckpt_csv, "a+", newline="") as file:
             writer = csv.writer(file)
             writer.writerow([logger[0].experiment.name, ckpt_path])
 
     return metric_dict, object_dict
 
 
-@hydra.main(version_base="1.3", config_path="./configs", config_name="train.yaml")
+@hydra.main(
+    version_base="1.3", config_path="../configs", config_name="train_dg.yaml"
+)
 def main(cfg: DictConfig) -> Optional[float]:
-
     # train the model
     metric_dict, _ = train(cfg)
 

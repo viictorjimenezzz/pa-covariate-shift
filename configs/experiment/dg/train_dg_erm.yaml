@@ -30,10 +30,11 @@ model:
     net: resnet18
 
 data:
-  batch_size: 64
-  num_workers: 1
-  pin_memory: true
-  # root_dir: '/cluster/project/jbuhmann/posterior_agreement/adv_pa/data/diagvib/domain_shift' # data_dir is specified in config.yaml
+  dg:
+    batch_size: 64
+    num_workers: 1
+    pin_memory: true
+    # root_dir: '/cluster/project/jbuhmann/posterior_agreement/adv_pa/data/diagvib/domain_shift' # data_dir is specified in config.yaml
 
 
 logger:
