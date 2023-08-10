@@ -1,4 +1,4 @@
-_target_: src.models.erm.ERMMnist
+_target_: src.models.erm_module.ERMMnist
 
 n_classes: 2
 optimizer:
@@ -15,7 +15,7 @@ scheduler:
   patience: 10
 
 net:
-  _target_: src.models.components.backbone.Backbone
+  _target_: src.models.components.dg_backbone.DGBackbone
   net: resnet18
   pretrained: false
   input_channels: 3
