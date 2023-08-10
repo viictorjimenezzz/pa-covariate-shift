@@ -1,4 +1,4 @@
-_target_: src.data.diagvib_datamodule.DiagvibDatamodule
+_target_: src.data.diagvib_datamodule.DiagvibDataModule
 
 data_dir:  ${paths.data_dir}/dg/dg_datasets
 batch_size: ???

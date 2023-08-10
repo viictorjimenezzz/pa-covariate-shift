@@ -9,7 +9,7 @@ from zipfile import ZipFile
 from src.data.components.diagvib_dataset import DiagVibSixDatasetSimple
 
 
-class DiagvibDatamodule(LightningDataModule):
+class DiagvibDataModule(LightningDataModule):
     def __init__(
         self,
         data_dir,
