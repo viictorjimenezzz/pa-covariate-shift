@@ -2,7 +2,7 @@
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5
 
 python src/train_pa.py \
-    # --cfg job
+    # --cfg job \
     experiment=adv/optimize_beta \
     data/adv/model@data.model=weak,robust \
     data/adv/attack@data.attack=PGD \

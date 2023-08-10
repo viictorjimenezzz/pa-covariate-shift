@@ -52,6 +52,7 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
     """
 
     # set seed for random number generators in pytorch, numpy and python.random
+    
     if cfg.get("seed"):
         pl.seed_everything(cfg.seed, workers=True)
 
