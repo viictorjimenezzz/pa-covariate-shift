@@ -70,11 +70,11 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
     if cfg.get("seed"):
         pl.seed_everything(cfg.seed, workers=True)
 
-    log.info(f"Instantiating datamodule <{cfg.data._target_}>")
-    datamodule: LightningDataModule = hydra.utils.instantiate(cfg.dg.data)
+    log.info(f"Instantiating datamodule <{cfg.data.dg._target_}>")
+    datamodule: LightningDataModule = hydra.utils.instantiate(cfg.data.dg)
 
-    log.info(f"Instantiating model <{cfg.model._target_}>")
-    model: LightningModule = hydra.utils.instantiate(cfg.dg.model)
+    log.info(f"Instantiating model <{cfg.model.dg._target_}>")
+    model: LightningModule = hydra.utils.instantiate(cfg.model.dg)
 
     log.info("Instantiating callbacks...")
     callbacks: List[Callback] = utils.instantiate_callbacks(cfg.get("callbacks"))
