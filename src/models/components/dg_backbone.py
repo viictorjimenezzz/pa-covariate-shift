@@ -105,10 +105,8 @@ def get_lm_model(exp_name, net,log_dir) -> nn.Module:
     
     ckpt_path = os.path.join(log_dir,'ckpt_exp.csv')
     df_ckpt = pd.read_csv(ckpt_path)
-    print(cfg.max_beta.exp_name)
-    ckpt_path = df_ckpt[df_ckpt['experiment_name']==cfg.max_beta.exp_name].ckpt_path.values[0]
+    ckpt_path = df_ckpt[df_ckpt['experiment_name']==exp_name].ckpt_path.values[0]
     
-    net = hydra.utils.instantiate(cfg.model.net)
     ckpt_lightning = torch.load(ckpt_path)
     weights = ckpt_lightning["state_dict"].copy()
     for key in ckpt_lightning["state_dict"].keys():
