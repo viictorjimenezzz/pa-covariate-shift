@@ -120,7 +120,7 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
 
 
 @hydra.main(
-    version_base="1.3", config_path="../configs", config_name="train_adv.yaml"
+    version_base="1.3", config_path="../configs", config_name="train_dg_pa.yaml"
 )
 def main(cfg: DictConfig) -> Optional[float]:
     # apply extra utilities
