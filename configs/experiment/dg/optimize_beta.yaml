@@ -36,8 +36,8 @@ trainer:
 
 data:
   dg:
-    ds1_env: train_env1
-    ds1_env: train_env2
+    ds1_env: ???
+    ds2_env: ???
     batch_size: 100
     num_workers: 40
     pin_memory: True
