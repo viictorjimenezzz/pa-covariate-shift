@@ -7,7 +7,7 @@ import torch.nn.functional as F
 class PosteriorAgreementKernel(torch.nn.Module):
     def __init__(self, beta0: Optional[float] = None):
         super().__init__()
-        beta0 = torch.tensor(beta0) if beta0 else torch.rand(1.0)
+        beta0 = torch.tensor(beta0) if beta0 else torch.rand(1)
 
         if beta0 < 0.0:
             raise ValueError("'beta' must be non-negative.")
