@@ -160,3 +160,4 @@ configs/local/default.yaml
 /results
 /wandb
 .DS_Store
+.hydra
