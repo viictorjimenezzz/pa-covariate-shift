@@ -34,8 +34,8 @@ class PosteriorAgreementModule(pl.LightningModule):
         self.kernel = PosteriorAgreementKernel(beta0=beta0)
         self.afr_true = Accuracy(task="multiclass", num_classes=10)
         self.afr_pred = Accuracy(task="multiclass", num_classes=10)
-        
-        self.betas =  np.linspace(0,10,100).tolist()
+
+        self.betas = np.linspace(0, 10, 100).tolist()
         self.training_step_outputs_1 = []
         self.training_step_outputs_2 = []
 
@@ -62,7 +62,6 @@ class PosteriorAgreementModule(pl.LightningModule):
             y_pred_adv = torch.argmax(o2.data, 1)
             y_true = train_batch["first"][1]
 
-
             self.afr_pred(y_pred_adv, y_pred)
             self.afr_true(y_pred_adv, y_true)
 
@@ -83,7 +82,7 @@ class PosteriorAgreementModule(pl.LightningModule):
                 prog_bar=True,
                 logger=True,
             )
-            
+
         self.training_step_outputs_1.append(o1)
         self.training_step_outputs_2.append(o2)
         self.kernel(o1, o2)
