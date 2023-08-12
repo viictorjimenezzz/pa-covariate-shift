@@ -74,14 +74,15 @@ class DiagvibPADataModule(LightningDataModule):
         careful not to execute things like random split twice!
         """
         # load and split datasets only if not loaded already
-        
-        dset1 = DiagVibSixDatasetSimple(root_dir=os.path.join(self.dataset_dir,self.ds1_env))
-        dset2 = DiagVibSixDatasetSimple(root_dir=os.path.join(self.dataset_dir,self.ds2_env))
+        self.dset1 = DiagVibSixDatasetSimple(
+            root_dir=os.path.join(self.dataset_dir, self.ds1_env)
+        )
+        self.dset2 = DiagVibSixDatasetSimple(
+            root_dir=os.path.join(self.dataset_dir, self.ds2_env)
+        )
 
-        
-        dset2_shifted = apply_shift_ratio_2(dset1,dset2,self.shift_ratio)
-        self.paired_dset = PairDataset(dset1,dset2_shifted)
-
+        self.dset2_shifted = self._apply_shift_ratio()
+        self.paired_dset = PairDataset(self.dset1, self.dset2_shifted)
     def train_dataloader(self):
             
         def diagvib_collate_fn(batch:list):
@@ -114,17 +115,17 @@ class DiagvibPADataModule(LightningDataModule):
     def load_state_dict(self, state_dict: Dict[str, Any]):
         """Things to do when loading checkpoint."""
         pass
-    
-    
 
-    def _apply_shift_ratio(dataset_A, dataset_B):
+    def _apply_shift_ratio(self):
         shift_ratio = 1 - self.shift_ratio
-        size_A = len(dataset_A)
-        num_samples_A = int(size_A * shift_ratio)
-        num_samples_B = size_A - num_samples_A
+        size_1 = len(self.dset1)
+        num_samples_1 = int(size_1 * shift_ratio)
+        num_samples_2 = size_1 - num_samples_1
 
-        sampled_A = Subset(dataset_A, range(num_samples_A))
-        sampled_B = Subset(dataset_B, range(len(dataset_B) - num_samples_B, len(dataset_B)))
+        sampled_A = Subset(self.dset1, range(num_samples_1))
+        sampled_B = Subset(
+            self.dset2, range(len(self.dset2) - num_samples_2, len(self.dset2))
+        )
 
         final_dataset = ConcatDataset([sampled_A, sampled_B])
 
