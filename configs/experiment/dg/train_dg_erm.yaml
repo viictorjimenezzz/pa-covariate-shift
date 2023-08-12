@@ -14,7 +14,7 @@ defaults:
 
 tags: ["diagvib", "erm_diavib"]
 
-name: diagvib_erm_test
+name: ???
 seed: 12345
 
 trainer:
