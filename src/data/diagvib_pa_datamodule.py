@@ -1,9 +1,16 @@
 from typing import Any, Dict, Optional
 
+import os
 import os.path as osp
 
 import torch
-from torch.utils.data import DataLoader, Dataset, TensorDataset, ConcatDataset, Subset
+from torch.utils.data import (
+    DataLoader,
+    Dataset,
+    TensorDataset,
+    ConcatDataset,
+    Subset,
+)
 
 from pytorch_lightning import LightningDataModule
 
@@ -40,8 +47,8 @@ class DiagvibPADataModule(LightningDataModule):
 
     def __init__(
         self,
-        ds1_env: str = 'train_env1',
-        ds2_env: str = 'train_env2',
+        ds1_env: str = "train_env1",
+        ds2_env: str = "train_env2",
         shift_ratio: float = 1.0,
         batch_size: int = 64,
         data_dir: str = osp.join(".", "data", "datasets"),
@@ -49,12 +56,13 @@ class DiagvibPADataModule(LightningDataModule):
         pin_memory: bool = False,
     ):
         super().__init__()
-        
-        self.dataset_dir = os.path.join(data_dir,'dataset')
+
+        self.dataset_dir = os.path.join(data_dir, "dataset")
         self.shift_ratio = shift_ratio
         self.ds1_env = ds1_env
         self.ds2_env = ds2_env
         self.save_hyperparameters()
+
     @property
     def num_classes(self):
         return 10
@@ -66,7 +74,6 @@ class DiagvibPADataModule(LightningDataModule):
         """
         pass
 
-
     def setup(self, stage: Optional[str] = None):
         """Load data. Set variables: `self.data_train`, `self.data_val`, `self.data_test`.
 
@@ -74,6 +81,7 @@ class DiagvibPADataModule(LightningDataModule):
         careful not to execute things like random split twice!
         """
         # load and split datasets only if not loaded already
+
         self.dset1 = DiagVibSixDatasetSimple(
             root_dir=os.path.join(self.dataset_dir, self.ds1_env)
         )
@@ -83,9 +91,9 @@ class DiagvibPADataModule(LightningDataModule):
 
         self.dset2_shifted = self._apply_shift_ratio()
         self.paired_dset = PairDataset(self.dset1, self.dset2_shifted)
+
     def train_dataloader(self):
-            
-        def diagvib_collate_fn(batch:list):
+        def diagvib_collate_fn(batch: list):
             aux = {}
             for key in batch[0]:  # iterate over "first" and "second"
                 aux[key] = [
@@ -99,14 +107,16 @@ class DiagvibPADataModule(LightningDataModule):
                     torch.tensor([b[key][1] for b in batch]),
                 ]
             return aux
-            
-        return DataLoader(dataset=self.paired_dset,
-                    batch_size=self.hparams.batch_size,
-                    num_workers=self.hparams.num_workers,
-                    pin_memory=self.hparams.pin_memory,
-                    drop_last=False,
-                    shuffle=False,
-                    collate_fn=diagvib_collate_fn)
+
+        return DataLoader(
+            dataset=self.paired_dset,
+            batch_size=self.hparams.batch_size,
+            num_workers=self.hparams.num_workers,
+            pin_memory=self.hparams.pin_memory,
+            drop_last=False,
+            shuffle=False,
+            collate_fn=diagvib_collate_fn,
+        )
 
     def teardown(self, stage: Optional[str] = None):
         """Clean up after fit or test."""
