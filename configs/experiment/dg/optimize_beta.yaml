@@ -16,13 +16,14 @@ defaults:
 name: test_diagvib_optimization
 
 model:
-  optimizer:
-    _target_: torch.optim.Adam
-  classifier:
-    exp_name: ${name}
-    net:
-      net: resnet18
-      pretrain: false
+  dg:
+    optimizer:
+      _target_: torch.optim.Adam
+    classifier:
+      exp_name: ${name}
+      net:
+        net: resnet18
+        pretrained: false
 
 tags: ["diagvib", "adam", "1000_epochs", "${model.dg.classifier.exp_name}"]
 
