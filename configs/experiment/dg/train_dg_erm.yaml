@@ -41,7 +41,7 @@ logger:
   wandb:
     tags: ${tags}
     project: adv_pa_new
-    group: domain_generalization
+    group: dg_model_train
     save_dir: ${paths.output_dir}/dg
     name: ${name}
 
