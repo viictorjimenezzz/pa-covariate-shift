@@ -24,7 +24,7 @@ model:
       net: resnet18
       pretrain: false
 
-tags: ["diagvib", "adam", "1000_epochs", "${model.classifier.exp_name}"]
+tags: ["diagvib", "adam", "1000_epochs", "${model.dg.classifier.exp_name}"]
 
 seed: 12345
 
