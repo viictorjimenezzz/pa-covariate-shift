@@ -1,5 +1,3 @@
-# @package data
-
 _target_: src.data.diagvib_pa_datamodule.DiagvibPADataModule
 ds1_env: ???
 ds2_env: ???
