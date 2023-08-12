@@ -25,7 +25,8 @@ class PosteriorAgreementKernel(torch.nn.Module):
         # with eps, in a gradient compliant way. Replace nans in gradients
         # deriving from 0 * inf
         probs_sum = probs_sum + (probs_sum < 1e-44) * (1e-44 - probs_sum)
-        probs_sum.register_hook(torch.nan_to_num)
+        if probs_sum.requires_grad:
+            probs_sum.register_hook(torch.nan_to_num)
 
         self.log_post += torch.log(probs_sum).sum(dim=0)
 
