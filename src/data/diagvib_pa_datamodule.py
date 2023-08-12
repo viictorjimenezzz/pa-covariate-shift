@@ -54,7 +54,7 @@ class DiagvibPADataModule(LightningDataModule):
         self.shift_ratio = shift_ratio
         self.ds1_env = ds1_env
         self.ds2_env = ds2_env
-        
+        self.save_hyperparameters()
     @property
     def num_classes(self):
         return 10
