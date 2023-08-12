@@ -90,7 +90,11 @@ class DiagvibPADataModule(LightningDataModule):
             for key in batch[0]:  # iterate over "first" and "second"
                 aux[key] = [
                     torch.cat(
-                        [b[key][0].reshape(1,*dset1.img_shape) for b in batch], dim=0
+                        [
+                            b[key][0].reshape(1, *self.dset1.img_shape)
+                            for b in batch
+                        ],
+                        dim=0,
                     ),
                     torch.tensor([b[key][1] for b in batch]),
                 ]
