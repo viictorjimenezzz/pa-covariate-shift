@@ -101,17 +101,19 @@ class DGBackbone(nn.Module):
         return h
 
 
-def get_lm_model(exp_name, net,log_dir) -> nn.Module:
-    
-    ckpt_path = os.path.join(log_dir,'ckpt_exp.csv')
+def get_lm_model(exp_name: str, net: nn.Module, log_dir: str) -> nn.Module:
+    ckpt_path = os.path.join(log_dir, "ckpt_exp.csv")
     df_ckpt = pd.read_csv(ckpt_path)
-    ckpt_path = df_ckpt[df_ckpt['experiment_name']==exp_name].ckpt_path.values[0]
-    
+    ckpt_path = df_ckpt[
+        df_ckpt["experiment_name"] == exp_name
+    ].ckpt_path.values[0]
+
     ckpt_lightning = torch.load(ckpt_path)
     weights = ckpt_lightning["state_dict"].copy()
     for key in ckpt_lightning["state_dict"].keys():
         if "model" in key:
             weights[key[6:]] = weights.pop(key)
+
     net.load_state_dict(weights)
 
     return net
