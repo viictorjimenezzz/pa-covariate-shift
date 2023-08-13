@@ -47,8 +47,8 @@ def gibbs_posteriors_2d():
 
     xs, ys = np.meshgrid(np.linspace(-1, 2, 301), np.linspace(-1, 2, 301))
     v = np.stack((xs, ys))
-    m1, s1 = np.array([[[0]], [[0]]]), np.array([[0.8, 0.4], [0.4, 1.2]])
-    m2, s2 = np.array([[[1]], [[1]]]), np.array([[1.6, 0.1], [0.1, 0.3]])
+    m1, s1 = np.array([[[-0.2]], [[+0.3]]]), np.array([[0.8, 0.4], [0.4, 1.2]])
+    m2, s2 = np.array([[[1]], [[1.2]]]), np.array([[1.6, 0.1], [0.1, 0.3]])
 
     # s2 = (1, 2, 2) v = (n, n, 2)
     sub1 = (v - m1).reshape(2, -1)
@@ -56,7 +56,7 @@ def gibbs_posteriors_2d():
     dst1 = (sub1 * (np.linalg.inv(s1) @ sub1)).sum(axis=0)
     dst2 = (sub2 * (np.linalg.inv(s2) @ sub2)).sum(axis=0)
 
-    # lower normal part of gaussian
+    # lower normal part of Gaussian
     norm1 = np.sqrt((2 * np.pi) ** len(sub1) * np.linalg.det(s1))
     norm2 = np.sqrt((2 * np.pi) ** len(sub2) * np.linalg.det(s2))
 
@@ -78,8 +78,8 @@ def gibbs_posteriors_2d():
     plt.contour(xs, ys, g2, cmap="Reds")
     textcolor = (0.35, 0.35, 0.3)
     plt.text(
-        m1[0] + 1,
-        m1[1] - 0.63,
+        m1[0] + 0.7,
+        m1[1] - 0.83,
         "$p(c \mid X^\prime)$",
         c=textcolor,
         fontsize=16,
@@ -87,8 +87,8 @@ def gibbs_posteriors_2d():
         verticalalignment="center",
     )
     plt.text(
-        m2[0] + 0,
-        m2[1] + 0.68,
+        m2[0] + 0.4,
+        m2[1] - 0.58,
         "$p(c \mid X^{\prime\!\:\!\prime})$",
         c=textcolor,
         fontsize=16,
@@ -181,4 +181,5 @@ def beta_curve():
 
 
 if __name__ == "__main__":
+    # gibbs_posteriors_2d()
     gibbs_posteriors_2d()
