@@ -114,6 +114,67 @@ def gibbs_posteriors_2d():
     # plt.title(f"$\\beta = {beta}$" + f": {title}" )
 
     fname = osp.join(dirname, f"gibbs2d_beta={beta}.pdf")
+    plt.tight_layout()
+    plt.savefig(fname)
+    plt.clf()
+    plt.close()
+
+
+def beta_curve():
+    dirname = osp.join("results", "plots", "paper")
+    os.makedirs(dirname, exist_ok=True)
+
+    or_betas = [0.5, 8.0, 40.0]
+    or_pas = [0.2, 10.0, 0.01]
+    betas = [0.47, 0.48, 0.5, 0.51, 5.5, 8.0, 15, 38.0, 40.0, 44.0]
+    pas = [0.05, 0.1, 0.2, 0.25, 9.8, 10.0, 8, 0.2, 0.01, 0.0]
+    cs = CubicSpline(betas, pas)
+    xs = np.arange(0.0, 45.0, 0.1)
+
+    # Text
+    fontname = "DejaVu Serif"
+    fontsize = 18
+    _ = fm.findfont(fm.FontProperties(family=fontname))
+    plt.rcParams["font.family"] = "serif"
+    plt.rcParams["font.serif"] = fontname
+
+    # Style
+    sns.set_style("ticks")
+
+    plt.figure(figsize=(18, 4))
+    sns.set_style("ticks")
+    plt.plot(xs, cs(xs), c="tab:orange")
+    plt.xlim(0.0, 41.0)
+    plt.xlabel("$\\beta$", fontsize=fontsize, fontname=fontname)
+    plt.ylabel("Post. Agr.", fontsize=fontsize, fontname=fontname)
+    textcolor = (0.35, 0.35, 0.3)
+    plt.plot(or_betas, or_pas, "o", c=textcolor)
+    offsets = ((1.35, 0.0), (0.0, -1.0), (-0.2, 0.8))
+    for beta, pa, offset in zip(or_betas, or_pas, offsets):
+        plt.text(
+            beta + offset[0],
+            pa + offset[1],
+            f"$\\beta$ = {beta}",
+            c=textcolor,
+            fontsize=16,
+            fontname=fontname,
+            horizontalalignment="center",
+            verticalalignment="center",
+        )
+    plt.tick_params(
+        axis="both", which="both", direction="in", labelsize=fontsize - 2
+    )
+    plt.gca().spines["bottom"].set_color(textcolor)
+    plt.gca().spines["top"].set_color(textcolor)
+    plt.gca().spines["left"].set_color(textcolor)
+    plt.gca().spines["right"].set_color(textcolor)
+
+    plt.gca().axes.xaxis.set_ticklabels(np.arange(0, 45, 5))
+    plt.gca().axes.yaxis.set_ticklabels([])
+    # plt.title(f"$\\beta = {beta}$" + f": {title}" )
+
+    fname = osp.join(dirname, f"gibbs_betas.pdf")
+    plt.tight_layout()
     plt.savefig(fname)
     plt.clf()
     plt.close()
