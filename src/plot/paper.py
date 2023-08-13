@@ -17,24 +17,35 @@ def gibbs_posteriors():
     ys1 = np.exp(-0.5 * ((xs1 - m1) / s1) ** 2.0)
     ys2 = np.exp(-0.5 * ((xs2 - m2) / s2) ** 2.0)
 
+    fontname = "DejaVu Serif"
+    fontsize = 18
+    _ = fm.findfont(fm.FontProperties(family=fontname))
+    plt.rcParams["font.family"] = "serif"
+    plt.rcParams["font.serif"] = fontname
+
     for beta, title in (
         (0.5, "Underfitting"),
         (8.0, "Optimal"),
         (40.0, "Overfitting"),
     ):
         sns.set_style("ticks")
-        plt.style.use("science")
         g1 = np.exp(beta * ys1) / np.exp(beta * ys1).sum()
         g2 = np.exp(beta * ys2) / np.exp(beta * ys2).sum()
         plt.plot(xs1, g1, c="b")
         plt.plot(xs2, g2, c="r")
         plt.plot((0, 0), (g1.min(), 0.045), "--", c="g")
         plt.plot((1, 1), (g2.min(), 0.045), "--", c="g")
+        plt.tick_params(axis="both", which="both", direction="in")
+        plt.gca().axes.minorticks_on()
         plt.gca().axes.xaxis.set_ticklabels([])
         plt.gca().axes.yaxis.set_ticklabels([])
-        plt.title(f"$\\beta = {beta}$" + f": {title}")
-        plt.xlabel("solutions")
-        plt.ylabel("Gibbs posteriors")
+        plt.title(
+            f"$\\beta = {beta}$" + f": {title}",
+            fontsize=fontsize,
+            fontname=fontname,
+        )
+        plt.xlabel("solutions", fontsize=fontsize, fontname=fontname)
+        plt.ylabel("Gibbs posteriors", fontsize=fontsize, fontname=fontname)
         fname = osp.join(dirname, f"method_beta={beta}.pdf")
         plt.savefig(fname)
         plt.clf()
