@@ -1,11 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
-device=0
-process_size=6
-exp_names=("weak")
+device=2,3,4,5
+process_size=3
+exp_names=("robust")
 process=0
-counter=40
+counter=0
 
 # CUDA_VISIBLE_DEVICES=${device} python src/train_dg_pa.py \
 #     experiment=dg/optimize_beta \
@@ -17,10 +17,10 @@ counter=40
 #     # logger=wandb
 
 for exp_name in "${exp_names[@]}"; do  # models
-    for env in $(seq 4 5); do
+    for env in $(seq 0 5); do
         for shift_ratio in $(seq 0.1 0.1 1); do
-            log_file="outputs/dg/dg_script_${counter}.log"
-            CUDA_VISIBLE_DEVICES=${process} python src/train_dg_pa.py \
+            log_file="outputs/dg/dg_script_${counter}_${exp_name}.log"
+            CUDA_VISIBLE_DEVICES=${device} python src/train_dg_pa.py \
                 experiment=dg/optimize_beta \
                 data.dg.ds1_env=test0 \
                 data.dg.ds2_env=test${env} \
