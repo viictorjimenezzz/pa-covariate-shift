@@ -502,13 +502,12 @@ if __name__ == "__main__":
     # afr_vs_logpa_separate(df, comparison_metric)
 
 if __name__ == "__main__":
-    date = "2023-08-02"
-    tags = ["diagvib", "1000_epochs", "order_by_attack"]
+    date = "2023-08-15"
+    tags = ["diagvib", "500_epochs", "logk_corr", "adam"]
     afr = "pred"
 
     df = create_dataframe_from_wandb_runs(
         project="adv_pa_new",
-        date=date,
         filters={
             "state": "finished",
             "group": "dg_pa_test_euler",
@@ -516,6 +515,7 @@ if __name__ == "__main__":
             "$and": [{"tags": tag} for tag in tags],
             "created_at": {"$gte": date},
         },
+        date=date,
         afr=afr,
         cache=True,
     )
