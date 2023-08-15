@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import seaborn as sns
 
-from src.plot.utils import create_dataframe_from_wandb_runs
+from src.plot.adv.utils import create_dataframe_from_wandb_runs
 
 
 def logpa(df: pd.DataFrame):
