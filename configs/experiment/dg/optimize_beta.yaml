@@ -49,4 +49,4 @@ logger:
     project: adv_pa_new
     group: dg_pa
     save_dir: ${paths.output_dir}/adv
-    name: ${data.dg.ds2_env}_sr=${data.dg.shift_ratio}
+    name: model=${model.dg.classifier.exp_name}_${data.dg.ds2_env}_sr=${data.dg.shift_ratio}
