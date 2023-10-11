@@ -88,7 +88,7 @@ def logpa(df: pd.DataFrame):
             ax1.grid(linestyle="--")
 
             ax1.set_xlabel(x_name, fontname=fontname)
-            ax1.set_ylabel("LogPA", fontname=fontname)
+            ax1.set_ylabel("PA", fontname=fontname)
 
             # Legend
             handles, labels = ax1.get_legend_handles_labels()
