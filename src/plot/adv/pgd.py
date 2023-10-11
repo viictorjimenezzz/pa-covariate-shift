@@ -42,7 +42,7 @@ def logpa(df: pd.DataFrame) -> None:
                     "AFR",
                 ],
             ]
-            df["adversarial_ratio"] != 0.0
+
             dashes_dict = {"Standard": (2, 2), "Engstrom2019Robustness": (2, 2)}
             colors_dict = {
                 "Standard": "tab:orange",
