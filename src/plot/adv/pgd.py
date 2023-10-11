@@ -85,6 +85,7 @@ def logpa(df: pd.DataFrame) -> None:
                 ax.set_xticks([0.0314, 0.0627, 0.1255])
 
             ax.tick_params(axis="both", which="both", direction="in")
+            plt.xticks(rotation=45)
             xticks_font = fm.FontProperties(family=fontname)
             for tick in ax.get_xticklabels():
                 tick.set_fontproperties(xticks_font)
