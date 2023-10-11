@@ -39,6 +39,24 @@ def gibbs_posteriors():
         plt.plot((1, 1), (g2.min(), 0.045), "--", c="tab:green")
         plt.tick_params(axis="both", which="both", direction="in")
         plt.gca().axes.minorticks_on()
+        plt.text(
+            m1 - 0.05,
+            g1.max() + 1e-3,
+            "$p(c \mid X^\prime)$",
+            c="tab:blue",
+            horizontalalignment="right",
+            verticalalignment="bottom",
+            fontsize=fontsize,
+        )
+        plt.text(
+            m2 + 0.05,
+            g2.max() + 1e-3,
+            "$p(c \mid X^{\prime\!\:\!\prime})$",
+            c="tab:red",
+            horizontalalignment="left",
+            verticalalignment="bottom",
+            fontsize=fontsize,
+        )
         plt.gca().axes.xaxis.set_ticklabels([])
         plt.gca().axes.yaxis.set_ticklabels([])
         plt.title(
