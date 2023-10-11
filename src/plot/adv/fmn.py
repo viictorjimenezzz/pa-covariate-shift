@@ -28,7 +28,7 @@ def logpa(df: pd.DataFrame):
     _ = fm.findfont(fm.FontProperties(family=fontname))
     # Subset the DataFrame to include only the relevant columns and rows
     level_set = df.loc[
-        ~df["adversarial_ratio"].eq(0.0),
+        :,  # ~df["adversarial_ratio"].eq(0.0),
         [
             "attack_name",
             "model_name",
