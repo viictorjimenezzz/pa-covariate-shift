@@ -450,58 +450,6 @@ def afr_vs_logpa_separate(df: pd.DataFrame, comparison_metric: str = "ASR"):
 
 
 if __name__ == "__main__":
-    tags = ["diagvib", "1000_epochs", "adam"]
-    date = "2023-08-14"
-
-    df = create_dataframe_from_wandb_runs(
-        project="malvai/adv_pa_new",
-        date=date,
-        filters={
-            "state": "finished",
-            "group": "dg_pa_test_euler",
-            # "tags": {"$all": ["cifar10", attack]},  # for some reason this does not work
-            "$and": [{"tags": tag} for tag in tags],
-            "created_at": {"$gte": date},
-        },
-        afr="true",
-        cache=True,
-    )
-
-    comparison_metric = "AFR"
-
-    factors = {
-        "test_texture": "test_texture",
-        "test_size": "test_size",
-        "test_position": "test_position",
-        "test_lightness": "test_lightness",
-        "test_color": "test_color",
-        "test0": "0",
-        "test1": "1",
-        "test2": "2",
-        "test3": "3",
-        "test4": "4",
-        "test5": "5",
-    }
-    df["shift_factor"] = df["shift_factor"].replace(factors)
-    df["shift_factor"] = pd.Categorical(
-        df["shift_factor"], categories=list(factors.values()), ordered=True
-    )
-
-    # df = pd.melt(
-    #     frame=df,
-    #     id_vars=["attack_type", "model_name", "poison_ratio", "linf"],
-    #     value_vars=["AFR", "logPA"],
-    #     var_name="metric",
-    #     value_name="metric_score",
-    # )
-
-    # df = df.drop_duplicates(subset="name")
-    logpa(df)
-    # afr_vs_logpa(df, comparison_metric)
-    # afr_vs_logpa_barplots(df, comparison_metric)
-    # afr_vs_logpa_separate(df, comparison_metric)
-
-if __name__ == "__main__":
     date = "2023-08-15"
     tags = ["diagvib", "500_epochs", "logk_corr", "adam"]
     afr = "pred"
