@@ -108,7 +108,7 @@ def get_lm_model(exp_name: str, net: nn.Module, log_dir: str) -> nn.Module:
         df_ckpt["experiment_name"] == exp_name
     ].ckpt_path.values[0]
 
-    ckpt_lightning = torch.load(ckpt_path)
+    ckpt_lightning = torch.load(ckpt_path, map_location=torch.device("cpu"))
     weights = ckpt_lightning["state_dict"].copy()
     for key in ckpt_lightning["state_dict"].keys():
         if "model" in key:
