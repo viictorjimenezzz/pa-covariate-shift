@@ -32,7 +32,7 @@ def logpa(df: pd.DataFrame) -> None:
         for value in tqdm(pair, total=len(pair)):
             # Subset the DataFrame to include only the relevant columns and rows
             level_set = df.loc[
-                df[level].eq(value) & ~df["adversarial_ratio"].eq(0.0),
+                df[level].eq(value),  # & ~df["adversarial_ratio"].eq(0.0),
                 [
                     "attack_name",
                     "model_name",
