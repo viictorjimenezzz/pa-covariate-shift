@@ -213,4 +213,4 @@ def beta_curve():
 
 if __name__ == "__main__":
     # gibbs_posteriors_2d()
-    gibbs_posteriors_2d()
+    gibbs_posteriors()
