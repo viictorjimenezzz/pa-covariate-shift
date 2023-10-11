@@ -67,6 +67,7 @@ def create_dataframe_from_wandb_runs(
         data["shift_factor"].append(config["data/dg/ds2_env"])
         data["AFR"].append(history[f"AFR {afr}"].max())
         data["logPA"].append(history["logPA_epoch"].max())
+        data["beta"].append(history["beta_epoch"][history["logPA_epoch"].argmax()])
 
     df = pd.DataFrame(data)
     df.to_pickle(fname)
