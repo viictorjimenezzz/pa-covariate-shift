@@ -247,5 +247,6 @@ if __name__ == "__main__":
     )
 
     # afr_vs_logpa(df, "AFR")
+    df.loc[df["adversarial_ratio"].eq(0.0), "logPA"] = 0.0
     logpa(df)
     logpa(df)
