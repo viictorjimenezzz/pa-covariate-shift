@@ -88,15 +88,17 @@ class CIFAR10DataModule(LightningDataModule):
         """
         CDataLoaderCIFAR10().load(val_size=0)
 
-        AdversarialCIFAR10Dataset(
-            self.attack,
-            self.classifier,
-            self.hparams.data_dir,
-            self.checkpoint_fname,
-            self.hparams.adversarial_ratio,
-            self.hparams.verbose,
-            self.hparams.cache,
-        )
+        # create the adversarial dataset that will be subsequently used
+        if self.hparams.cache:
+            AdversarialCIFAR10Dataset(
+                self.attack,
+                self.classifier,
+                self.hparams.data_dir,
+                self.checkpoint_fname,
+                self.hparams.adversarial_ratio,
+                self.hparams.verbose,
+                self.hparams.cache,
+            )
 
     def setup(self, stage: Optional[str] = None):
         """Load data. Set variables: `self.data_train`, `self.data_val`, `self.data_test`.
