@@ -15,7 +15,9 @@
 [![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/ashleve/lightning-hydra-template/pulls)
 <!-- [![contributors](https://img.shields.io/github/contributors/aretor/adv_pa_new.svg)](https://github.com/aretor/adv_pa_new/graphs/contributors) -->
 
-Code for replicating the experiments in the paper "\<bib of paper\>"
+Code for replicating the experiments in the paper: *"J. B. Carvalho,
+A. Torcinovich, A. E. Cinà, L. Schönherr, J. M. Buhmann, Posterior Agreement
+for Model Robustness Assessment in Covariate Shift Scenarios"*.
 
 Made with the [<kbd>lightning-hydra-template</kbd>](https://github.com/ashleve/lightning-hydra-template)
 
