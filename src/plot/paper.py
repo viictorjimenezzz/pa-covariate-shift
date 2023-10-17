@@ -33,12 +33,30 @@ def gibbs_posteriors():
         sns.set_style("ticks")
         g1 = np.exp(beta * ys1) / np.exp(beta * ys1).sum()
         g2 = np.exp(beta * ys2) / np.exp(beta * ys2).sum()
-        plt.plot(xs1, g1, c="b")
-        plt.plot(xs2, g2, c="r")
-        plt.plot((0, 0), (g1.min(), 0.045), "--", c="g")
-        plt.plot((1, 1), (g2.min(), 0.045), "--", c="g")
+        plt.plot(xs1, g1, c="tab:blue")
+        plt.plot(xs2, g2, c="tab:red")
+        plt.plot((0, 0), (g1.min(), 0.045), "--", c="tab:green")
+        plt.plot((1, 1), (g2.min(), 0.045), "--", c="tab:green")
         plt.tick_params(axis="both", which="both", direction="in")
         plt.gca().axes.minorticks_on()
+        plt.text(
+            m1 - 0.05,
+            g1.max() + 1e-3,
+            "$p(c \mid X^\prime)$",
+            c="tab:blue",
+            horizontalalignment="right",
+            verticalalignment="bottom",
+            fontsize=fontsize,
+        )
+        plt.text(
+            m2 + 0.05,
+            g2.max() + 1e-3,
+            "$p(c \mid X^{\prime\!\:\!\prime})$",
+            c="tab:red",
+            horizontalalignment="left",
+            verticalalignment="bottom",
+            fontsize=fontsize,
+        )
         plt.gca().axes.xaxis.set_ticklabels([])
         plt.gca().axes.yaxis.set_ticklabels([])
         plt.title(
@@ -60,7 +78,7 @@ def gibbs_posteriors_2d():
 
     xs, ys = np.meshgrid(np.linspace(-1, 2, 301), np.linspace(-1, 2, 301))
     v = np.stack((xs, ys))
-    m1, s1 = np.array([[[-0.2]], [[+0.3]]]), np.array([[0.8, 0.4], [0.4, 1.2]])
+    m1, s1 = np.array([[[-0.2]], [[0.3]]]), np.array([[0.8, 0.4], [0.4, 1.2]])
     m2, s2 = np.array([[[1]], [[1.2]]]), np.array([[1.6, 0.1], [0.1, 0.3]])
 
     # s2 = (1, 2, 2) v = (n, n, 2)
@@ -94,7 +112,7 @@ def gibbs_posteriors_2d():
         m1[0] + 0.7,
         m1[1] - 0.83,
         "$p(c \mid X^\prime)$",
-        c=textcolor,
+        c="tab:blue",
         fontsize=16,
         horizontalalignment="center",
         verticalalignment="center",
@@ -103,7 +121,7 @@ def gibbs_posteriors_2d():
         m2[0] + 0.4,
         m2[1] - 0.58,
         "$p(c \mid X^{\prime\!\:\!\prime})$",
-        c=textcolor,
+        c="tab:red",
         fontsize=16,
         horizontalalignment="center",
         verticalalignment="center",
@@ -195,4 +213,4 @@ def beta_curve():
 
 if __name__ == "__main__":
     # gibbs_posteriors_2d()
-    gibbs_posteriors_2d()
+    gibbs_posteriors()
