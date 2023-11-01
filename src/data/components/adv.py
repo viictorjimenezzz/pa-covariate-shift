@@ -24,6 +24,7 @@ from secml.ml.peval.metrics import CMetricAccuracy
 
 from src.data.utils import carray2tensor
 
+from src.data.components.gaussian_attack import GaussianAttack
 
 class AdversarialCIFAR10Dataset(TensorDataset):
     """Generate adversarially crafted CIFAR10 data, for an image
@@ -129,6 +130,11 @@ def get_attack(attack_name: str, classifier: CClassifierPyTorch, **kwargs):
             classifier=classifier,
             abs_stepsize=None,
             **kwargs,
+        )
+    elif attack_name == "GAUSSIAN":
+        attack = GaussianAttack(
+            classifier=classifier,
+            **kwargs, # the noise_std will be here
         )
     else:
         raise ValueError(
