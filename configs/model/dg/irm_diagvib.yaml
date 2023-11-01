@@ -1,0 +1,20 @@
+defaults:
+  - net.yaml
+
+_target_: src.models.irm_module.IRMMnist
+lamb: 1.0
+
+
+n_classes: ${model.dg.net.n_classes}
+optimizer:
+  _target_: torch.optim.Adam
+  _partial_: true
+  lr: 0.001
+  weight_decay: 0.0
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  mode: min
+  factor: 0.1
+  patience: 10
