@@ -4,7 +4,7 @@ defaults:
 _target_: src.models.erm_module.ERMMnist
 
 
-n_classes: 2
+n_classes: ${model.dg.net.n_classes}
 optimizer:
   _target_: torch.optim.Adam
   _partial_: true

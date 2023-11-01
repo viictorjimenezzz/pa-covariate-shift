@@ -4,10 +4,9 @@
 # python train.py experiment=example
 
 defaults:
-  - override /data/dg: diagvib.yaml
+  - override /data/dg: diagvib_two.yaml
   - override /model/dg: erm_diagvib.yaml
   - override /trainer: ddp.yaml
-
 
 # all parameters below will be merged with parameters from default configurations set above
 # this allows you to overwrite only specified parameters
@@ -31,6 +30,10 @@ model:
 
 data:
   dg:
+    datasets_dir: ${paths.data_dir}/dg/dg_datasets/paper_replication/
+    collate_fn:
+      _target_: hydra.utils.get_method # to avoid instantiation of a callable
+      path: src.data.components.collate_functions.ERM_collate_fn
     batch_size: 64
     num_workers: 1
     pin_memory: true
@@ -40,8 +43,9 @@ data:
 logger:
   wandb:
     tags: ${tags}
-    project: adv_pa_new
-    group: dg_model_train
+    entity: entity-name
+    project: project-name
+    group: group-name
     save_dir: ${paths.output_dir}/dg
     name: ${name}
 
