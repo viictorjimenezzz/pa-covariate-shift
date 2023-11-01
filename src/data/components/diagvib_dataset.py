@@ -1,91 +1,155 @@
-import numpy as np
 import torch
-from pandas import read_csv
-from copy import deepcopy
 import os
-from PIL import Image
-from torch.utils.data import Dataset
+import pickle
+from typing import Optional, List
+
+from diagvibsix.data.dataset.dataset import Dataset, DatasetCSV
+from diagvibsix.data.wrappers import TorchDatasetWrapper, get_per_ch_mean_std
+from diagvibsix.data.auxiliaries import load_yaml
+
+__all__ = ['DiagVib6Dataset', 'select_dataset_spec']
 
 
-from src.data.components.diagvibsix.dataset.config import OBJECT_ATTRIBUTES
+def select_dataset_spec(dataset_dir: str, dataset_name: str):
+    """
+    Given a dataset directory and a dataset name, provides with the corresponding specification file and/or cache file.
+    Since this function works with the DiagvibDataModule, a cache_filepath will always be considered (not None).
+    """
+    yml_path = os.path.join(dataset_dir, dataset_name + ".yml")
+    csv_path = os.path.join(dataset_dir, dataset_name + ".csv")
+    cache_filepath = os.path.join(dataset_dir, dataset_name + ".pkl")
+    
+    if os.path.exists(yml_path):
+        return yml_path, cache_filepath
+    elif os.path.exists(csv_path):
+        return csv_path, cache_filepath
+    else:
+        return None, cache_filepath
 
-FACTORS = deepcopy(OBJECT_ATTRIBUTES)
-FACTORS["position_factor"] = FACTORS.pop("position")
-FACTORS["scale_factor"] = FACTORS.pop("scale")
-#
 
+def check_conditions(dataset_specs_path, cache_path):
+    # check the filepaths are correct
+    if dataset_specs_path != None:
+        is_csv = dataset_specs_path.endswith('.csv')
+        is_yml = dataset_specs_path.endswith('.yml') or dataset_specs_path.endswith('.yaml')
+        dataset_exists = os.path.exists(dataset_specs_path)
+    else:
+        is_csv = False
+        is_yml = False
+        dataset_exists = False
 
-class DiagVibSixDatasetSimple(Dataset):
-    def __init__(self, root_dir, transform=None):
-        super().__init__()
+    if cache_path != None:
+        is_pkl = cache_path.endswith('.pkl')
+        cache_exists = os.path.exists(cache_path)
+    else:
+        is_pkl = False
+        cache_exists = False
+    
+    
+    # If only a CSV or YML file is provided
+    if dataset_exists and (is_csv or is_yml) and not cache_exists:
+        if is_pkl:
+            print("Images will be generated from the CSV/YML file and stored in the cache file.")
+        else:
+            print("Images will be generated from the CSV/YML file and not stored.")
+    # If only cache file is provided
+    elif cache_exists and is_pkl and not dataset_exists:
+        print("Dataset will be generated from the .pkl file.")
+    # If both an existing cache file and cache path are provided
+    elif dataset_exists and (is_csv or is_yml) and cache_exists and is_pkl:
+        print("Dataset will be loaded from the cache file.")
+    else:
+        raise ValueError("Invalid or missing input files. Ensure you provide an existing CSV or YML file and/or a .pkl file.")
+    
+    return is_csv
 
-        self.metadata_fields = [
-            "shape",
-            "hue",
-            "lightness",
-            "texture",
-            "position_factor",
-            "scale_factor",
-        ]
+# I STILL HAVE TO THINK ABOUT THE DATALOADER STRUCTURE.
+class DiagVib6Dataset(TorchDatasetWrapper):
+    def __init__(self,
+                 mnist_preprocessed_path: str,
+                 dataset_specs_path: Optional[str] = None,
+                 cache_filepath: Optional[str] = None,
+                 t: str = 'train',
+                 seed: Optional[int] = 123,
+                 normalization: Optional[str] = 'z-score', 
+                 mean: Optional[List[float]] = None, 
+                 std: Optional[List[float]] = None):
+        
+        # Check if the input files are valid
+        is_csv = check_conditions(dataset_specs_path, cache_filepath)
+        
+        # Load dataset object (uint8 images) from cache if available
+        if (cache_filepath is not None) and (os.path.exists(cache_filepath)):
+            with open(cache_filepath, 'rb') as f:
+                self.dataset = pickle.load(f)
+        else:
+            if is_csv:
+                self.dataset = DatasetCSV(
+                    mnist_preprocessed_path=mnist_preprocessed_path,
+                    csv_path=dataset_specs_path,
+                    t=t,
+                    seed=seed)
+            else:
+                self.dataset = Dataset(
+                    dataset_spec=load_yaml(dataset_specs_path), 
+                    mnist_preprocessed_path=mnist_preprocessed_path,
+                    cache_path=None,
+                    seed=seed)
 
-        self.metadata = read_csv(os.path.join(root_dir, "metada.csv"))
-        self.transform = transform
-        self.permutations = self.metadata.permutation.to_list()
-        self.targets = self.metadata.task_labels.to_list()
-        self.label_correction = {}
-        for i, label in enumerate(np.unique(np.array(self.targets))):
-            self.label_correction[label] = i
-        self.label_recorrection = {
-            v: k for k, v in self.label_correction.items()
-        }
-        self.targets = [
-            self.label_correction[target] for target in self.targets
-        ]
-        self.mean, self.std = np.genfromtxt(
-            os.path.join(root_dir, "mean_std.csv"), delimiter=","
-        )
-        self.mean = np.expand_dims(self.mean, axis=(1, 2))
-        self.std = np.expand_dims(self.std, axis=(1, 2))
+            # Save dataset object to cache if cache_path is provided
+            if cache_filepath is not None:
+                with open(cache_filepath, 'wb') as f:
+                    pickle.dump(self.dataset, f, pickle.HIGHEST_PROTOCOL)
 
-        images_dir = os.path.join(root_dir, "images")
-        names = os.listdir(images_dir)
-        names = [name.split(".")[0] for name in names if name.endswith("jpeg")]
-        names.sort(key=float)
-        self.images_path = [
-            os.path.join(images_dir, name + ".jpeg") for name in names
-        ]
-        self.img_shape = [3, 32, 32]
+        self.unique_targets = sorted(list(set(self.dataset.task_labels)))
 
-    #     def _get_mt_labels(task_label):
-    #         return np.argmax([cls == task_label[1] for cls in OBJECT_ATTRIBUTES[task_label[0]]])
+        self.normalization = normalization
+        self.mean, self.std = mean, std
+        self.min = 0.
+        self.max = 255.
+        if self.normalization == 'z-score' and (self.mean is None or self.std is None):
+            self.mean, self.std = get_per_ch_mean_std(self.dataset.images)
 
-    def _normalize(self, X):
-        return X.sub_(torch.tensor(self.mean)).div_(torch.tensor(self.std))
-
-    def _to_T(self, x, dtype):
-        return torch.from_numpy(x).type(dtype)
-
-    def __len__(self):
-        return len(self.targets)
-
-    def __getitem__(self, idx):
-        idx = self.permutations[idx]
-
-        # Image
-        img_path = self.images_path[idx]
-
-        image = Image.open(img_path)
-        image = np.moveaxis(np.array(image), 2, 0)
+    def __getitem__(self, item):
+        sample = self.dataset.getitem(item)
+        image, target, tag = sample.values()
         image = self._normalize(self._to_T(image, torch.float))
-        if self.transform:
-            image = self.transform(image)
+        #return {'image': image, 'target': target, 'tag': tag}
+        return [image, self.unique_targets.index(target[1])] # we assume the task is the shape
+    
 
-        # target = torch.tensor(_get_mt_labels(self.targets[idx]),dtype=torch.long)
-        target = torch.tensor(self.targets[idx], dtype=torch.long)
+# DEMOSTRACIO DE COM FUNCIONA: PREGUNTAR JOAO (especialment mida + task)
+"""
+from diagvibsix.data.dataset.preprocess_mnist import get_processed_mnist
 
-        # metadata
-        metadata = torch.tensor(
-            self.metadata.iloc[idx, 2:8].to_list(), dtype=torch.float
-        )
-        # return [image, target, metadata]
-        return [image, target]
+PROCMNIST_PATH = get_processed_mnist("data/dg/")
+
+ds = DiagVib6Dataset(
+    mnist_preprocessed_path=PROCMNIST_PATH,
+    dataset_specs_path="victor_proves.yml",
+    cache_filepath="victor_proves_yml.pkl"
+)
+
+import matplotlib.pyplot as plt
+
+for i in range(4):
+    image, target, tag = ds.__getitem__(i).values()
+    title = 'YML_' + str(i) + "_" + str(target) + "_" + str(tag)
+    plt.imshow(image.permute(1, 2, 0))
+    plt.savefig(title)
+
+
+ds = DiagVib6Dataset(
+    mnist_preprocessed_path=PROCMNIST_PATH,
+    dataset_specs_path="victor_proves.csv",
+    cache_filepath="victor_proves_csv.pkl"
+)
+
+import matplotlib.pyplot as plt
+
+for i in range(4):
+    image, target, tag = ds.__getitem__(i).values()
+    title = 'CSV_' + str(i) + "_" + str(target) + "_" + str(tag)
+    plt.imshow(image.permute(1, 2, 0))
+    plt.savefig(title)
+"""

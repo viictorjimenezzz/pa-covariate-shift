@@ -1,7 +1,0 @@
-_target_: src.data.diagvib_datamodule.DiagvibDataModule
-
-data_dir:  ${paths.data_dir}/dg/dg_datasets
-batch_size: ???
-num_workers: 0
-pin_memory: False
-# grouping_fields: ['hue'] #['shape', 'hue', 'lightness', 'texture', 'position_factor', 'scale_factor']
