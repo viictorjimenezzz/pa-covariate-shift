@@ -1,0 +1,51 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data/dg: diagvib_two.yaml
+  - override /model/dg: lisa_diagvib.yaml
+  - override /trainer: ddp.yaml
+
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+tags: ["diagvib", "lisa_diavib"]
+
+name: ???
+seed: 12345
+
+trainer:
+  min_epochs: 1
+  max_epochs: 1
+  gradient_clip_val: 0.5
+
+model:
+  optimizer:
+    lr: 0.002
+  net:
+    pretrained: true
+    net: resnet18
+
+data:
+  dg:
+    datasets_dir: ${paths.data_dir}/dg/dg_datasets/paper_replication/
+    collate_fn:
+      _target_: hydra.utils.get_method # to avoid instantiation of a callable
+      path: src.data.components.collate_functions.LISA_collate_fn
+    batch_size: 64
+    num_workers: 1
+    pin_memory: true
+    # root_dir: '/cluster/project/jbuhmann/posterior_agreement/adv_pa/data/diagvib/domain_shift' # data_dir is specified in config.yaml
+
+
+logger:
+  wandb:
+    tags: ${tags}
+    entity: entity-name
+    project: project-name
+    group: group-name
+    save_dir: ${paths.output_dir}/dg
+    name: ${name}

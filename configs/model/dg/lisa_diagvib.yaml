@@ -1,0 +1,21 @@
+# Not necessary, dont copy when cluster is available again
+defaults:
+  - net.yaml
+
+_target_: src.models.lisa_module.LISAMnist
+ppred: 0.4 # probability of LISA-L
+mix_alpha: 0.4 # mixup weight
+
+n_classes: ${model.dg.net.n_classes}
+optimizer:
+  _target_: torch.optim.Adam
+  _partial_: true
+  lr: 0.001
+  weight_decay: 0.0
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  mode: min
+  factor: 0.1
+  patience: 10
