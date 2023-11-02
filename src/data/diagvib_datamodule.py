@@ -66,26 +66,29 @@ class DiagVibDataModule2Envs(LightningDataModule):
 
     def setup(self, stage: Optional[str] = None):
 
-        if stage == "fit" or stage is None:
-            dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.datasets_dir, dataset_name='train_' + self.ds_env1)
-            self.train_ds1 = DiagVib6Dataset(
-                mnist_preprocessed_path = self.mnist_preprocessed_path,
-                dataset_specs_path=dataset_specs_path,
-                cache_filepath=cache_filepath,
-                t='train')
-            
-            dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.datasets_dir, dataset_name='train_' + self.ds_env2)
-            self.train_ds2 = DiagVib6Dataset(
-                mnist_preprocessed_path = self.mnist_preprocessed_path,
-                dataset_specs_path=dataset_specs_path,
-                cache_filepath=cache_filepath,
-                t='train')
-            
-            self.train_ds2_shifted = self._apply_shift_ratio(self.train_ds1, self.train_ds2)
-            self.train_pairedds = PairDataset(self.train_ds1, self.train_ds2_shifted)
+        dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.datasets_dir, dataset_name='train_' + self.ds_env1)
+        self.train_ds1 = DiagVib6Dataset(
+            mnist_preprocessed_path = self.mnist_preprocessed_path,
+            dataset_specs_path=dataset_specs_path,
+            cache_filepath=cache_filepath,
+            t='train')
+        
+        dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.datasets_dir, dataset_name='train_' + self.ds_env2)
+        self.train_ds2 = DiagVib6Dataset(
+            mnist_preprocessed_path = self.mnist_preprocessed_path,
+            dataset_specs_path=dataset_specs_path,
+            cache_filepath=cache_filepath,
+            t='train')
+        
+        self.train_ds2_shifted = self._apply_shift_ratio(self.train_ds1, self.train_ds2)
+        self.train_pairedds = PairDataset(self.train_ds1, self.train_ds2_shifted)
 
-        if stage == 'validate': # or stage == "fit": # uncomment to activate callbacks
-            dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.datasets_dir, dataset_name='val_' + self.ds_env1)
+        dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.datasets_dir, dataset_name='val_' + self.ds_env1)
+        if dataset_specs_path == None and not os.path.exists(cache_filepath):
+            # We avoid error, simply  don't perform validation
+            print("\nNo configuration or .pkl file has been provided for validation.\n")
+            self.val_pairedds = None
+        else:
             self.val_ds1 = DiagVib6Dataset(
                 mnist_preprocessed_path = self.mnist_preprocessed_path,
                 dataset_specs_path=dataset_specs_path,
@@ -102,7 +105,6 @@ class DiagVibDataModule2Envs(LightningDataModule):
             self.val_ds2_shifted = self._apply_shift_ratio(self.val_ds1, self.val_ds2)
             self.val_pairedds = PairDataset(self.val_ds1, self.val_ds2_shifted)
 
-
     def train_dataloader(self):
         return DataLoader(
             dataset=self.train_pairedds,
@@ -114,17 +116,17 @@ class DiagVibDataModule2Envs(LightningDataModule):
             collate_fn=self.collate_fn,
         )
 
-
     def val_dataloader(self):
-        return DataLoader(
-            dataset=self.val_pairedds,
-            batch_size=self.hparams.batch_size,
-            num_workers=self.hparams.num_workers,
-            pin_memory=self.hparams.pin_memory,
-            drop_last=False,
-            shuffle=False,
-            collate_fn=self.collate_fn
-        ) 
+        if self.val_pairedds is not None:
+            return DataLoader(
+                dataset=self.val_pairedds,
+                batch_size=self.hparams.batch_size,
+                num_workers=self.hparams.num_workers,
+                pin_memory=self.hparams.pin_memory,
+                drop_last=False,
+                shuffle=False,
+                collate_fn=self.collate_fn
+            ) 
 
 
     def _apply_shift_ratio(self, ds1, ds2):

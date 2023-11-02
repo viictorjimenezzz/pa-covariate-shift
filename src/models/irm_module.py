@@ -262,7 +262,7 @@ class IRM(LightningModule):
 
     def configure_optimizers(self):
         optimizer = self.hparams.optimizer(params=self.parameters())
-        if self.hparams.scheduler is not None:
+        if (self.hparams.scheduler is not None) and self.trainer.datamodule.val_dataloader():
             scheduler = self.hparams.scheduler(optimizer=optimizer)
             return {
                 "optimizer": optimizer,
