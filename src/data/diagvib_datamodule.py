@@ -25,7 +25,7 @@ class DiagVibDataModule2Envs(LightningDataModule):
         env1_name: Name of the first environment. The .pkl or .csv/.yml files must be named "train_{env1_name}" and/or "val_{env1_name}".
         env2_name: Name of the second environment. The .pkl or .csv/.yml files must be named "train_{env1_name}" and/or "val_{env1_name}".
         shift_ratio: Ratio of samples to be shifted from the first to the second environment.
-        datasets_dir: Path to the directory containing the dataset configuration files.
+        datasets_dir: Path to the directory containing the dataset configuration files or the cache.
         mnist_preprocessed_path: Path to the preprocessed MNIST dataset. If not available, it will be generated there.
         collate_fn: Collate function to be used by the DataLoader. Each collate function adapts the output for a specific model.
         batch_size: Batch size.

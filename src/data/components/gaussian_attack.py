@@ -7,10 +7,17 @@ from torch import randn
 
 class GaussianAttack(CAttackEvasion):
     """
-    Modifications from original class:
+    secml subclass for a Gaussian attack. It is a simple attack that adds Gaussian noise to the input data.
+
+    Modifications from original CAttackEvasion class:
     - Avoid _run() method bc of its simplicity.
     - No class selection, all classes are attacked.
-    - adv_f_obj is a mean of the f_obj. I set to None.
+    - adv_f_obj is a mean of the f_obj. I set to None, as it is not used for the attack.
+
+    Args:
+        classifier: Target classifier.
+        epsilons: 3*standard deviation of the Gaussian noise. The values of epsilon can be compared with the extent of the perturbations of a PGD attack.
+
     """
     def __init__(self, 
                 classifier: CClassifierPyTorch, 
@@ -43,15 +50,10 @@ class GaussianAttack(CAttackEvasion):
         Y = CArray(Y).atleast_2d()
         adv_ds = CDataset(adv_X.deepcopy(), Y.deepcopy())
 
-    
-        #adv_scores = self.classifier.forward(adv_X).softmax(dim=1)
-        #adv_Y_pred = adv_scores.argmax()
         adv_Y_pred, adv_scores = self.attacked_classifier.predict(adv_ds.X, return_decision_function=True)
         adv_Y_pred = CArray(adv_Y_pred)
 
-
         adv_f_obj = None # try
-    
         return adv_Y_pred, adv_scores, adv_ds, adv_f_obj
 
 
