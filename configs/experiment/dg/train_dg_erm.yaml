@@ -5,7 +5,7 @@
 
 defaults:
   - override /data/dg: diagvib_two.yaml
-  - override /model/dg: erm_diagvib.yaml
+  - override /model/dg: erm.yaml
   - override /trainer: ddp.yaml
 
 # all parameters below will be merged with parameters from default configurations set above

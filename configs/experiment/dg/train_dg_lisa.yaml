@@ -5,7 +5,7 @@
 
 defaults:
   - override /data/dg: diagvib_two.yaml
-  - override /model/dg: lisa_diagvib.yaml
+  - override /model/dg: lisa.yaml
   - override /trainer: ddp.yaml
 
 
