@@ -1,8 +1,5 @@
 # @package _global_
 
-# to execute this experiment run:
-# python train.py experiment=example
-
 defaults:
   - override /data/dg: diagvib_two.yaml
   - override /model/dg: optimize.yaml
@@ -11,21 +8,17 @@ defaults:
     - rich_progress_bar.yaml
   - override /trainer: ddp.yaml
 
-# all parameters below will be merged with parameters from default configurations set above
-# this allows you to overwrite only specified parameters
-name: test_diagvib_optimization
-
 model:
   dg:
     optimizer:
       _target_: torch.optim.Adam
     classifier:
-      exp_name: ${name}
+      exp_name: ???
       net:
         net: resnet18
         pretrained: false
 
-tags: ["diagvib", "adam", "1000_epochs", "${model.dg.classifier.exp_name}"]
+tags: ["diagvib", "adam", "500_epochs", "${model.dg.classifier.exp_name}"]
 
 seed: 12345
 
@@ -37,8 +30,11 @@ trainer:
 
 data:
   dg:
-    ds1_env: ???
-    ds2_env: ???
+    datasets_dir: ${paths.data_dir}/dg/dg_datasets/paper_replication/
+    collate_fn:
+      _target_: hydra.utils.get_method
+      path: src.data.components.collate_functions.IRM_collate_fn
+    shift_ratio: ???
     batch_size: 100
     num_workers: 40
     pin_memory: True
@@ -46,7 +42,8 @@ data:
 logger:
   wandb:
     tags: ${tags}
-    project: adv_pa_new
-    group: dg_pa
-    save_dir: ${paths.output_dir}/adv
-    name: model=${model.dg.classifier.exp_name}_${data.dg.ds2_env}_sr=${data.dg.shift_ratio}
+    entity: entity-name
+    project: project-name
+    group: group-name
+    save_dir: ${paths.output_dir}/dg
+    name: model=${model.dg.classifier.exp_name}_${data.dg.env1_name}_vs_${data.dg.env2_name}_sr=${data.dg.shift_ratio}
