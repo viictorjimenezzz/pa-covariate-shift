@@ -111,10 +111,11 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
             writer.writerow(["place_holder", "place_holder"])
 
     pd_ckpt = pd.read_csv(path_ckpt_csv)
-    if logger[0].experiment.name not in pd_ckpt["experiment_name"].tolist():
-        with open(path_ckpt_csv, "a+", newline="") as file:
-            writer = csv.writer(file)
-            writer.writerow([logger[0].experiment.name, ckpt_path])
+    if logger:
+        if logger[0].experiment.name not in pd_ckpt["experiment_name"].tolist():
+            with open(path_ckpt_csv, "a+", newline="") as file:
+                writer = csv.writer(file)
+                writer.writerow([logger[0].experiment.name, ckpt_path])
 
     return metric_dict, object_dict
 
