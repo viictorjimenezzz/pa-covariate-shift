@@ -6,7 +6,7 @@
 defaults:
   - _self_
   - data/dg: diagvib_two.yaml
-  - model/dg: erm_diagvib.yaml
+  - model/dg: erm.yaml
   - callbacks: default.yaml
   - logger: null
   - trainer: default.yaml

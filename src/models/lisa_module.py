@@ -14,7 +14,7 @@ class LISA(ERM):
     the mixup is performed on the fly in the module for the selected SA strategy s.
 
     It could be a problem if B_env1 and B_env2 do not share a single observation with the same label.
-    So far, batch_size=64 does not seem to be a problem.
+    So far, batch_size=64 does not seem to be a problem if samples are permuted randomly before going into batches.
 
     Args:
         n_classes: Number of classes.

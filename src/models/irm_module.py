@@ -66,12 +66,11 @@ class IRM(LightningModule):
         )
 
     def compute_penalty(self, logits, y):
-        #dummy_w = torch.tensor(1.).cuda().requires_grad_() # cuda for ddp!
-        dummy_w = torch.tensor(1.).requires_grad_()
+        dummy_w = torch.tensor(1.).to(self.device).requires_grad_()
         with torch.enable_grad():
             loss = self.loss(logits*dummy_w, y)
         gradient = grad(loss, [dummy_w], create_graph=True)[0]
-        return gradient**2
+        return torch.sum(gradient**2).to(self.device)
 
     def training_step(self, batch, batch_idx):
         envs = batch["envs"]

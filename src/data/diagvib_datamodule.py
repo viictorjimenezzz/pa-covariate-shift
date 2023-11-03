@@ -85,7 +85,10 @@ class DiagVibDataModule2Envs(LightningDataModule):
 
         dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.datasets_dir, dataset_name='val_' + self.ds_env1)
         if dataset_specs_path == None and not os.path.exists(cache_filepath):
-            # We avoid error, simply  don't perform validation
+            """
+            If there is no validation dataset, the datamodule will not yield error.
+            Nevertheless, the callbacks for the training will have to be disabled. Use: --callbacks=none
+            """
             print("\nNo configuration or .pkl file has been provided for validation.\n")
             self.val_pairedds = None
         else:
