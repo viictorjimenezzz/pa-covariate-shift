@@ -161,3 +161,4 @@ configs/local/default.yaml
 /wandb
 .DS_Store
 .hydra
+.submitit
