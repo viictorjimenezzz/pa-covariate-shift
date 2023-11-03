@@ -1,5 +1,3 @@
-# @package data
-
 defaults:
   - /model/adv/cifar10@_here_
   - attack: null

@@ -1,5 +1,3 @@
-# @package model
-
 defaults:
   - cifar10.yaml
 
