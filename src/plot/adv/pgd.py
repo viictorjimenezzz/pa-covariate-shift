@@ -259,98 +259,38 @@ def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR") -> None:
             plt.close()
 
 
-def afr_vs_logpa_separate(
-    df: pd.DataFrame, comparison_metric: str = "AFR"
-) -> None:
-    """Create and store plots of Linf/Poison ratio vs comparison_metric/logPA.
-    Each plot have Linf/Adversarial Ratio on the x axis and two curves on the y
-    axis: comparison_metric and LogPA for a (weak/robust) model.
-    """
-    dirname = osp.join("results", "plots", "adv", "separate")
-    os.makedirs(dirname, exist_ok=True)
-
-    pairs = [("adversarial_ratio", "linf"), ("linf", "adversarial_ratio")]
-    for levels in tqdm(pairs, total=len(pairs)):
-        level, x_level = levels
-        level_name, x_name = (
-            ("$\ell_\infty$", "Adversarial Ratio")
-            if level == "linf"
-            else ("Adversarial Ratio", "$\ell_\infty$")
+def table(df: pd.DataFrame) -> None:
+    dset = df.loc[
+        df["adversarial_ratio"] == 1.0,
+        [
+            "model_name",
+            "linf",
+            "logPA",
+            "AFR",
+        ],
+    ]
+    dset = dset.replace(LABEL_DICT)
+    dset = pd.melt(
+        dset, id_vars=["model_name", "linf"], value_vars=["logPA", "AFR"]
+    )
+    dset = dset.sort_values(by="linf")
+    dset = dset.pivot(
+        index="model_name", columns=["linf", "variable"], values="value"
+    )
+    dset.index.name = "Models"
+    print(
+        dset.to_latex(
+            float_format="{:.2f}".format,
+            escape=False,
+            sparsify=True,
+            multirow=True,
+            multicolumn=True,
+            multicolumn_format="c",
+            caption="my caption",
+            label="tab:logpa",
+            position="t",
         )
-        levels = df[level].unique()
-        # import ipdb; ipdb.set_trace()
-        for value in tqdm(levels, total=len(levels)):
-            # Subset the DataFrame to include only the relevant columns and rows
-            level_set = df.loc[
-                df[level] == value,
-                [
-                    "name",
-                    "attack_name",
-                    "model_name",
-                    "adversarial_ratio",
-                    "linf",
-                    "logPA",
-                    comparison_metric,
-                ],
-            ]
-
-            # Create a line plot for PGD attack type with Seaborn
-            for attack_name in ("PGD",):
-                for model_name in ("Standard", "Engstrom2019Robustness"):
-                    # import ipdb; ipdb.set_trace()
-                    subset = level_set[
-                        (level_set["attack_name"] == attack_name)
-                        & (level_set["model_name"] == model_name)
-                    ]
-
-                    _, ax1 = plt.subplots()
-                    sns.set_style("whitegrid")
-                    ax2 = ax1.twinx()
-                    sns.set_style("ticks")
-
-                    ids = subset[x_level].sort_values().index
-                    # import ipdb; ipdb.set_trace()
-                    ax1.plot(
-                        subset[x_level].loc[ids],
-                        subset["logPA"].loc[ids],
-                        c=COLORS_DICT[model_name],
-                        dashes=(None, None),
-                        label=f"{model_name} (logPA)",
-                        marker="o",
-                    )
-                    ax2.plot(
-                        subset[x_level].loc[ids],
-                        subset[comparison_metric].loc[ids],
-                        c=COLORS_DICT[model_name],
-                        dashes=(2, 2),
-                        label=f"{model_name} ({comparison_metric})",
-                        marker="X",
-                    )
-                    # ax1.set_ylim([0, 1])
-                    # ax2.set_ylim([0, 1])
-                    ax1.set_xlabel(x_name)
-                    ax1.set_ylabel("LogPA")
-                    ax2.set_ylabel(comparison_metric)
-                    handles1, labels1 = ax1.get_legend_handles_labels()
-                    handles2, labels2 = ax2.get_legend_handles_labels()
-                    handles, labels = handles1 + handles2, labels1 + labels2
-                    ax2.legend(handles, labels)
-                    ax1.legend().remove()
-
-                    plt.title(
-                        f"{attack_name} attack, "
-                        f"{LABEL_DICT[model_name]} model, "
-                        f"{level_name} = {value:.4f}"
-                    )
-
-                    fname = osp.join(
-                        dirname,
-                        f"{attack_name}_{LABEL_DICT[model_name]}_{level}={value:.8f}.png",
-                    )
-
-                    plt.savefig(fname)
-                    plt.clf()
-                    plt.close()
+    )
 
 
 if __name__ == "__main__":
@@ -383,6 +323,7 @@ if __name__ == "__main__":
     )
 
     df.loc[df["adversarial_ratio"].eq(0.0), "logPA"] = 0.0
-    curves(df, "AFR")
-    curves(df, "AFR")
+    table(df)
+    # curves(df, "AFR")
+    # curves(df, "AFR")
     # afr_vs_logpa(df, "AFR")
