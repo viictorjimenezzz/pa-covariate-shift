@@ -52,15 +52,15 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
     """
 
     # set seed for random number generators in pytorch, numpy and python.random
-    
+
     if cfg.get("seed"):
         pl.seed_everything(cfg.seed, workers=True)
 
-    log.info(f"Instantiating datamodule <{cfg.data._target_}>")
-    datamodule: LightningDataModule = hydra.utils.instantiate(cfg.data)
+    log.info(f"Instantiating datamodule <{cfg.data.adv._target_}>")
+    datamodule: LightningDataModule = hydra.utils.instantiate(cfg.data.adv)
 
-    log.info(f"Instantiating model <{cfg.model._target_}>")
-    model: LightningModule = hydra.utils.instantiate(cfg.model)
+    log.info(f"Instantiating model <{cfg.model.adv._target_}>")
+    model: LightningModule = hydra.utils.instantiate(cfg.model.adv)
 
     log.info("Instantiating callbacks...")
     callbacks: List[Callback] = utils.instantiate_callbacks(

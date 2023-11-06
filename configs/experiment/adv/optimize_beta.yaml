@@ -15,11 +15,12 @@ defaults:
 # this allows you to overwrite only specified parameters
 
 model:
-  classifier: ${data.classifier}
-  optimizer:
-    _target_: torch.optim.Adam
+  adv:
+    classifier: ${data.adv.classifier}
+    optimizer:
+      _target_: torch.optim.Adam
 
-tags: ["order_by_attack", "adam", "500_epochs", "1000_steps", "cifar10", "${model.classifier.model_name}", "${data.attack.attack_name}"]
+tags: ["order_by_attack", "adam", "500_epochs", "1000_steps", "cifar10", "${data.adv.classifier.model_name}", "${data.adv.attack.attack_name}"]
 
 seed: 12345
 
@@ -39,4 +40,4 @@ logger:
     project: adv_pa_new
     group: adversarial
     save_dir: ${paths.output_dir}/adv
-    name: att=${data.attack.attack_name}_mod=${model.classifier.model_name}_ar=${data.adversarial_ratio}
+    name: att=${data.adv.attack.attack_name}_mod=${data.adv.classifier.model_name}_ar=${data.adv.adversarial_ratio}
