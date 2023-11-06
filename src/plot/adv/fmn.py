@@ -38,14 +38,20 @@ def logpa(df: pd.DataFrame):
         ],
     ]
 
-    dashes_dict = {"Standard": (2, 2), "Engstrom2019Robustness": (2, 2)}
+    dashes_dict = {
+        "Standard": (2, 2),
+        "Engstrom2019Robustness": (2, 2),
+        "BPDA": (2, 2),
+    }
     colors_dict = {
         "Standard": "tab:orange",
         "Engstrom2019Robustness": "tab:blue",
+        "BPDA": "tab:green",
     }
     label_dict = {
-        "Standard": "Weak",
-        "Engstrom2019Robustness": "Robust",
+        "Standard": "Undefended",
+        "Engstrom2019Robustness": "Engstrom et al.",
+        "BPDA": "Athalye et al.",
     }
 
     # Create a line plot for PGD attack type with Seaborn

@@ -58,12 +58,18 @@ def create_dataframe_from_wandb_runs(
         history = run.history()
 
         data["name"].append(run.name)
-        data["attack_name"].append(config["data/attack/attack_name"])
-        data["model_name"].append(config["data/classifier/model_name"])
-        data["adversarial_ratio"].append(config["data/adversarial_ratio"])
+        data["attack_name"].append(
+        config.get("data/attack/attack_name", config.get("data/adv/attack/attack_name"))
+)
+        data["model_name"].append(
+        config.get("data/classifier/model_name", config.get("data/adv/classifier/model_name"))
+)
+        data["adversarial_ratio"].append(
+        config.get("data/adversarial_ratio", config.get("data/adv/adversarial_ratio"))
+)
 
-        if "data/attack/epsilons" in config:
-            data["linf"].append(config["data/attack/epsilons"])
+        if "data/attack/epsilons" in config or "data/adv/attack/epsilons" in config:
+            data["linf"].append(config.get("data/attack/epsilons", config.get("data/adv/attack/epsilons")))
         data["AFR"].append(history[f"AFR {afr}"].max())
         data["logPA"].append(history["logPA_epoch"].max())
 
