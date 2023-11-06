@@ -35,7 +35,7 @@ def main(cfg: DictConfig) -> Optional[float]:
     if cfg.get("seed"):
         seed_everything(cfg.seed, workers=True)
 
-    dm = hydra.utils.instantiate(cfg.data)
+    dm = hydra.utils.instantiate(cfg.data.adv)
     dm.setup()
 
 
