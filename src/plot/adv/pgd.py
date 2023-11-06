@@ -368,7 +368,15 @@ def afr_vs_logpa_separate(
 if __name__ == "__main__":
     attack = "PGD"
     date = "2023-08-02"
-    tags = ["cifar10", attack, "1000_steps", "500_epochs", "order_by_attack"]
+    # Note: I've adedd adam 04/11/2023, check if it's right
+    tags = [
+        "cifar10",
+        attack,
+        "adam",
+        "1000_steps",
+        "500_epochs",
+        "order_by_attack",
+    ]
     afr = "pred"
 
     df = create_dataframe_from_wandb_runs(
