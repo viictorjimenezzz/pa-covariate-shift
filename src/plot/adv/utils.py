@@ -8,6 +8,7 @@ from tqdm import tqdm
 import pandas as pd
 
 import wandb
+import time
 
 
 def create_dataframe_from_wandb_runs(
@@ -77,16 +78,15 @@ def create_dataframe_from_wandb_runs(
             )
         )
 
-        if (
-            "data/attack/epsilons" in config
-            or "data/adv/attack/epsilons" in config
-        ):
+        if "data/attack/epsilons" in config or "data/adv/attack/epsilons" in config:
             data["linf"].append(
                 config.get(
                     "data/attack/epsilons",
                     config.get("data/adv/attack/epsilons"),
                 )
             )
+        # pause because wandb sometimes is not able to retrieve the results
+        time.sleep(3)
         data["AFR"].append(
             max(
                 [
