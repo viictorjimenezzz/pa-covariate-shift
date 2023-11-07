@@ -27,16 +27,21 @@ def diagvib_collate_fn(batch: List, img_shape: Tensor = None):
     return aux
 
 def IRM_collate_fn(batch: List):
-
     batch_dict = {}
-    for env in batch[0]:
-        batch_dict[env] = [
-            torch.stack([b[env][0] for b in batch]),
-            torch.tensor([b[env][1] for b in batch]),
-        ]
+    if not isinstance(batch[0], dict): # just one environment
+        x = torch.stack([b[0] for b in batch])
+        y = torch.tensor([b[1] for b in batch])
+        batch_dict["0"] = [x,y]
+        batch_dict["envs"] = ["0"]
+    else:
+        for env in batch[0]:
+            batch_dict[env] = [
+                torch.stack([b[env][0] for b in batch]),
+                torch.tensor([b[env][1] for b in batch]),
+            ]
 
-    # Save environments list
-    batch_dict["envs"] = [env for env in batch[0].keys()]
+        # Save environments list
+        batch_dict["envs"] = [env for env in batch[0].keys()]
 
     return batch_dict
     
