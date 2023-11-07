@@ -209,6 +209,35 @@ def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "AFR"):
     plt.clf()
     plt.close()
 
+def table(df: pd.DataFrame) -> None:
+    dset = df.loc[
+        df["adversarial_ratio"] == 1.0,
+        [
+            "model_name",
+            "logPA",
+            "AFR",
+        ],
+    ]
+    dset["logPA"] = dset["logPA"].apply(lambda x: int(round(x, 0)))
+    dset = dset.replace(LABEL_DICT)
+    dset = pd.melt(dset, id_vars=["model_name"], value_vars=["logPA", "AFR"])
+    # dset = dset.sort_values(by="linf")
+    dset = dset.pivot(index="model_name", columns=["variable"], values="value")
+    dset.index.name = "Models"
+    print(
+        dset.to_latex(
+            float_format="{:.0f}".format,
+            escape=False,
+            sparsify=True,
+            multirow=True,
+            multicolumn=True,
+            multicolumn_format="c",
+            caption="\small PA vs. AFR, model discriminability.",
+            label="tab:logpa_pgd",
+            position="t",
+        )
+    )
+
 
 if __name__ == "__main__":
     attack = "FMN"
