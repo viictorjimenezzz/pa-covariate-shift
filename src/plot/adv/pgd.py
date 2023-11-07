@@ -269,14 +269,11 @@ def table(df: pd.DataFrame) -> None:
             "AFR",
         ],
     ]
+    dset["logPA"] = dset["logPA"].apply(lambda x: int(round(x, 0)))
     dset = dset.replace(LABEL_DICT)
-    dset = pd.melt(
-        dset, id_vars=["model_name", "linf"], value_vars=["logPA", "AFR"]
-    )
+    dset = pd.melt(dset, id_vars=["model_name", "linf"], value_vars=["logPA", "AFR"])
     dset = dset.sort_values(by="linf")
-    dset = dset.pivot(
-        index="model_name", columns=["linf", "variable"], values="value"
-    )
+    dset = dset.pivot(index="model_name", columns=["linf", "variable"], values="value")
     dset.index.name = "Models"
     print(
         dset.to_latex(
