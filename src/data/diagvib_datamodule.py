@@ -114,7 +114,7 @@ class DiagVibDataModule2Envs(LightningDataModule):
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
-            drop_last=False,
+            drop_last=True,
             shuffle=False,
             collate_fn=self.collate_fn,
         )
@@ -126,7 +126,7 @@ class DiagVibDataModule2Envs(LightningDataModule):
                 batch_size=self.hparams.batch_size,
                 num_workers=self.hparams.num_workers,
                 pin_memory=self.hparams.pin_memory,
-                drop_last=False,
+                drop_last=True,
                 shuffle=False,
                 collate_fn=self.collate_fn
             ) 
