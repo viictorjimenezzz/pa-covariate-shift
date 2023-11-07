@@ -1,7 +1,6 @@
 from src.models.erm_module import ERM
 import torch
 from torch import nn, Tensor, optim
-from typing import List, Callable
 
 from torch.distributions.beta import Beta # to sample mixup weight (lambda)
 from torch.distributions.bernoulli import Bernoulli # to select SA strategy (s)
@@ -67,9 +66,6 @@ class LISA(ERM):
         bsz = len(x1)
         a = torch.full((bsz, 1), mix_alpha).to(self.device)
         l = Beta(a, a).sample().to(self.device)
-
-        if (len(a) == 0) or (len(l) == 0) or (len(x1) == 0):
-            raise NotImplementedError(str([str(i) for i in [len(a), len(l), len(x1)]]))
 
         if len(x1.shape) == 4:
             l_x = l.unsqueeze(-1).unsqueeze(-1).expand(-1, *x1.shape[1:]).to(self.device)
@@ -144,8 +140,8 @@ class LISA(ERM):
                 B1_lab, B2_lab = self.pair_lisa(envs_int[mask]) # indexes wrt mask
 
                 # accumulate indexes wrt all observations
-                B1 = torch.cat((B1, torch.index_select(all_inds[mask], 0, B1_lab)))
-                B2 = torch.cat((B2, torch.index_select(all_inds[mask], 0, B2_lab)))
+                B1 = torch.cat((B1, torch.index_select(all_inds[mask], 0, B1_lab.sort()[0])))
+                B2 = torch.cat((B2, torch.index_select(all_inds[mask], 0, B2_lab.sort()[0])))
 
         else: # LISA-D
             # group data by environment
@@ -154,15 +150,15 @@ class LISA(ERM):
                 B1_lab, B2_lab = self.pair_lisa(y[mask]) # indexes wrt mask
 
                 # accumulate indexes wrt all observations
-                B1 = torch.cat((B1, torch.index_select(all_inds[mask], 0, B1_lab)))
-                B2 = torch.cat((B2, torch.index_select(all_inds[mask], 0, B2_lab)))
+                B1 = torch.cat((B1, torch.index_select(all_inds[mask], 0, B1_lab.sort()[0])))
+                B2 = torch.cat((B2, torch.index_select(all_inds[mask], 0, B2_lab.sort()[0])))
 
         # mixup
         mixed_x, mixed_y = self.mix_up(self.hparams.mix_alpha, 
-                                            torch.index_select(input=x, dim=0, index=B1).to(self.device), 
-                                            self.to_one_hot(torch.index_select(input=y, dim=0, index=B1), self.hparams.n_classes), 
-                                            torch.index_select(input=x, dim=0, index=B2).to(self.device),
-                                            self.to_one_hot(torch.index_select(input=y, dim=0, index=B2), self.hparams.n_classes))
+                                            torch.index_select(input=x, dim=0, index=B1.sort()[0]).to(self.device), 
+                                            self.to_one_hot(torch.index_select(input=y, dim=0, index=B1.sort()[0]), self.hparams.n_classes), 
+                                            torch.index_select(input=x, dim=0, index=B2.sort()[0]).to(self.device),
+                                            self.to_one_hot(torch.index_select(input=y, dim=0, index=B2.sort()[0]), self.hparams.n_classes))
 
         return mixed_x, self.from_one_hot(mixed_y)
 
