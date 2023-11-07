@@ -14,9 +14,7 @@ def curves(df: pd.DataFrame, metric: str = "logPA") -> None:
     """
     metric can be either logPA or AFR
     """
-    dirname = osp.join(
-        "results", "plots", "adv", "PA" if metric == "logPA" else "AFR"
-    )
+    dirname = osp.join("results", "plots", "adv", "PA" if metric == "logPA" else "AFR")
     os.makedirs(dirname, exist_ok=True)
 
     pairs = [("linf", "adversarial_ratio"), ("adversarial_ratio", "linf")]
@@ -74,9 +72,7 @@ def curves(df: pd.DataFrame, metric: str = "logPA") -> None:
 
             ax.minorticks_on()
             if level == "linf":
-                ax.set_xticks(
-                    [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-                )
+                ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
             else:  # level == "adversarial_ratio"
                 ax.set_xticks([0.0314, 0.0627, 0.1255])
 
@@ -89,9 +85,7 @@ def curves(df: pd.DataFrame, metric: str = "logPA") -> None:
             ax.grid(linestyle="--")
 
             ax.set_xlabel(x_label, fontname=fontname)
-            ax.set_ylabel(
-                "PA" if metric == "logPA" else "AFR", fontname=fontname
-            )
+            ax.set_ylabel("PA" if metric == "logPA" else "AFR", fontname=fontname)
 
             # Legend
             handles, labels = ax.get_legend_handles_labels()
@@ -293,7 +287,6 @@ def table(df: pd.DataFrame) -> None:
 if __name__ == "__main__":
     attack = "PGD"
     date = "2023-08-02"
-    # Note: I've adedd adam 04/11/2023, check if it's right
     tags = [
         "cifar10",
         attack,
@@ -321,6 +314,5 @@ if __name__ == "__main__":
 
     df.loc[df["adversarial_ratio"].eq(0.0), "logPA"] = 0.0
     table(df)
-    # curves(df, "AFR")
-    # curves(df, "AFR")
-    # afr_vs_logpa(df, "AFR")
+    # curves(df, "logPA")
+    # curves(df, "logPA")
