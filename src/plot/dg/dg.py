@@ -6,14 +6,20 @@ import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import seaborn as sns
 
-from src.plot.dg.utils import create_dataframe_from_wandb_runs
+import numpy as np
 
 
-def logpa(df: pd.DataFrame):
-    dirname = osp.join("results", "plots", "dg", "PA")
+def logpa(df: pd.DataFrame,
+          dirname: str,
+          show_AFR: bool = True,
+          picformat: str = "png",
+          metric="logPA"):
+
+    model_names = df["model_name"].unique()
+    dirname = osp.join(dirname, "PA" if metric == "logPA" else "AFR")
     os.makedirs(dirname, exist_ok=True)
 
-    pairs = [("shift_factor", "shift_ratio"), ("shift_ratio", "shift_factor")]
+    pairs = [("shift_ratio", "shift_factor")]
     for levels in tqdm(pairs, total=len(pairs)):
         level, x_level = levels
         if level == "shift_factor":
@@ -30,18 +36,16 @@ def logpa(df: pd.DataFrame):
             ]
             levels = sorted(level_set[level].unique())
         else:
-            level_set = df[df["shift_factor"].str.contains("[0-9]", regex=True)]
-            # level_set = level_set.sort_values(
-            #     by=x_level,
-            #     key=lambda x: np.argsort(index_natsorted(level_set[x_level]))
-            # )
-            # levels = sorted(level_set[level].unique())
+            #level_set = df[df["shift_factor"].str.contains("[0-9]", regex=True)]
+            # shift factor always has a value
+            level_set = df
             levels = level_set[level].unique()
+            level_set.sort_values(x_level, inplace=True)
 
         fontname = "DejaVu serif"
         font_path = fm.findfont(fm.FontProperties(family=fontname))
+        levels = np.concatenate([levels, np.array([levels[0]])])
         for value in tqdm(levels, total=len(levels)):
-            # Subset the DataFrame to include only the relevant columns and rows
             subset = level_set.loc[
                 level_set[level] == value,
                 [
@@ -49,15 +53,16 @@ def logpa(df: pd.DataFrame):
                     "shift_ratio",
                     "shift_factor",
                     "logPA",
+                    "AFR"
                 ],
             ]
+            colors_dict = {model_name: plt.rcParams['axes.prop_cycle'].by_key()['color'][i] for i, model_name in enumerate(model_names)}
+            label_dict = {model_name: str(i) for i, model_name in enumerate(model_names)}
 
-            dashes_dict = {"diagvib_robust": (2, 2), "diagvib_weak": (2, 2)}
-            colors_dict = {
-                "diagvib_weak": "tab:orange",
-                "diagvib_robust": "tab:blue",
-            }
-            label_dict = {"diagvib_weak": "Weak", "diagvib_robust": "Robust"}
+            # Addendum for ERM, IRM, LISA
+            standard_models = ["ERM", "IRM", "LISA"]
+            if len(model_names) == 3 and [model_name[:3].lower() for model_name in model_names] == ["erm", "irm", "lis"]:
+                label_dict = {model_name: standard_models[i] for i, model_name in enumerate(model_names)}
 
             _, ax1 = plt.subplots(figsize=(2 * 3.861, 2 * 2.7291))
             sns.set(font_scale=1.9)
@@ -69,7 +74,7 @@ def logpa(df: pd.DataFrame):
                 data=subset,
                 ax=ax1,
                 x=x_level,
-                y="logPA",
+                y=metric,
                 hue="model_name",
                 style="model_name",
                 palette=colors_dict,
@@ -77,6 +82,18 @@ def logpa(df: pd.DataFrame):
                 marker="o",
                 linewidth=3,
             )
+
+            if show_AFR:
+                for i, point in subset.iterrows():
+                    ax1.text(
+                        point['shift_factor'], 
+                        point['logPA'],        
+                        f"{point['AFR']:.2f}", 
+                        color='black',       
+                        ha='center',       
+                        va='bottom',
+                        fontsize=9    
+                    )
 
             ax1.minorticks_on()
             ax1.tick_params(axis="both", which="both", direction="in")
@@ -96,7 +113,7 @@ def logpa(df: pd.DataFrame):
 
             # sort labels and handles
             ids = sorted(range(len(labels)), key=labels.__getitem__)
-            ids[0], ids[1] = ids[1], ids[0]
+            #ids[0], ids[1] = ids[1], ids[0]
             labels = [labels[i] for i in ids]
             handles = [handles[i] for i in ids]
 
@@ -112,10 +129,10 @@ def logpa(df: pd.DataFrame):
 
             plt.tight_layout()
             if level == "shift_ratio":
-                fname = osp.join(dirname, f"{level}={value:.8f}.pdf")
+                fname = osp.join(dirname, f"{list(set(list(subset['model_name'])))[0]}_{level}={value:.3f}." + picformat)
             else:
                 fname = osp.join(
-                    dirname, f"{level}={value.split('test_')[1]}.pdf"
+                    dirname, f"{level}={value.split('test_')[1]}." + picformat
                 )
 
             plt.savefig(fname)

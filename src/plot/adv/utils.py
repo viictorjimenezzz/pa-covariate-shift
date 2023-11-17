@@ -13,11 +13,11 @@ import time
 
 def create_dataframe_from_wandb_runs(
     project: str,
-    attack: str,
     filters: dict,
     date: str = None,
     afr: str = "true",
     cache: bool = False,
+    attack: str = None,
 ) -> pd.DataFrame:
     """
     Create a pandas DataFrame from the data retrieved by Weight & Biases. The
@@ -59,18 +59,21 @@ def create_dataframe_from_wandb_runs(
         history = run.history()
 
         data["name"].append(run.name)
+        """
         data["attack_name"].append(
             config.get(
                 "data/attack/attack_name",
                 config.get("data/adv/attack/attack_name"),
             )
         )
+        
         data["model_name"].append(
             config.get(
                 "data/classifier/model_name",
                 config.get("data/adv/classifier/model_name"),
             )
         )
+
         data["adversarial_ratio"].append(
             config.get(
                 "data/adversarial_ratio",
@@ -85,8 +88,16 @@ def create_dataframe_from_wandb_runs(
                     config.get("data/adv/attack/epsilons"),
                 )
             )
+        """
+
+        parts = run.name.split('_')
+        data["model_name"].append('_'.join(parts[:2])[6:]) # for original
+        data["shift_ratio"].append(config["data/dg/shift_ratio"])
+        data["shift_factor"].append(config["data/dg/ds2_env"]) # for original
+
         # pause because wandb sometimes is not able to retrieve the results
-        time.sleep(3)
+        time.sleep(5)
+        #import ipdb; ipdb.set_trace()
         data["AFR"].append(
             max(
                 [

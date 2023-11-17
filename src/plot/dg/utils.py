@@ -5,32 +5,22 @@ from tqdm import tqdm
 import wandb
 
 import pandas as pd
+import numpy as np
+
+import time
+
+def retrieve_from_history(run, keyname):
+    return [row[keyname] for row in run.scan_history(keys=[keyname]) if row[keyname] is not None]
 
 
-def create_dataframe_from_wandb_runs(
-    project: str,
-    filters: dict,
-    date: str = None,
-    afr: str = "true",
-    cache: bool = False,
-) -> pd.DataFrame:
-    """
-    Create a pandas DataFrame from the data retrieved by Weight & Biases. The
-    data can be used for plotting.
-
-    project (str): name of the W&B project (e.g. <entity>/<project>).
-    dset (str): name of the dataset (currently used only for the fname if
-        cache=True).
-    date_start (str): a date in the normal date format. All runs after that
-        date will be retrieved.
-    date_end (str): a date in the normal date format. All runs before that
-        date will be retrieved.
-    asr (str): string specifying the ASR metric to be used. Can be one of
-        "true" or "clean". Default: "true"
-    cache (bool): boolean specifying whether to store and retrieve the
-        DataFrame for subsequent uses, instead of recomputing it from scratch.
-        Default: False.
-    """
+def dg_pa_dataframe(
+        project: str,
+        filters: dict,
+        dirname: str,
+        afr: str = "pred",
+        cache: bool = False,
+        ) -> pd.DataFrame:
+    
     if afr not in ("true", "pred"):
         raise ValueError(
             f"'asr' must be one of 'true' or 'pred'. {afr} received instead."
@@ -39,8 +29,7 @@ def create_dataframe_from_wandb_runs(
     api = wandb.Api(timeout=100)
     runs = api.runs(project, filters)
 
-    dirname = osp.join("results", "dataframes")
-    fname = osp.join(dirname, f"diagvib_afr={afr}_{date}.pkl")
+    fname = osp.join(dirname, f"diagvib_afr={afr}_{filters['$and'][0]['tags']}.pkl")
     os.makedirs(dirname, exist_ok=True)
 
     if cache and osp.exists(fname):
@@ -49,25 +38,16 @@ def create_dataframe_from_wandb_runs(
     data = defaultdict(list)
 
     for i, run in tqdm(enumerate(runs), total=len(runs)):
-        # if "sr" not in run.name[-9:]:
-        #     continue
-        # if not run.config["max_beta/exp_name"].endswith("robust2"):
-        #     continue
-
-        # if not len(run.history()):
-        #     print(run.name)
-        #     continue
-
         config = run.config
-        history = run.history()
 
         data["name"].append(run.name)
         data["shift_ratio"].append(config["data/dg/shift_ratio"])
         data["model_name"].append(config["model/dg/classifier/exp_name"])
-        data["shift_factor"].append(config["data/dg/ds2_env"])
-        data["AFR"].append(history[f"AFR {afr}"].max())
-        data["logPA"].append(history["logPA_epoch"].max())
-        data["beta"].append(history["beta_epoch"][history["logPA_epoch"].argmax()])
+        data["shift_factor"].append(config["data/dg/envs_index"][1]) # for original
+        data["AFR"].append(max(retrieve_from_history(run, f"AFR {afr}")))
+        logpa_epoch = retrieve_from_history(run, "logPA_epoch")
+        data["logPA"].append(max(logpa_epoch))
+        data["beta"].append(retrieve_from_history(run, "beta_epoch")[np.argmax(logpa_epoch)])
 
     df = pd.DataFrame(data)
     df.to_pickle(fname)
