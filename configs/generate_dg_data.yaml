@@ -1,0 +1,39 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - paths: default.yaml
+
+extras:
+  print_config: True
+  ignore_warnings: True
+
+BATCH_SIZE: 64
+DATASETS_DIR: ${paths.data_dir}/dg/dg_datasets/replicate/
+
+# Desired sizes of the datasets
+# If the datasets are meant to have unique observations, do not surpass the sizes (4500, 1000, 900).
+# SIZE_TRAIN: 4500
+# SIZE_VAL: 1000
+# SIZE_TEST: 900
+SIZE_TRAIN: 40000
+SIZE_VAL: 20000
+SIZE_TEST: 10000
+
+## FACTORS: hue, lightness, texture, position, scale
+BALANCE: True
+envs_name: repbal # (balanced)
+
+# 2 train/val environments
+train_val_especs:
+  train_val_1: [0,3,0,4,2]
+  train_val_2: [4,3,0,4,2]
+
+# 6 test environments
+test_especs:
+  test_0: [0,3,0,4,2]
+  test_1: [4,3,0,4,2]
+  test_2: [4,2,0,4,2]
+  test_3: [4,2,0,7,2]
+  test_4: [4,2,0,7,3]
+  test_5: [4,2,1,7,3]
