@@ -1,0 +1,18 @@
+_target_: src.data.diagvib_datamodules.DiagVibDataModuleTestPA
+
+envs_index: ??? # [1,2]
+envs_name: env
+shift_ratio: 1.0
+
+datasets_dir: ${paths.data_dir}/dg/dg_datasets/
+mnist_preprocessed_path : ${paths.data_dir}/dg/mnist_processed.npz
+
+collate_fn: ???
+
+batch_size: ???
+num_workers: 2
+pin_memory: False
+
+# Not important for testPA
+disjoint_envs: False
+train_val_sequential: False

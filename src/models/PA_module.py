@@ -13,8 +13,7 @@ from torchmetrics.classification.accuracy import Accuracy
 
 
 class PosteriorAgreementModule(pl.LightningModule):
-    """Optimization over the inverse temperature parameter of the Posterior
-    Agreement kernel.
+    """Optimization over the inverse temperature parameter of the Posterior Agreement kernel.
     """
 
     def __init__(
@@ -32,19 +31,20 @@ class PosteriorAgreementModule(pl.LightningModule):
 
         self.model = classifier.eval()
         self.kernel = PosteriorAgreementKernel(beta0=beta0)
-        self.afr_true = Accuracy(task="multiclass", num_classes=10)
+        self.afr_true = Accuracy(task="multiclass", num_classes=10) # FIX THIS LATER TOO
         self.afr_pred = Accuracy(task="multiclass", num_classes=10)
 
         # self.betas = np.linspace(0, 10, 100).tolist()
         # self.training_step_outputs_1 = []
         # self.training_step_outputs_2 = []
 
-    def model_step(self, batch: Any):
+    def model_step(self, batch: dict):
         # QUICK FIX for projection. TODO: implement a better version
-        self.kernel.beta.data.clamp_(min=0.0)
 
+        env_names = batch["envs"]
+        self.kernel.beta.data.clamp_(min=0.0)
         self.kernel.reset()
-        x1, x2 = batch["first"][0], batch["second"][0]
+        x1, x2 = batch[env_names[0]][0], batch[env_names[1]][0]
 
         with torch.no_grad():
             o1, o2 = self.model(x1), self.model(x2)
@@ -60,7 +60,7 @@ class PosteriorAgreementModule(pl.LightningModule):
         if self.current_epoch == 0:  # AFR does not change during the epochs
             y_pred = torch.argmax(o1.data, 1)
             y_pred_adv = torch.argmax(o2.data, 1)
-            y_true = train_batch["first"][1]
+            y_true = train_batch["0"][1]
 
             self.afr_pred(y_pred_adv, y_pred)
             self.afr_true(y_pred_adv, y_true)

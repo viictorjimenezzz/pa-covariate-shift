@@ -1,7 +1,7 @@
 defaults:
   - net@classifier
 
-_target_: src.models.diagvib_pa_module.PosteriorAgreementModule
+_target_: src.models.PA_module.PosteriorAgreementModule
 
 classifier:
   _target_: src.models.components.dg_backbone.get_lm_model
