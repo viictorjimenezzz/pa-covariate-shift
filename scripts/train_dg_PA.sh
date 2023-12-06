@@ -1,17 +1,17 @@
 #!/bin/bash
 
-python src/train_dg.py \
+python3 src/train_dg_pa.py \
     --multirun \
-    experiment=dg/train_dg_erm \
-    name=erm_rebuttal \
-    data.dg.envs_index=[0,1] \
-    data.dg.envs_name=rebuttal \
-    data.dg.disjoint_envs=True \
-    data.dg.train_val_sequential=True \
+    experiment=dg/erm_irm_lisa_pa \
+    model.dg.classifier.exp_name=erm_rebuttal_pa,irm_rebuttal_pa,lisa_rebuttalL_pa,lisa_rebuttalD_pa \
+    data.dg.envs_index=[0,1],[0,2],[0,3],[0,4],[0,5] \
+    data.dg.shift_ratio=0.2,0.4,0.6,0.8,1.0 \
+    data.dg.envs_name=test_rebuttal \
+    data.dg.disjoint_envs=False \
+    data.dg.train_val_sequential=False \
     trainer=ddp \
     +trainer.fast_dev_run=False \
     +trainer.limit_train_batches=1.0 \
-    +trainer.limit_val_batches=1.0 \
     trainer.min_epochs=100 \
     trainer.max_epochs=100 \
     logger=wandb \
@@ -22,4 +22,5 @@ python src/train_dg.py \
     +hydra.launcher.num_gpus=4 \
     logger.wandb.entity=malvai \
     logger.wandb.project=cov_pa \
-    logger.wandb.group=pa_meeting \
+    logger.wandb.group=pa_lightningdebug_pa
+    
