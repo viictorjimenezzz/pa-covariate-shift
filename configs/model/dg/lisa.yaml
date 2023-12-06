@@ -3,7 +3,7 @@ defaults:
   - net.yaml
 
 _target_: src.models.lisa_module.LISAMnist
-ppred: 0.4 # probability of LISA-L
+ppred: 1.0 # probability of LISA-L
 mix_alpha: 0.4 # mixup weight
 
 n_classes: ${model.dg.net.n_classes}
