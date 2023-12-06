@@ -2,6 +2,7 @@ import hydra
 from omegaconf import DictConfig
 from pytorch_lightning import seed_everything
 
+import os
 import numpy as np
 import pandas as pd
 
@@ -101,6 +102,8 @@ def main(cfg: DictConfig):
         seed_everything(cfg.seed, workers=True)
 
     DATASETS_DIR = cfg.get("DATASETS_DIR")
+    os.makedirs(DATASETS_DIR, exist_ok=True)
+
     TO_BALANCE = cfg.get("BALANCE")
     envs_name = cfg.get("envs_name")
 
@@ -115,6 +118,7 @@ def main(cfg: DictConfig):
     # hue, lightness, texture, position, scale
     train_val_especs = cfg.get("train_val_especs")
     train_val_envs = list(train_val_especs.keys())
+    tran_val_randperm = cfg.get("train_val_randperm")
     
     sizes = [SIZE_TRAIN, SIZE_VAL]
     tasks = ["train", "val"]
@@ -130,6 +134,11 @@ def main(cfg: DictConfig):
         for t in range(len(train_val_envs)):
             config = train_val_especs[train_val_envs[t]]
 
+            if tran_val_randperm:
+                permutation = np.random.permutation(SIZE)
+            else:
+                permutation = np.arange(SIZE)
+
             df = pd.DataFrame(
                 {
                     "task_labels": task_label,
@@ -139,7 +148,7 @@ def main(cfg: DictConfig):
                     "texture": config[2]*np.ones(SIZE).astype(int),
                     "position": config[3]*np.ones(SIZE).astype(int),
                     "scale": config[4]*np.ones(SIZE).astype(int),
-                    "permutation": np.arange(SIZE).astype(int)
+                    "permutation": permutation.astype(int)
                 }
             )
 
