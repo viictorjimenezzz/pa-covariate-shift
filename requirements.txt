@@ -42,8 +42,8 @@ pytest          # tests
 # ------ adversarial ------- #
 secml
 foolbox
-robustbench @ git+https://github.com/RobustBench/robustbench@master
 diagvibsix @ git+https://github.com/viictorjimenezzz/diagvibsix@librarization
+robustbench @ git+https://github.com/RobustBench/robustbench@ec26a6cd0b0812135270c3659caabcab80701b15
 
 # ---------- fix ---------- #
 gevent  # needed to fix a problem with wandb loading
