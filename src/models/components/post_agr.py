@@ -18,7 +18,6 @@ class PosteriorAgreementKernel(torch.nn.Module):
     def forward(self, preds1, preds2):
         probs1 = F.softmax(self.beta * preds1, dim=1)
         probs2 = F.softmax(self.beta * preds2, dim=1)
-
         probs_sum = (probs1 * probs2).sum(dim=1)
 
         # log correction for numerical stability: replace values less than eps
@@ -29,6 +28,13 @@ class PosteriorAgreementKernel(torch.nn.Module):
             probs_sum.register_hook(torch.nan_to_num)
 
         self.log_post += torch.log(probs_sum).sum(dim=0)
+
+    def evaluate(self, beta_opt, preds1, preds2):
+        with torch.set_grad_enabled(False):
+            probs1 = F.softmax(beta_opt * preds1, dim=1)
+            probs2 = F.softmax(beta_opt * preds2, dim=1)
+            probs_sum = (probs1 * probs2).sum(dim=1)
+            self.log_post = self.log_post + torch.log(probs_sum).sum(dim=0)
 
     def reset(self):
         self.log_post = torch.tensor([0.0], device=self.log_post.device)
