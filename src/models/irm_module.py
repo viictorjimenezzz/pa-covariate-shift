@@ -1,10 +1,15 @@
-from pytorch_lightning import LightningModule
+from pytorch_lightning import LightningModule, LightningDataModule
 import torch
+import os.path as osp
 from torch import nn, argmax, optim
 from torch.autograd import grad
 from torchmetrics import Accuracy, F1Score, Recall, Specificity, Precision
 
-
+# For the PA metric
+from src.pa_metric_torch import PosteriorAgreement
+from src.data.diagvib_datamodules import DiagVibDataModuleTestPA
+from src.data.components.collate_functions import MultiEnv_collate_fn
+from copy import deepcopy
 
 class IRM(LightningModule):
     """Invariant Risk Minimization (IRM) module."""
@@ -22,63 +27,58 @@ class IRM(LightningModule):
         self.model = None
         self.loss = None
         self.lamb = lamb
+        self.save_hyperparameters(ignore=["net"])  # for easier retrieval from w&b and sanity checks
 
-        self.save_hyperparameters(
-            ignore=["net"]
-        )  # for easier retrieval from w&b and sanity checks
-
-        # Metrics
         self.n_classes = int(n_classes)
-
         _task = "multiclass" if self.n_classes > 2 else "binary"
-        self.train_acc = Accuracy(
-            task=_task, num_classes=self.n_classes, average="macro"
-        )
-        self.train_f1 = F1Score(
-            task=_task, num_classes=self.n_classes, average="macro"
-        )
 
-        self.train_specificity = Specificity(
-            task=_task, num_classes=self.n_classes, average="macro"
-        )
+        # Training metrics
+        self.train_acc = Accuracy(task=_task, num_classes=self.n_classes, average="macro")
+        self.train_f1 = F1Score(task=_task, num_classes=self.n_classes, average="macro")
+        self.train_specificity = Specificity(task=_task, num_classes=self.n_classes, average="macro")
+        self.train_sensitivity = Recall(task=_task, num_classes=self.n_classes, average="macro")
+        self.train_precision = Precision(task=_task, num_classes=self.n_classes, average="macro")
 
-        self.train_sensitivity = Recall(
-            task=_task, num_classes=self.n_classes, average="macro"
-        )
-        self.train_precision = Precision(
-            task=_task, num_classes=self.n_classes, average="macro"
-        )
+        # Validation metrics
+        self.val_acc = Accuracy(task=_task, num_classes=self.n_classes, average="macro")
+        self.val_f1 = F1Score(task=_task, num_classes=self.n_classes, average="macro")
+        self.val_specificity = Specificity(task=_task, num_classes=self.n_classes, average="macro")
+        self.val_sensitivity = Recall(task=_task, num_classes=self.n_classes, average="macro")
+        self.val_precision = Precision(task=_task, num_classes=self.n_classes, average="macro")
 
-        self.val_acc = Accuracy(
-            task=_task, num_classes=self.n_classes, average="macro"
-        )
-        self.val_f1 = F1Score(
-            task=_task, num_classes=self.n_classes, average="macro"
-        )
-        self.val_specificity = Specificity(
-            task=_task, num_classes=self.n_classes, average="macro"
-        )
-        self.val_sensitivity = Recall(
-            task=_task, num_classes=self.n_classes, average="macro"
-        )
-        self.val_precision = Precision(
-            task=_task, num_classes=self.n_classes, average="macro"
-        )
+        # PA metric
+        # TO DELETE
+        # dm = DiagVibDataModuleTestPA(
+        #     envs_index = [0, 1],
+        #     shift_ratio = 1.0,
+        #     envs_name = "val_randnobal", # here the full name not only the environment, as we may want to use test_ or val_ or even a custom name
+        #     datasets_dir = "./data/dg/dg_datasets/randnobal/",
+        #     mnist_preprocessed_path = "./data/dg/mnist_processed.npz",
+        #     batch_size = 64,
+        #     num_workers = 2,
+        #     pin_memory = True,
+        #     collate_fn = MultiEnv_collate_fn)
+        
+        # dm.prepare_data()
+        # dm.setup()
+
+        # self.PA = PosteriorAgreement(
+        #             dataset = dm.test_pairedds,
+        #             pa_epochs = 10,
+        #             strategy = "lightning")
 
     def compute_penalty(self, logits, y):
         dummy_w = torch.tensor(1.).to(self.device).requires_grad_()
         with torch.enable_grad():
-            loss = self.loss(logits*dummy_w, y)
+            loss = self.loss(logits*dummy_w, y).to(self.device)
         gradient = grad(loss, [dummy_w], create_graph=True)[0]
-        return torch.sum(gradient**2).to(self.device)
+        return gradient**2
 
     def training_step(self, batch, batch_idx):
         envs = batch["envs"]
-
-        outputs = {} # I try to conserve structure of ERM module
+        outputs = {} 
         for env in envs:
             x, y = batch[env]
-            self.model.train() # to delete afterwards
             logits = self.model(x)
 
             outputs[env] = {
@@ -86,7 +86,7 @@ class IRM(LightningModule):
                 "targets": y,
                 "penalty": self.compute_penalty(logits, y)
             }
-
+        
         return outputs
 
     def training_step_end(self, outputs):
@@ -107,60 +107,18 @@ class IRM(LightningModule):
         y = torch.cat(ys, dim=0)
         preds = torch.cat(preds, dim=0)
 
-        self.log(
-            "train/loss",
-            loss,
-            prog_bar=False,
-            on_step=True,
-            on_epoch=True,
-        )
+        # Log training metrics
+        metrics_dict = {
+            "train/loss": loss,
+            "train/acc": self.train_acc(preds, y),
+            "train/f1": self.train_f1(preds, y),
+            "train/sensitivity": self.train_sensitivity(preds, y),
+            "train/specificity": self.train_specificity(preds, y),
+            "train/precision": self.train_precision(preds, y),
+        }
+        self.log_dict(metrics_dict, prog_bar=False, on_step=True, on_epoch=True, logger=True, sync_dist=True)
 
-        self.train_acc(preds, y)
-        self.log(
-            "train/acc",
-            self.train_acc,
-            on_step=True,
-            on_epoch=True,
-            prog_bar=False,
-            logger=True,
-        )
-        self.train_f1(preds, y)
-        self.log(
-            "train/f1",
-            self.train_f1,
-            on_step=True,
-            on_epoch=True,
-            prog_bar=False,
-            logger=True,
-        )
-        self.train_sensitivity(preds, y)
-        self.log(
-            "train/sensitivity",
-            self.train_sensitivity,
-            on_step=True,
-            on_epoch=True,
-            prog_bar=False,
-            logger=True,
-        )
-        self.train_specificity(preds, y)
-        self.log(
-            "train/specificity",
-            self.train_specificity,
-            on_step=True,
-            on_epoch=True,
-            prog_bar=False,
-            logger=True,
-        )
-        self.train_precision(preds, y)
-        self.log(
-            "train/precision",
-            self.train_precision,
-            on_step=True,
-            on_epoch=True,
-            prog_bar=False,
-            logger=True,
-        )
-
+        # Return loss for optimization
         return {"loss": loss}
 
     
@@ -173,7 +131,7 @@ class IRM(LightningModule):
 
             with torch.enable_grad():
                 logits = self.model(x)
-
+            
             outputs[env] = {
                 "logits": logits,
                 "targets": y,
@@ -200,64 +158,33 @@ class IRM(LightningModule):
         y = torch.cat(ys, dim=0)
         preds = torch.cat(preds, dim=0)
 
-        self.log(
-            "val/loss", 
-            loss, 
-            prog_bar=False, 
-            on_step=True, 
-            on_epoch=True
-        )
+        # Log PA in the last batch of the epoch. Log every n epochs.
+        # if self.trainer.is_last_batch and self.current_epoch % 2 == 0:
+        #     self.PA.update(deepcopy(self.model))
+        #     pa_dict = self.PA.compute()
+        #     metrics_dict = {
+        #         "val/logPA": pa_dict["logPA"],
+        #         "val/beta": pa_dict["beta"],
+        #         "val/PA": pa_dict["PA"],
+        #         "val/AFR pred": pa_dict["AFR pred"],
+        #         "val/AFR true": pa_dict["AFR true"],
+        #         "val/acc_pa": pa_dict["acc_pa"],
+        #     }
+        #     self.log_dict(metrics_dict, prog_bar=False, on_step=False, on_epoch=True, logger=True, sync_dist=True)
 
-        self.val_acc(preds, y)
-        self.log(
-            "val/acc",
-            self.val_acc,
-            on_step=True,
-            on_epoch=True,
-            prog_bar=False,
-            logger=True,
-        )
-        self.val_f1(preds, y)
-        self.log(
-            "val/f1",
-            self.val_f1,
-            on_step=True,
-            on_epoch=True,
-            prog_bar=False,
-            logger=True,
-        )
-        self.val_sensitivity(preds, y)
-        self.log(
-            "val/sensitivity",
-            self.val_sensitivity,
-            on_step=True,
-            on_epoch=True,
-            prog_bar=False,
-            logger=True,
-        )
-        self.val_specificity(preds, y)
-        self.log(
-            "val/specificity",
-            self.val_specificity,
-            on_step=True,
-            on_epoch=True,
-            prog_bar=False,
-            logger=True,
-        )
-        self.val_precision(preds, y)
-        self.log(
-            "val/precision",
-            self.val_precision,
-            on_step=True,
-            on_epoch=True,
-            prog_bar=False,
-            logger=True,
-        )
+        # Log validation metrics
+        metrics_dict = {
+            "val/loss": loss,
+            "val/acc": self.val_acc(preds, y),
+            "val/f1": self.val_f1(preds, y),
+            "val/sensitivity": self.val_sensitivity(preds, y),
+            "val/specificity": self.val_specificity(preds, y),
+            "val/precision": self.val_precision(preds, y),
+        }
+        self.log_dict(metrics_dict, prog_bar=False, on_step=True, on_epoch=True, logger=True, sync_dist=True)
 
+        # Return loss for scheduler
         return {"loss": loss}
-
-    def predict_step(self, predic_batch, batch_idx):
-        return self.model(predic_batch)
 
     def configure_optimizers(self):
         optimizer = self.hparams.optimizer(params=self.parameters())
@@ -272,6 +199,7 @@ class IRM(LightningModule):
                     "frequency": 1,
                 },
             }
+        
         return {"optimizer": optimizer}
     
 
