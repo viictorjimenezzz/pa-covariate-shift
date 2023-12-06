@@ -1,8 +1,12 @@
+import torch
+from torch import Tensor
 from torch.utils.data import Dataset
-from typing import List    
+from typing import List, Tuple
 
 class MultienvDataset(Dataset):
-    """Dataset to return tuples of Dataset items."""
+    """
+    We assume datasets return a tuple (input tensor, label).
+    """
 
     def __init__(self, dset_list: List[Dataset]):
         len_ds = len(dset_list[0])
@@ -11,9 +15,77 @@ class MultienvDataset(Dataset):
                 raise ValueError("All datasets must have the same size.")
             
         self.dset_list = dset_list
+        self.num_envs = len(dset_list)
+        self.permutation = [torch.arange(len(self.dset_list[0])).tolist()]*self.num_envs
 
     def __len__(self):
-        return len(self.dset_list[0])
+        return len(self.permutation[0])
  
     def __getitem__(self, idx: int):
-        return {str(i): dset[idx] for i, dset in enumerate(self.dset_list)}
+        return {str(i): dset[self.permutation[i][idx]] for i, dset in enumerate(self.dset_list)}
+    
+    def __getitems__(self, indices: List[int]):
+        """
+        When I request several items, I prefer to get a tensor for each dataset.
+        This will be useful for the PA metric.
+        """
+        # Is there a way to do it without multiplicating the calls to __getitem__?
+        output_list = [None]*self.num_envs
+        for i, dset in enumerate(self.dset_list):
+            output_list[i] = tuple([torch.stack([dset.__getitem__(idx)[0] for idx in indices]), 
+                                    torch.tensor([dset.__getitem__(idx)[1] for idx in indices])])
+        
+        return output_list
+    
+    def __getlabels__(self, indices: List[int]):
+        """
+        Useful method to retrieve only the labels associated with a specific index. This will help with the pairing of samples for the metric.
+        """
+
+        output_list = [None]*self.num_envs
+        for i, dset in enumerate(self.dset_list):
+            output_list[i] = torch.tensor([dset.__getitem__(idx)[1] for idx in indices])
+        
+        return output_list
+
+
+    
+
+class LogitsDataset(Dataset):
+    """
+    TorchDataset wrapper for logits computation in the PA metric.
+    """
+    def __init__(self, envs: int) -> None:
+        self.envs = envs
+
+        self.logits = [None]*envs
+        self.y = None
+
+    def check_input(self, logits: List[Tensor], y: Tensor) -> None:
+        assert self.envs == len(logits), "Must add a logit for each environment"
+
+        assert all(logits[0].size(0) == logit.size(0) for logit in logits), "Size mismatch between logits"
+        assert all(y.size(0) == logit.size(0) for logit in logits), "Size mismatch between y and logits"
+
+    def __additem__(self, logits: List[Tensor], y: Tensor) -> None:
+        self.check_input(logits, y)
+
+        if self.y is None:
+            self.y = y
+        else:
+            self.y = torch.cat([self.y, y])
+        
+        for i in range(self.envs):
+            if self.logits[i] is None:
+                self.logits[i] = logits[i] 
+            else:
+                self.logits[i] = torch.cat([self.logits[i], logits[i]]) 
+
+    def __getitem__(self, index: int):
+        return tuple([tuple([self.logits[i][index] for i in range(self.envs)]), 
+                    self.y[index]])
+
+    def __len__(self):
+        return self.logits[0].size(0)
+            
+                
