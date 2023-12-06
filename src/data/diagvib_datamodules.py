@@ -11,6 +11,7 @@ from diagvibsix.data.dataset.preprocess_mnist import get_processed_mnist
 from src.data.components import MultienvDataset
 from src.data.components.collate_functions import MultiEnv_collate_fn
 from src.data.components.diagvib_dataset import DiagVib6DatasetPA, select_dataset_spec
+from src.pa_metric_torch import PosteriorAgreementSampler
 
 
 class DiagVibDataModuleMultienv(LightningDataModule):
@@ -36,8 +37,8 @@ class DiagVibDataModuleMultienv(LightningDataModule):
         envs_index: List[int] = [1],
         envs_name: str = 'env',
         datasets_dir: str = osp.join(".", "data", "datasets"),
-        disjoint_envs: bool = True,
-        train_val_sequential: bool = True,
+        disjoint_envs: bool = False,
+        train_val_sequential: bool = False,
         mnist_preprocessed_path: str = osp.join(".", "data", "dg", "mnist_processed.npz"),
         collate_fn: Optional[Callable] = None,
         batch_size: Optional[int] = 64,
@@ -148,6 +149,9 @@ class DiagVibDataModuleMultienv(LightningDataModule):
             ) 
         
 
+import torch.distributed
+from torch.utils.data.distributed import DistributedSampler
+
 class DiagVibDataModuleTestPA(DiagVibDataModuleMultienv):
     """
     See parent class for full information about the arguments. This subclass is used to generate the dataloader for the PA optimization, consisting of a single environment each time 
@@ -161,14 +165,14 @@ class DiagVibDataModuleTestPA(DiagVibDataModuleMultienv):
         self.save_hyperparameters()
 
     def setup(self, stage: Optional[str] = None):
-        dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.datasets_dir, dataset_name='test_' + self.envs_name + str(self.envs_index[0]))
+        dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.datasets_dir, dataset_name= self.envs_name + str(self.envs_index[0]))
         self.test_ds1 = DiagVib6DatasetPA(
             mnist_preprocessed_path = self.mnist_preprocessed_path,
             dataset_specs_path=dataset_specs_path,
             cache_filepath=cache_filepath,
             t='test')
         
-        dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.datasets_dir, dataset_name='test_' + self.envs_name + str(self.envs_index[1]))
+        dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.datasets_dir, dataset_name= self.envs_name + str(self.envs_index[1]))
         self.test_ds2 = DiagVib6DatasetPA(
             mnist_preprocessed_path = self.mnist_preprocessed_path,
             dataset_specs_path=dataset_specs_path,
@@ -179,15 +183,26 @@ class DiagVibDataModuleTestPA(DiagVibDataModuleMultienv):
         self.test_pairedds = MultienvDataset([self.test_ds1, self.test_ds2_shifted])
         
     def train_dataloader(self):
+        """
+        I don't need to disable the shuffling in the DistributedSampler to get corresponding observations X and X', as these are paired in the
+        collate function. Nevertheless, I want to control strictly the data that is used for the PA optimization so that I can compare with the metric.
+        """
+
+        ddp_init = torch.distributed.is_available() and torch.distributed.is_initialized() 
+        if ddp_init:
+            print("\n\nDistributedSampler\n\n")
+            sampler = PosteriorAgreementSampler(self.test_pairedds, shuffle=False, drop_last = True)
+        else:
+            sampler = PosteriorAgreementSampler(self.test_pairedds, shuffle=False, drop_last = True, num_replicas=1, rank=0)
+        
         return DataLoader(
-            dataset=self.test_pairedds,
-            batch_size=self.hparams.batch_size,
-            num_workers=self.hparams.num_workers,
-            pin_memory=self.hparams.pin_memory,
-            drop_last=True,
-            shuffle=False,
-            collate_fn=MultiEnv_collate_fn,
-        )
+                dataset=self.test_pairedds,
+                batch_size=self.hparams.batch_size,
+                num_workers=self.hparams.num_workers,
+                pin_memory=self.hparams.pin_memory,
+                collate_fn=MultiEnv_collate_fn,
+                sampler=sampler
+            )
     
     def val_dataloader(self):
         pass
@@ -206,8 +221,7 @@ class DiagVibDataModuleTestPA(DiagVibDataModuleMultienv):
         if size != len(ds2):
             raise ValueError("Both test datasets must have the same size.")
         
-        shift_ratio = 1 - self.shift_ratio
-        num_samples_1 = int(size*shift_ratio)
+        num_samples_1 = int(size*(1 - self.shift_ratio))
 
         sampled_1 = Subset(ds1, range(num_samples_1)) # first (1-SR)*size_1 samples are from ds1
         sampled_2 = Subset(ds2, range(num_samples_1, size)) # complete with last samples of ds2
