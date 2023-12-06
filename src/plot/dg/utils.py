@@ -44,10 +44,12 @@ def dg_pa_dataframe(
         data["shift_ratio"].append(config["data/dg/shift_ratio"])
         data["model_name"].append(config["model/dg/classifier/exp_name"])
         data["shift_factor"].append(config["data/dg/envs_index"][1]) # for original
-        data["AFR"].append(max(retrieve_from_history(run, f"AFR {afr}")))
-        logpa_epoch = retrieve_from_history(run, "logPA_epoch")
+        data["AFR"].append(max(retrieve_from_history(run, f"val/AFR {afr}")))
+        data["acc_pa"].append(max(retrieve_from_history(run, "val/acc_pa")))
+        logpa_epoch = retrieve_from_history(run, "val/logPA")
         data["logPA"].append(max(logpa_epoch))
-        data["beta"].append(retrieve_from_history(run, "beta_epoch")[np.argmax(logpa_epoch)])
+        data["beta"].append(retrieve_from_history(run, "val/beta")[np.argmax(logpa_epoch)])
+        #data["beta"].append(retrieve_from_history(run, "beta")[np.argmax(logpa_epoch)])
 
     df = pd.DataFrame(data)
     df.to_pickle(fname)

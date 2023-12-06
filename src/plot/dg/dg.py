@@ -11,7 +11,7 @@ import numpy as np
 
 def logpa(df: pd.DataFrame,
           dirname: str,
-          show_AFR: bool = True,
+          show_acc: bool = True,
           picformat: str = "png",
           metric="logPA"):
 
@@ -53,7 +53,8 @@ def logpa(df: pd.DataFrame,
                     "shift_ratio",
                     "shift_factor",
                     "logPA",
-                    "AFR"
+                    "AFR",
+                    "acc_pa"
                 ],
             ]
             colors_dict = {model_name: plt.rcParams['axes.prop_cycle'].by_key()['color'][i] for i, model_name in enumerate(model_names)}
@@ -83,12 +84,12 @@ def logpa(df: pd.DataFrame,
                 linewidth=3,
             )
 
-            if show_AFR:
+            if show_acc:
                 for i, point in subset.iterrows():
                     ax1.text(
                         point['shift_factor'], 
                         point['logPA'],        
-                        f"{point['AFR']:.2f}", 
+                        f"{point['acc_pa']:.2f}", 
                         color='black',       
                         ha='center',       
                         va='bottom',
@@ -466,6 +467,7 @@ def afr_vs_logpa_separate(df: pd.DataFrame, comparison_metric: str = "ASR"):
                     plt.close()
 
 
+"""
 if __name__ == "__main__":
     date = "2023-08-15"
     tags = ["diagvib", "500_epochs", "logk_corr", "adam"]
@@ -488,3 +490,4 @@ if __name__ == "__main__":
     # afr_vs_logpa(df, "AFR")
     logpa(df)
     logpa(df)
+"""
