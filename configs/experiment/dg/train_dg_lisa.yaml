@@ -31,7 +31,7 @@ model:
 
 data:
   dg:
-    datasets_dir: ${paths.data_dir}/dg/dg_datasets/replicate/
+    datasets_dir: ${paths.data_dir}/dg/dg_datasets/rebuttal/
     collate_fn:
       _target_: hydra.utils.get_method # to avoid instantiation of a callable
       path: src.data.components.collate_functions.MultiEnv_collate_fn
