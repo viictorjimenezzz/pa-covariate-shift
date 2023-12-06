@@ -5,6 +5,8 @@ from torch import nn, Tensor, optim
 from torch.distributions.beta import Beta # to sample mixup weight (lambda)
 from torch.distributions.bernoulli import Bernoulli # to select SA strategy (s)
 
+from copy import deepcopy
+
 class LISA(ERM):
     """
     Implements selective augmentation on top of ERM.
@@ -50,7 +52,7 @@ class LISA(ERM):
 
     def mix_up(self, mix_alpha: float, x: Tensor, y: Tensor, x2: Tensor = None, y2: Tensor = None):
         """y_1 and y_2 should be one-hot encoded.
-            Function adapted from the LISA repo to work only with pytorch.
+            Function adapted from the LISA repo to work with pytorch.
         """
 
         if x2 is None:
@@ -114,12 +116,16 @@ class LISA(ERM):
         return  B_1, B_2 # indexes
 
 
-    def model_step(self, batch):
+    def model_step(self, batch: dict):
         """
         Implements mixup and selective augmentation.
         """
+
         # get data and convert env to tensor
-        x, y, envs = batch
+        x = torch.cat([batch[env][0] for env in batch["envs"]])
+        y = torch.cat([batch[env][1] for env in batch["envs"]])
+        envs = [env for env in batch["envs"] for _ in range(len(batch[batch["envs"][0]][1]))]
+
         all_inds = torch.arange(len(envs)).to(self.device)
         env_to_int = {item: i for i, item in enumerate(set(envs))}
         envs_int = torch.tensor([env_to_int[item] for item in envs], dtype=torch.int8).to(self.device) # envs in a tensor
@@ -138,20 +144,22 @@ class LISA(ERM):
             for label in y.unique():
                 mask = y.eq(label)
                 B1_lab, B2_lab = self.pair_lisa(envs_int[mask]) # indexes wrt mask
+                #print("LISA-L, samples with the same label:", len(envs_int[mask]))
 
                 # accumulate indexes wrt all observations
-                B1 = torch.cat((B1, torch.index_select(all_inds[mask], 0, B1_lab.sort()[0])))
-                B2 = torch.cat((B2, torch.index_select(all_inds[mask], 0, B2_lab.sort()[0])))
+                B1 = torch.cat((B1, torch.index_select(all_inds[mask], 0, B1_lab)))
+                B2 = torch.cat((B2, torch.index_select(all_inds[mask], 0, B2_lab)))
 
         else: # LISA-D
             # group data by environment
             for env in envs_int.unique():
                 mask = envs_int.eq(env)
                 B1_lab, B2_lab = self.pair_lisa(y[mask]) # indexes wrt mask
+                #print("LISA-D, samples with the same domain:", len(y[mask]))
 
                 # accumulate indexes wrt all observations
-                B1 = torch.cat((B1, torch.index_select(all_inds[mask], 0, B1_lab.sort()[0])))
-                B2 = torch.cat((B2, torch.index_select(all_inds[mask], 0, B2_lab.sort()[0])))
+                B1 = torch.cat((B1, torch.index_select(all_inds[mask], 0, B1_lab)))
+                B2 = torch.cat((B2, torch.index_select(all_inds[mask], 0, B2_lab)))
 
         # mixup
         mixed_x, mixed_y = self.mix_up(self.hparams.mix_alpha, 
