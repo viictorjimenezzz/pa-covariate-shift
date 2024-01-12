@@ -56,14 +56,16 @@ def logpa(df: pd.DataFrame,
                     "AFR",
                     "acc_pa"
                 ],
-            ]
+            ].sort_values(by='model_name')
             colors_dict = {model_name: plt.rcParams['axes.prop_cycle'].by_key()['color'][i] for i, model_name in enumerate(model_names)}
             label_dict = {model_name: str(i) for i, model_name in enumerate(model_names)}
 
             # Addendum for ERM, IRM, LISA
-            standard_models = ["ERM", "IRM", "LISA"]
+            ids = None
+            standard_models = ["Vanilla ERM", "Arjovsky et al.", "Yao et al."]
             if len(model_names) == 3 and [model_name[:3].lower() for model_name in model_names] == ["erm", "irm", "lis"]:
                 label_dict = {model_name: standard_models[i] for i, model_name in enumerate(model_names)}
+                ids = [0, 1, 2]
 
             _, ax1 = plt.subplots(figsize=(2 * 3.861, 2 * 2.7291))
             sns.set(font_scale=1.9)
@@ -113,12 +115,20 @@ def logpa(df: pd.DataFrame,
             labels = [label_dict[label] for label in labels]
 
             # sort labels and handles
-            ids = sorted(range(len(labels)), key=labels.__getitem__)
-            #ids[0], ids[1] = ids[1], ids[0]
+            if not ids:
+                ids = sorted(range(len(labels)), key=labels.__getitem__)
             labels = [labels[i] for i in ids]
             handles = [handles[i] for i in ids]
 
-            ax1.legend(handles, labels)
+            #ax1.legend(handles, labels)
+            fontname = "DejaVu Serif"
+            _ = fm.findfont(fm.FontProperties(family=fontname))
+            ax1.legend(
+                handles,
+                labels,
+                handlelength=0.5,
+                prop={"family": fontname, "size": 16},
+            )
 
             if level_name == "Shift Ratio":
                 ax1.set_title(f"{level_name} = {value:.4f}", fontname=fontname)
