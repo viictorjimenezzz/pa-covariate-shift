@@ -4,7 +4,7 @@ from torchmetrics import Accuracy, F1Score, Recall, Specificity, Precision
 
 # For the PA metric
 from src.pa_metric_torch import PosteriorAgreement
-from src.data.diagvib_datamodules import DiagVibDataModuleTestPA
+from src.data.diagvib_datamodules import DiagVibDataModulePA
 from src.data.components.collate_functions import MultiEnv_collate_fn
 from copy import deepcopy
 

@@ -1,22 +1,25 @@
 # @package _global_
 
 defaults:
-  - override /data/dg: diagvib_testPA.yaml
+  - override /data/dg: diagvib_PA.yaml
   - override /model/dg: optimize.yaml
   - override /callbacks:
     - model_summary.yaml
     - rich_progress_bar.yaml
   - override /trainer: ddp.yaml
 
+exp_name: ???
+
 model:
   dg:
     optimizer:
       _target_: torch.optim.Adam
     classifier:
-      exp_name: ???
+      exp_name: ${exp_name}
       net:
         net: resnet18
         pretrained: false
+    num_classes: 2
 
 
 seed: 12345
@@ -40,7 +43,7 @@ data:
     pin_memory: True
 
 
-tags: ["diagvib", "adam", "${trainer.max_epochs}_epochs", "${model.dg.classifier.exp_name}"]
+tags: ["diagvib", "adam", "${trainer.max_epochs}_epochs", "${exp_name}"]
 
 logger:
   wandb:
@@ -49,4 +52,4 @@ logger:
     project: project-name
     group: group-name
     save_dir: ${paths.output_dir}/dg
-    name: model=${model.dg.classifier.exp_name}_${data.dg.envs_index[0]}_${data.dg.envs_index[1]}_sr=${data.dg.shift_ratio}
+    name: model=${exp_name}_${data.dg.envs_index[0]}_${data.dg.envs_index[1]}_sr=${data.dg.shift_ratio}

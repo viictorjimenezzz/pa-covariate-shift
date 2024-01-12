@@ -1,4 +1,4 @@
-_target_: src.data.diagvib_datamodules.DiagVibDataModuleTestPA
+_target_: src.data.diagvib_datamodules.DiagVibDataModulePA
 
 envs_index: ??? # [1,2]
 envs_name: env
