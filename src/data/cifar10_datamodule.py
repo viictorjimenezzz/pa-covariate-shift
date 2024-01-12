@@ -12,9 +12,10 @@ from secml.ml.classifiers import CClassifierPyTorch
 from secml.adv.attacks import CAttack
 
 
-from src.data.components import PairDataset
+from src.data.components import MultienvDataset
 from src.data.components.adv import AdversarialCIFAR10Dataset
 from src.data.utils import carray2tensor
+from src.data.components.collate_functions import MultiEnv_collate_fn
 
 
 class CIFAR10DataModule(LightningDataModule):
@@ -125,28 +126,23 @@ class CIFAR10DataModule(LightningDataModule):
                 self.hparams.cache,
             )
 
-            self.paired_dset = PairDataset(
-                self.original_dset, self.adversarial_dset
+            # PairDataset
+            self.paired_dset = MultienvDataset(
+                [self.original_dset, self.adversarial_dset]
             )
 
     def train_dataloader(self):
-        def cifar10_collate_fn(batch: list):
-            aux = {}
-            for key in batch[0]:  # iterate over "first" and "second"
-                aux[key] = [
-                    torch.stack([b[key][0] for b in batch]),
-                    torch.tensor([b[key][1] for b in batch]),
-                ]
-            return aux
-
         return DataLoader(
             dataset=self.paired_dset,
             batch_size=self.hparams.batch_size,
-            collate_fn=cifar10_collate_fn,
+            collate_fn=MultiEnv_collate_fn,
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=False,
         )
+    
+    def val_dataloader(self):
+        return self.train_dataloader()
 
     def teardown(self, stage: Optional[str] = None):
         """Clean up after fit or test."""

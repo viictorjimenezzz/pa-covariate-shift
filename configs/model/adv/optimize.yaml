@@ -1,7 +1,8 @@
 defaults:
   - cifar10.yaml
 
-_target_: src.models.cifar10_module.PosteriorAgreementModule
+#_target_: src.models.cifar10_module.PosteriorAgreementModule
+_target_: src.models.PA_module.PosteriorAgreementModule
 
 optimizer:
   _target_: torch.optim.SGD
@@ -11,3 +12,5 @@ optimizer:
 
 # initial inverse temperature of PA kernel
 beta0: 1.0
+
+num_classes: 10 # ???
