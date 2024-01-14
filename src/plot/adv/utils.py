@@ -87,16 +87,19 @@ def create_dataframe_from_wandb_runs(
             )
         # pause because wandb sometimes is not able to retrieve the results
         time.sleep(3)
-        data["AFR"].append(
-            max(
-                [
-                    row["AFR pred"]
-                    for row in run.scan_history()
-                    if row["AFR pred"] is not None
-                ]
+        try:
+            data["AFR"].append(
+                max(
+                    [
+                        row["val/AFR pred"]
+                        for row in run.scan_history()
+                        if row["val/AFR pred"] is not None
+                    ]
+                )
             )
-        )
-        data["logPA"].append(history["logPA_epoch"].max())
+        except:
+            continue
+        data["logPA"].append(history["val/logPA"].max())
 
     df = pd.DataFrame(data)
     df.to_pickle(fname)

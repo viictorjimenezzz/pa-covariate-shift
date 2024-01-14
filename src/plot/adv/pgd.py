@@ -10,7 +10,7 @@ from src.plot.adv import DASHES_DICT, COLORS_DICT, LABEL_DICT, YEARS
 from src.plot.adv.utils import create_dataframe_from_wandb_runs
 
 
-def curves(df: pd.DataFrame, metric: str = "logPA") -> None:
+def curves(df: pd.DataFrame, metric: str = "logPA", attack_name = None) -> None:
     """
     metric can be either logPA or AFR
     """
@@ -33,6 +33,7 @@ def curves(df: pd.DataFrame, metric: str = "logPA") -> None:
 
         fontname = "DejaVu Serif"
         _ = fm.findfont(fm.FontProperties(family=fontname))
+        
         for value in tqdm(pair, total=len(pair)):
             # Subset the DataFrame to include only the relevant columns and rows
             level_set = df.loc[
@@ -48,7 +49,7 @@ def curves(df: pd.DataFrame, metric: str = "logPA") -> None:
             ]
 
             # Create a line plot for PGD attack type with Seaborn
-            attack_name = "PGD"
+            attack_name = "PGD" if attack_name is None else attack_name
             subset = level_set[level_set["attack_name"] == attack_name]
             _, ax = plt.subplots(figsize=(2 * 3.861, 2 * 2.7291))
             # _, ax = plt.subplots(figsize=(2 * 4.361, 2 * 2.7291))
@@ -56,6 +57,9 @@ def curves(df: pd.DataFrame, metric: str = "logPA") -> None:
             plt.rcParams["font.family"] = "serif"
             plt.rcParams["font.serif"] = fontname
             sns.set_style("ticks")
+
+            # Divide by the cardinality of cifar10
+            subset["logPA"] = subset["logPA"]/10000.0
 
             sns.lineplot(
                 data=subset,
@@ -85,7 +89,14 @@ def curves(df: pd.DataFrame, metric: str = "logPA") -> None:
             ax.grid(linestyle="--")
 
             ax.set_xlabel(x_label, fontname=fontname)
-            ax.set_ylabel("PA" if metric == "logPA" else "AFR", fontname=fontname)
+            ax.set_ylabel(r"$10^{4} \cdot $ PA" if metric == "logPA" else "AFR", fontname=fontname)
+
+            # Modified y axis
+            # if level == "linf":
+            #     ax.set_ylim(min(subset[metric])*10, 10 if attack_name == 'PGD' else 100)
+            # else:
+            #     ax.set_ylim(min(subset[metric])*10, None)
+            # ax.set_yscale('symlog') 
 
             # Legend
             handles, labels = ax.get_legend_handles_labels()
@@ -94,6 +105,8 @@ def curves(df: pd.DataFrame, metric: str = "logPA") -> None:
             # sort labels and handles
             ids = sorted(range(len(labels)), key=YEARS.__getitem__)
             # ids[0], ids[1] = ids[1], ids[0]
+            # ids = [2,1,0]
+            ids = [5, 0, 2, 4, 3, 1]
             labels = [labels[i] for i in ids]
             handles = [handles[i] for i in ids]
 
@@ -105,7 +118,10 @@ def curves(df: pd.DataFrame, metric: str = "logPA") -> None:
             )
             # sns.move_legend(ax2, "upper right")
 
-            title = f"{attack_name} attack"
+            if attack_name == 'GAUSSIAN':
+                title = "Gaussian noise"
+            else:
+                title = f"{attack_name} attack"
             if level == "linf":
                 title += f", {level_name} = {round(value * 255):d} / 255"
 

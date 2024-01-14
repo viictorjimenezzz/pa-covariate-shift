@@ -11,6 +11,7 @@ COLORS_DICT = {
     "BPDA": "tab:green",
     "Wong2020Fast": "tab:red",
     "Addepalli2021Towards_RN18": "tab:purple",
+    "Wang2023Better_WRN-28-10": "tab:brown"
 }
 LABEL_DICT = {
     "Standard": "Undefended",
@@ -18,5 +19,6 @@ LABEL_DICT = {
     "BPDA": "Athalye et al.",
     "Wong2020Fast": "Wong et al.",
     "Addepalli2021Towards_RN18": "Addepalli et al.",
+    "Wang2023Better_WRN-28-10": "Wang et al."
 }
-YEARS = [0, 2019, 2018, 2020, 2021]
+YEARS = [0, 2019, 2018, 2020, 2021, 2023]
