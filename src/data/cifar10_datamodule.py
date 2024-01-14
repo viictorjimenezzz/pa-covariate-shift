@@ -12,10 +12,13 @@ from secml.ml.classifiers import CClassifierPyTorch
 from secml.adv.attacks import CAttack
 
 
-from src.data.components import MultienvDataset
+from src.data.components import MultienvDataset, LogitsDataset
 from src.data.components.adv import AdversarialCIFAR10Dataset
 from src.data.utils import carray2tensor
 from src.data.components.collate_functions import MultiEnv_collate_fn
+
+from torch.utils.data.distributed import DistributedSampler
+from src.pa_metric_torch import PosteriorAgreementSampler
 
 
 class CIFAR10DataModule(LightningDataModule):
@@ -60,14 +63,16 @@ class CIFAR10DataModule(LightningDataModule):
     ):
         super().__init__()
 
-        self.classifier = CClassifierPyTorch(
+        self.num_envs = 2 # original + attacked
+        self.classifier = classifier # torch.nn.Module
+        self.cclassifier = CClassifierPyTorch(
             model=classifier,
             input_shape=(3, 32, 32),
             pretrained=True,
             batch_size=batch_size,
         )
-        self.classifier.name = classifier.name
-        self.attack = attack(classifier=self.classifier)
+        self.cclassifier.name = classifier.name
+        self.attack = attack(classifier=self.cclassifier)
 
         self.checkpoint_fname = self.attack.info + ".pt"
 
@@ -93,7 +98,7 @@ class CIFAR10DataModule(LightningDataModule):
         if self.hparams.cache:
             AdversarialCIFAR10Dataset(
                 self.attack,
-                self.classifier,
+                self.cclassifier,
                 self.hparams.data_dir,
                 self.checkpoint_fname,
                 self.hparams.adversarial_ratio,
@@ -118,7 +123,7 @@ class CIFAR10DataModule(LightningDataModule):
 
             self.adversarial_dset = AdversarialCIFAR10Dataset(
                 self.attack,
-                self.classifier,
+                self.cclassifier,
                 self.hparams.data_dir,
                 self.checkpoint_fname,
                 self.hparams.adversarial_ratio,
@@ -126,7 +131,6 @@ class CIFAR10DataModule(LightningDataModule):
                 self.hparams.cache,
             )
 
-            # PairDataset
             self.paired_dset = MultienvDataset(
                 [self.original_dset, self.adversarial_dset]
             )
@@ -156,6 +160,9 @@ class CIFAR10DataModule(LightningDataModule):
         """Things to do when loading checkpoint."""
         pass
 
+from src.data.components.logits_pa import LogitsPA
 
-if __name__ == "__main__":
-    LightningDataModule()
+class CIFAR10DataModulelogits(LogitsPA, CIFAR10DataModule):
+    def __init__(self, classifier: torch.nn.Module, *args, **kwargs):
+        super().__init__(classifier)
+        CIFAR10DataModule.__init__(self, classifier, *args, **kwargs)

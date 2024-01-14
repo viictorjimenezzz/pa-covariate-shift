@@ -27,7 +27,6 @@ class MultienvDataset(Dataset):
     def __getitems__(self, indices: List[int]):
         """
         When I request several items, I prefer to get a tensor for each dataset.
-        This will be useful for the PA metric.
         """
         # Is there a way to do it without multiplicating the calls to __getitem__?
         output_list = [None]*self.num_envs
@@ -48,44 +47,33 @@ class MultienvDataset(Dataset):
         
         return output_list
 
-
-    
-
 class LogitsDataset(Dataset):
     """
     TorchDataset wrapper for logits computation in the PA metric.
     """
-    def __init__(self, envs: int) -> None:
-        self.envs = envs
+    def __init__(self, logits: List[Tensor], y: Tensor) -> None:
+        self.num_envs = len(logits)
+        self._check_input(logits, y)
+        self.logits = logits
+        self.y = y
 
-        self.logits = [None]*envs
-        self.y = None
-
-    def check_input(self, logits: List[Tensor], y: Tensor) -> None:
-        assert self.envs == len(logits), "Must add a logit for each environment"
-
+    def _check_input(self, logits: List[Tensor], y: Tensor) -> None:
+        assert self.num_envs == len(logits), "Must add a logit for each environment"
         assert all(logits[0].size(0) == logit.size(0) for logit in logits), "Size mismatch between logits"
         assert all(y.size(0) == logit.size(0) for logit in logits), "Size mismatch between y and logits"
 
     def __additem__(self, logits: List[Tensor], y: Tensor) -> None:
-        self.check_input(logits, y)
-
-        if self.y is None:
-            self.y = y
-        else:
-            self.y = torch.cat([self.y, y])
+        """
+        This method is slow, because it's concatenating tensors, so it should be avoided whenever possible.
+        """
+        self._check_input(logits, y)
+        self.y = torch.cat([self.y, y])
         
-        for i in range(self.envs):
-            if self.logits[i] is None:
-                self.logits[i] = logits[i] 
-            else:
-                self.logits[i] = torch.cat([self.logits[i], logits[i]]) 
+        for i in range(self.num_envs):
+            self.logits[i] = torch.cat([self.logits[i], logits[i]]) 
 
     def __getitem__(self, index: int):
-        return tuple([tuple([self.logits[i][index] for i in range(self.envs)]), 
-                    self.y[index]])
+        return {str(i): tuple([self.logits[i][index], self.y[index]]) for i in range(self.num_envs)}
 
     def __len__(self):
         return self.logits[0].size(0)
-            
-                

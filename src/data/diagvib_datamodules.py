@@ -3,7 +3,7 @@ from typing import List, Optional, Callable
 import os
 import os.path as osp
 
-from torch.utils.data import DataLoader, Subset, ConcatDataset
+from torch.utils.data import DataLoader, Subset, ConcatDataset, SequentialSampler
 
 from pytorch_lightning import LightningDataModule
 from diagvibsix.data.dataset.preprocess_mnist import get_processed_mnist
@@ -13,6 +13,8 @@ from src.data.components.collate_functions import MultiEnv_collate_fn
 from src.data.components.diagvib_dataset import DiagVib6DatasetPA, select_dataset_spec
 from src.pa_metric_torch import PosteriorAgreementSampler
 
+import torch.distributed
+from torch.utils.data.distributed import DistributedSampler
 
 class DiagVibDataModuleMultienv(LightningDataModule):
     """
@@ -149,10 +151,7 @@ class DiagVibDataModuleMultienv(LightningDataModule):
             ) 
         
 
-import torch.distributed
-from torch.utils.data.distributed import DistributedSampler
-
-class DiagVibDataModuleTestPA(DiagVibDataModuleMultienv):
+class DiagVibDataModulePA(DiagVibDataModuleMultienv):
     """
     See parent class for full information about the arguments. This subclass is used to generate the dataloader for the PA optimization, consisting of a single environment each time 
     """
@@ -181,8 +180,8 @@ class DiagVibDataModuleTestPA(DiagVibDataModuleMultienv):
         
         self.test_ds2_shifted = self._apply_shift_ratio(self.test_ds1, self.test_ds2)
         self.test_pairedds = MultienvDataset([self.test_ds1, self.test_ds2_shifted])
-        
-    def train_dataloader(self):
+
+    def _set_sampler(self):
         """
         I don't need to disable the shuffling in the DistributedSampler to get corresponding observations X and X', as these are paired in the
         collate function. Nevertheless, I want to control strictly the data that is used for the PA optimization so that I can compare with the metric.
@@ -190,22 +189,22 @@ class DiagVibDataModuleTestPA(DiagVibDataModuleMultienv):
 
         ddp_init = torch.distributed.is_available() and torch.distributed.is_initialized() 
         if ddp_init:
-            print("\n\nDistributedSampler\n\n")
-            sampler = PosteriorAgreementSampler(self.test_pairedds, shuffle=False, drop_last = True)
+            return PosteriorAgreementSampler(self.test_pairedds, shuffle=False, drop_last = True)
         else:
-            sampler = PosteriorAgreementSampler(self.test_pairedds, shuffle=False, drop_last = True, num_replicas=1, rank=0)
+            return PosteriorAgreementSampler(self.test_pairedds, shuffle=False, drop_last = True, num_replicas=1, rank=0)
         
+    def train_dataloader(self):
         return DataLoader(
                 dataset=self.test_pairedds,
                 batch_size=self.hparams.batch_size,
                 num_workers=self.hparams.num_workers,
                 pin_memory=self.hparams.pin_memory,
                 collate_fn=MultiEnv_collate_fn,
-                sampler=sampler
+                sampler=self._set_sampler()
             )
     
     def val_dataloader(self):
-        pass
+        return self.train_dataloader()
 
     def _apply_shift_ratio(self, ds1, ds2):
         """Generates the two-environment dataset adding (1-shift_ratio)*len(ds2) samples of ds1 to ds2.
@@ -227,6 +226,14 @@ class DiagVibDataModuleTestPA(DiagVibDataModuleMultienv):
         sampled_2 = Subset(ds2, range(num_samples_1, size)) # complete with last samples of ds2
 
         return ConcatDataset([sampled_1, sampled_2])
+    
+
+from src.data.components.logits_pa import LogitsPA
+
+class DiagVibDataModulePAlogits(LogitsPA, DiagVibDataModulePA):
+    def __init__(self, classifier: torch.nn.Module, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.classifier = classifier
 
 
 if __name__ == "__main__":
