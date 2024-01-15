@@ -19,6 +19,7 @@ model:
     classifier: ${data.adv.classifier}
     optimizer:
       _target_: torch.optim.Adam
+    num_classes: 10
 
 tags: ["order_by_attack", "adam", "500_epochs", "1000_steps", "cifar10", "${data.adv.classifier.model_name}", "${data.adv.attack.attack_name}"]
 

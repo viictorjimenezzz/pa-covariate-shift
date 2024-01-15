@@ -13,4 +13,4 @@ optimizer:
 # initial inverse temperature of PA kernel
 beta0: 1.0
 
-num_classes: 10 # ???
+num_classes: ???
