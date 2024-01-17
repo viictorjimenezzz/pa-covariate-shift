@@ -61,6 +61,7 @@ class PosteriorAgreementModule(pl.LightningModule):
             y_pred = torch.argmax(o1.data, 1)
             y_pred_adv = torch.argmax(o2.data, 1)
             y_true = train_batch[train_batch["envs"][0]][1]
+            assert torch.equal(y_true, train_batch[train_batch["envs"][1]][1]), "The true label tensors are not equal."
 
             # Second, compute the AFR
             values = {
