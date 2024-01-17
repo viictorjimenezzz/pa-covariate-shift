@@ -31,7 +31,7 @@ class PosteriorAgreementSampler(DistributedSampler):
                 new_nsamples = dataset.__len__() # samples after pairing (new permutation has been applied)
                 new_labels = dataset.__getlabels__(list(range(new_nsamples)))[0] # labels of first environment (idem second)
                 add_dataset = MultienvDataset(original_dset_list[2:])
-                print("len ", add_dataset.__len__())
+
                 add_labels = add_dataset.__getlabels__(list(range(add_dataset.__len__()))) # labels of the rest of environments
                 for i in range(self.num_envs-2):
                     new_permutations[i] = self._pair_validate(new_labels, add_labels[i])
@@ -40,10 +40,6 @@ class PosteriorAgreementSampler(DistributedSampler):
                 dataset.num_envs = 2 + filtered.sum().item()
                 dataset.dset_list = original_dset_list[:2] + [original_dset_list[2+i] for i in range(len(filtered)) if filtered[i].item()]
                 dataset.permutation = dataset.permutation + [newperm for newperm, flag in zip(new_permutations, filtered) if flag]
-
-                print(dataset)
-                print(dir(dataset))
-
 
         super().__init__(dataset, *args, **kwargs)
 
