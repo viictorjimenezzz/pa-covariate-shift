@@ -1,6 +1,6 @@
 import torch
 from torch import Tensor
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, TensorDataset
 from typing import List, Tuple
 
 class MultienvDataset(Dataset):
@@ -35,6 +35,13 @@ class MultienvDataset(Dataset):
                                     torch.tensor([dset.__getitem__(idx)[1] for idx in indices])])
         
         return output_list
+    
+    def Subset(self, indices: List[int]):
+        """
+        Returns a new MultienvDataset object with the subset of the original dataset.
+        """
+        subset_items = self.__getitems__(indices)
+        return MultienvDataset([TensorDataset(*env_subset) for env_subset in subset_items])
     
     def __getlabels__(self, indices: List[int]):
         """
