@@ -31,8 +31,8 @@ class MultienvDataset(Dataset):
         # Is there a way to do it without multiplicating the calls to __getitem__?
         output_list = [None]*self.num_envs
         for i, dset in enumerate(self.dset_list):
-            output_list[i] = tuple([torch.stack([dset.__getitem__(idx)[0] for idx in indices]), 
-                                    torch.tensor([dset.__getitem__(idx)[1] for idx in indices])])
+            output_list[i] = tuple([torch.stack([dset.__getitem__(self.permutation[i][idx])[0] for idx in indices]), 
+                                    torch.tensor([dset.__getitem__(self.permutation[i][idx])[1] for idx in indices])])
         
         return output_list
     
@@ -50,7 +50,7 @@ class MultienvDataset(Dataset):
 
         output_list = [None]*self.num_envs
         for i, dset in enumerate(self.dset_list):
-            output_list[i] = torch.tensor([dset.__getitem__(idx)[1] for idx in indices])
+            output_list[i] = torch.tensor([dset.__getitem__(self.permutation[i][idx])[1] for idx in indices])
         
         return output_list
 
