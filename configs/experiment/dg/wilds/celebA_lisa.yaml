@@ -6,7 +6,7 @@
 
 defaults:
   - /experiment/dg/wilds/wilds.yaml
-  - override /model/dg@model: lisa.yaml
+  - /model/dg@model: lisa.yaml
 
 # The original batch size is 16
 trainer:

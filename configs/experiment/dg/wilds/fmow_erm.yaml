@@ -6,7 +6,7 @@
 
 defaults:
   - /experiment/dg/wilds/wilds.yaml
-  - override /model/dg@model: erm.yaml
+  - /model/dg@model: erm.yaml
 
 # The original batch size is 32, we will use 16 with 2 gradient accumulation steps
 trainer:
