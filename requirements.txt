@@ -14,7 +14,7 @@ autoattack==0.1
 autocommand==2.2.2
 autopage==0.5.1
 certifi==2023.5.7
-chardet==4.0.0
+chardet==5.2.0
 charset-normalizer==3.2.0
 cheroot==10.0.0
 CherryPy==18.9.0
