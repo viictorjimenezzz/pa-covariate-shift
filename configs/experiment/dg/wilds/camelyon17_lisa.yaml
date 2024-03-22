@@ -38,4 +38,3 @@ tags:
   - "${model.net.net}"
   - "${name_logger}"
   - "${classname: ${model.optimizer._target_}}"
-  - "${seed}"
