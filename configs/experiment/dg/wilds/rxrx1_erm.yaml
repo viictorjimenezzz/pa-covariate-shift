@@ -36,4 +36,12 @@ model:
       num_warmup_steps: ${eval:'${trainer.accumulate_grad_batches} * 5415'} # 5415 is the number of warmup steps in the original code
       num_training_steps: ${eval:'0000 * ${trainer.max_epochs}'} # number_steps * number_of_epochs
 
-tags: ["dg", "wilds", "${data.dataset_name}", "erm", "${model.net.net}", "${name_logger}"]
+tags: 
+  - "dg"
+  - "wilds"
+  - "${data.dataset_name}"
+  - "erm"
+  - "${model.net.net}"
+  - "${name_logger}"
+  - "${classname: ${model.optimizer._target_}}"
+  - "${seed}"

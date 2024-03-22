@@ -30,4 +30,12 @@ model:
 
   scheduler: null
 
-tags: ["dg", "wilds", "${data.dataset_name}", "lisa", "${model.net.net}", "${name_logger}"]
+tags: 
+  - "dg"
+  - "wilds"
+  - "${data.dataset_name}"
+  - "lisa"
+  - "${model.net.net}"
+  - "${name_logger}"
+  - "${classname: ${model.optimizer._target_}}"
+  - "${seed}"
