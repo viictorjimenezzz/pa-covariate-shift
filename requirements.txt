@@ -101,7 +101,7 @@ pyparsing==3.0.9
 pyperclip==1.8.2
 pyrootutils==1.0.4
 python-dateutil==2.8.2
-python-dotenv==1.0.0
+python-dotenv==1.0.1
 pytorch-lightning==1.9.1
 pytz==2023.3
 PyWavelets==1.4.1
