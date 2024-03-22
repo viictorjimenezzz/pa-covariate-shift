@@ -11,7 +11,7 @@ mix_alpha: 0.4 # mixup weight
 loss:
   _target_: torch.nn.CrossEntropyLoss
 
-n_classes: ${model.dg.net.n_classes}
+n_classes: ${model.net.n_classes}
 
 optimizer:
   _target_: torch.optim.Adam

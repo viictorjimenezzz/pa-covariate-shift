@@ -8,7 +8,7 @@ lamb: 1.0
 loss:
   _target_: torch.nn.CrossEntropyLoss
 
-n_classes: ${model.dg.net.n_classes}
+n_classes: ${model.net.n_classes}
 
 optimizer:
   _target_: torch.optim.Adam
