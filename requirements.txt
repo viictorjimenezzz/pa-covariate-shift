@@ -19,7 +19,7 @@ charset-normalizer==3.2.0
 cheroot==10.0.0
 CherryPy==18.9.0
 click==8.1.6
-cliff==4.3.0
+cliff==4.6.0
 cloudpickle==2.2.1
 cmaes==0.10.0
 cmd2==2.4.3
