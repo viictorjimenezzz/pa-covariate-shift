@@ -51,7 +51,7 @@ def curves(df: pd.DataFrame, metric: str = "logPA") -> None:
         sns.set_style("ticks")
 
         # Divide by the cardinality of cifar10
-        subset["logPA"] = subset["logPA"]/10000.0
+        #subset["logPA"] = subset["logPA"]/10000.0
 
         sns.lineplot(
             data=subset,
@@ -77,16 +77,17 @@ def curves(df: pd.DataFrame, metric: str = "logPA") -> None:
         ax.grid(linestyle="--")
 
         ax.set_xlabel(x_label, fontname=fontname)
-        ax.set_ylabel(r"$10^{4} \cdot $ PA" if metric == "logPA" else "AFR", fontname=fontname)
+        #ax.set_ylabel(r"$10^{4} \cdot $ PA" if metric == "logPA" else "AFR", fontname=fontname)
+        ax.set_ylabel("PA" if metric == "logPA" else "AFR", fontname=fontname)
 
         # Legend
         handles, labels = ax.get_legend_handles_labels()
         labels = [LABEL_DICT[label] for label in labels]
 
         # sort labels and handles
-        #ids = sorted(range(len(labels)), key=YEARS.__getitem__)
+        ids = sorted(range(len(labels)), key=YEARS.__getitem__)
 
-        ids = [5, 0, 2, 4, 3, 1]
+        #ids = [5, 0, 2, 4, 3, 1]
         labels = [labels[i] for i in ids]
         handles = [handles[i] for i in ids]
 

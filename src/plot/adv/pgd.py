@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import seaborn as sns
+from numpy import asarray
 
 from src.plot.adv import DASHES_DICT, COLORS_DICT, LABEL_DICT, YEARS
 from src.plot.adv.utils import create_dataframe_from_wandb_runs
@@ -58,8 +59,11 @@ def curves(df: pd.DataFrame, metric: str = "logPA", attack_name = None) -> None:
             plt.rcParams["font.serif"] = fontname
             sns.set_style("ticks")
 
-            # Divide by the cardinality of cifar10
-            subset["logPA"] = subset["logPA"]/10000.0
+            
+            
+            df.loc[df["linf"].eq(0.0), "logPA"] = 0.0
+            subset = df.loc[df["linf"].lt(50.01/255.0)]  # because no error yields PA very very low
+            #subset["logPA"] = subset["logPA"]/10000.0 # Divide by the cardinality of cifar10
 
             sns.lineplot(
                 data=subset,
@@ -72,13 +76,21 @@ def curves(df: pd.DataFrame, metric: str = "logPA", attack_name = None) -> None:
                 dashes=False,
                 marker="o",
                 linewidth=3,
+                legend=False
             )
 
             ax.minorticks_on()
             if level == "linf":
                 ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
             else:  # level == "adversarial_ratio"
-                ax.set_xticks([0.0314, 0.0627, 0.1255])
+                # ax.set_xticks([0.0314, 0.0627, 0.1255])
+                # linfs = asarray(range(5,256, 5))
+                # ax.set_xticks(list(linfs/255.0)[::5])
+                # ax.set_xticklabels(list(linfs)[::5])
+
+                linfs = asarray(range(0,51, 5))
+                ax.set_xticks(list(linfs/255.0))
+                ax.set_xticklabels(list(linfs))
 
             ax.tick_params(axis="both", which="both", direction="in")
             plt.xticks(rotation=45)
@@ -88,15 +100,19 @@ def curves(df: pd.DataFrame, metric: str = "logPA", attack_name = None) -> None:
 
             ax.grid(linestyle="--")
 
+            #x_label = r"$255 \times$ " + x_label
             ax.set_xlabel(x_label, fontname=fontname)
-            ax.set_ylabel(r"$10^{4} \cdot $ PA" if metric == "logPA" else "AFR", fontname=fontname)
+            #ax.set_ylabel(r"$10^{-4} \times $ PA" if metric == "logPA" else "AFR", fontname=fontname)
+            ax.set_ylabel("PA" if metric == "logPA" else "AFR", fontname=fontname)
 
             # Modified y axis
-            # if level == "linf":
-            #     ax.set_ylim(min(subset[metric])*10, 10 if attack_name == 'PGD' else 100)
-            # else:
-            #     ax.set_ylim(min(subset[metric])*10, None)
-            # ax.set_yscale('symlog') 
+            if level == "linf":
+                #ax.set_ylim(min(subset[metric])*10, 10 if attack_name == 'PGD' else 100)
+                ax.set_ylim(None, None)
+            else:
+                ax.set_ylim(min(subset[metric])*2, 0.5)
+                #ax.set_ylim(min(subset[metric])*10, None)
+            ax.set_yscale('symlog') 
 
             # Legend
             handles, labels = ax.get_legend_handles_labels()
@@ -106,17 +122,17 @@ def curves(df: pd.DataFrame, metric: str = "logPA", attack_name = None) -> None:
             ids = sorted(range(len(labels)), key=YEARS.__getitem__)
             # ids[0], ids[1] = ids[1], ids[0]
             # ids = [2,1,0]
-            ids = [5, 0, 2, 4, 3, 1]
+            # ids = [5, 0, 2, 4, 3, 1]
             labels = [labels[i] for i in ids]
             handles = [handles[i] for i in ids]
 
-            ax.legend(
-                handles,
-                labels,
-                handlelength=0.5,
-                prop={"family": fontname, "size": 16},
-            )
-            # sns.move_legend(ax2, "upper right")
+            # ax.legend(
+            #     handles,
+            #     labels,
+            #     handlelength=0.5,
+            #     prop={"family": fontname, "size": 16},
+            # )
+            #sns.move_legend(ax2, "upper right")
 
             if attack_name == 'GAUSSIAN':
                 title = "Gaussian noise"

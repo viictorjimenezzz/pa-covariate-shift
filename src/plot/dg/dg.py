@@ -8,6 +8,40 @@ import seaborn as sns
 
 import numpy as np
 
+def _check_correlations(subset: pd.DataFrame):
+    sr = subset["shift_ratio"].values[0] # all the same
+    model_names = subset["model_name"].unique()
+    shift_factors = np.sort(subset["shift_factor"].unique())
+
+    def _compute_differences(v1, v2 = None):
+        if type(v2) == type(None):
+            v2 = v1.copy()
+        return np.asarray(v1[:-1]) - np.asarray(v2[1:])
+
+    cor_sf_true_pred = np.zeros(len(shift_factors))
+    cor_sf_true_true, cor_sf_pred = cor_sf_true_pred.copy(), cor_sf_true_pred.copy()
+    for i in range(len(shift_factors)):
+        condition = subset["shift_factor"] == shift_factors[i]
+        columns = subset.loc[condition, ["logPA", "AFR_true", "AFR_pred"]]
+        cor_sf_true_pred[i] = np.corrcoef(_compute_differences(columns["logPA"]), 
+                                     _compute_differences(columns["AFR_true"], columns["AFR_pred"]))[0, 1]
+        cor_sf_true_true[i] = np.corrcoef(_compute_differences(columns["logPA"]), 
+                                          _compute_differences(columns["AFR_true"]))[0, 1]
+        cor_sf_pred[i] = np.corrcoef(_compute_differences(columns["logPA"]), 
+                                     _compute_differences(columns["AFR_pred"]))[0, 1]
+            
+    cor_mod_true = np.zeros(len(model_names))
+    cor_mod_pred = np.zeros(len(model_names))
+    for i in range(len(model_names)):
+        condition = subset["model_name"] == model_names[i]
+        columns = subset.loc[condition, ["logPA", "AFR_true", "AFR_pred"]]
+        cor_mod_true[i] = np.corrcoef(_compute_differences(columns["logPA"]), 
+                                      _compute_differences(columns["AFR_true"]))[0, 1]
+        cor_mod_pred[i] = np.corrcoef(_compute_differences(columns["logPA"]), 
+                                      _compute_differences(columns["AFR_pred"]))[0, 1]
+
+    return np.mean(cor_sf_true_true), np.mean(cor_sf_true_pred), np.mean(cor_sf_pred), np.mean(cor_mod_true), np.mean(cor_mod_pred)
+
 
 def logpa(df: pd.DataFrame,
           dirname: str,
@@ -18,6 +52,11 @@ def logpa(df: pd.DataFrame,
     model_names = df["model_name"].unique()
     dirname = osp.join(dirname, "PA" if metric == "logPA" else "AFR")
     os.makedirs(dirname, exist_ok=True)
+
+    # To compute the correlations.
+    list_shift_ratios = np.sort(df["shift_ratio"].unique())
+    corr_sf_pred = np.zeros(len(list_shift_ratios))
+    corr_sf_true_true, corr_sf_true_pred, corr_mod_true, corr_mod_pred = corr_sf_pred.copy(), corr_sf_pred.copy(), corr_sf_pred.copy(), corr_sf_pred.copy()
 
     pairs = [("shift_ratio", "shift_factor")]
     for levels in tqdm(pairs, total=len(pairs)):
@@ -53,7 +92,8 @@ def logpa(df: pd.DataFrame,
                     "shift_ratio",
                     "shift_factor",
                     "logPA",
-                    "AFR",
+                    "AFR_true",
+                    "AFR_pred",
                     "acc_pa"
                 ],
             ].sort_values(by='model_name')
@@ -73,6 +113,7 @@ def logpa(df: pd.DataFrame,
             plt.rcParams["font.serif"] = fontname
             sns.set_style("ticks")
 
+            #subset["logPA"] = subset["logPA"]/1000.0
             sns.lineplot(
                 data=subset,
                 ax=ax1,
@@ -91,12 +132,16 @@ def logpa(df: pd.DataFrame,
                     ax1.text(
                         point['shift_factor'], 
                         point['logPA'],        
-                        f"{point['acc_pa']:.2f}", 
+                        f"{point['AFR_true']:.2f}", 
                         color='black',       
                         ha='center',       
                         va='bottom',
                         fontsize=9    
                     )
+
+            if level == "shift_ratio":
+                ind = int(np.where(list_shift_ratios == value)[0])
+                corr_sf_true_true[ind], corr_sf_true_pred[ind], corr_sf_pred[ind], corr_mod_true[ind], corr_mod_pred[ind] = _check_correlations(subset)
 
             ax1.minorticks_on()
             ax1.tick_params(axis="both", which="both", direction="in")
@@ -109,6 +154,9 @@ def logpa(df: pd.DataFrame,
 
             ax1.set_xlabel(x_name, fontname=fontname)
             ax1.set_ylabel("PA", fontname=fontname)
+            #ax1.set_ylabel(r"$2 \times 10^3 \cdot$" + " PA", fontname=fontname)
+            # ax1.set_ylim(min(subset["logPA"])*2, -5)
+            # ax1.set_yscale('symlog')
 
             # Legend
             handles, labels = ax1.get_legend_handles_labels()
@@ -149,6 +197,8 @@ def logpa(df: pd.DataFrame,
             plt.savefig(fname)
             plt.clf()
             plt.close()
+    
+    import ipdb; ipdb.set_trace()
 
 
 def afr_vs_logpa(df: pd.DataFrame, comparison_metric: str = "ASR"):

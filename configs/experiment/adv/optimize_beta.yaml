@@ -14,6 +14,10 @@ defaults:
 # all parameters below will be merged with parameters from default configurations set above
 # this allows you to overwrite only specified parameters
 
+data:
+  adv:
+    _target_: src.data.cifar10_datamodules.CIFAR10DataModulePA
+    
 model:
   adv:
     classifier: ${data.adv.classifier}

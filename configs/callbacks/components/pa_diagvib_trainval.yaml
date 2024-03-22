@@ -1,0 +1,9 @@
+# We turn a (train,val,test)_config into a single environment configuration.
+dset_list:
+    - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
+      mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
+      cache_filepath: data/dg/dg_datasets/test_data_pipeline/train_singlevar0.pkl
+
+    - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
+      mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
+      cache_filepath: data/dg/dg_datasets/test_data_pipeline/val_singlevar0.pkl

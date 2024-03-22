@@ -4,8 +4,8 @@
 # python train.py experiment=example
 
 defaults:
-  - override /data/dg: diagvib_multienv.yaml
-  - override /model/dg: irm.yaml
+  - override /data/dg@data: wilds_multienv.yaml
+  - override /model/dg@model: irm.yaml
   - override /trainer: ddp.yaml
 
 
@@ -13,32 +13,34 @@ defaults:
 # this allows you to overwrite only specified parameters
 
 name: ???
-tags: ["diagvib", "irm", "${name}"]
+tags: ["wilds", "irm", "${name}"]
 
 seed: 123
 
 trainer:
   min_epochs: 100
   max_epochs: 100
-  gradient_clip_val: 0.5
+  gradient_clip_val: 0.0
 
 model:
   optimizer:
-    lr: 0.002
+    _target_: torch.optim.SGD
+    lr: 0.0001
   net:
-    pretrained: true
+    pretrained: false
     net: resnet18
+    n_classes: ${data.dg.n_classes}
 
 data:
-  dg:
-    datasets_dir: ${paths.data_dir}/dg/dg_datasets/rebuttal/
-    collate_fn:
-      _target_: hydra.utils.get_method # to avoid instantiation of a callable
-      path: src.data.components.collate_functions.MultiEnv_collate_fn
-    batch_size: 64
-    num_workers: 2
-    pin_memory: true
-    # root_dir: '/cluster/project/jbuhmann/posterior_agreement/adv_pa/data/diagvib/domain_shift' # data_dir is specified in config.yaml
+  # datasets_dir: ${paths.data_dir}/dg/dg_datasets/rebuttal/
+  dataset_dir: ${paths.data_dir}/dg/dg_datasets/wilds/
+  # collate_fn:
+  #   _target_: hydra.utils.get_method # to avoid instantiation of a callable
+  #   path: src.data.components.collate_functions.MultiEnv_collate_fn
+  batch_size: 64
+  num_workers: 2
+  pin_memory: true
+  # root_dir: '/cluster/project/jbuhmann/posterior_agreement/adv_pa/data/diagvib/domain_shift' # data_dir is specified in config.yaml
 
 
 logger:

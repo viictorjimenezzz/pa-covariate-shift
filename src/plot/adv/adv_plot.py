@@ -4,7 +4,7 @@ pyrootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 from src.plot.adv.utils import create_dataframe_from_wandb_runs
 
 attack = "GAUSSIAN" # "PGD", "FMN
-date = "2024-01-12"
+date = "2024-01-15"
 tags = [
     "cifar10",
     attack,
@@ -21,7 +21,7 @@ df = create_dataframe_from_wandb_runs(
     date=date,
     filters={
         "state": "finished",
-        "group": "adversarial_pa",
+        "group": "adv_pa_cifar",
         # "tags": {"$all": ["cifar10", attack]},  # for some reason this does not work
         "$and": [{"tags": tag} for tag in tags],
         "created_at": {"$gte": date},

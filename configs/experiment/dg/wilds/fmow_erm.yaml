@@ -1,0 +1,44 @@
+# @package _global_
+
+# Source: WILDS paper & code
+# https://arxiv.org/pdf/2012.07421.pdf
+# https://github.com/p-lambda/wilds/blob/472677590de351857197a9bf24958838c39c272b/examples/configs/datasets.py
+
+defaults:
+  - /experiment/dg/wilds/wilds.yaml
+  - override /model/dg@model: erm.yaml
+
+# The original batch size is 32, we will use 16 with 2 gradient accumulation steps
+trainer:
+  max_epochs: 60
+  accumulate_grad_batches: 2
+
+model:
+  optimizer:
+    _target_: torch.optim.Adam
+    lr: 0.0001
+    weight_decay: 0.0
+    momentum: 0.0
+  net:
+    pretrained: true
+    net: densenet121
+    n_classes: ${data.n_classes}
+
+  scheduler:
+    interval: epoch
+    frequency: 1
+
+    scheduler:
+      _target_: torch.optim.lr_scheduler.StepLR
+      _partial_: true
+      gamma: 0.96
+
+tags: 
+  - "dg"
+  - "wilds"
+  - "${data.dataset_name}"
+  - "erm"
+  - "${model.net.net}"
+  - "${name_logger}"
+  - "${classname: ${model.optimizer._target_}}"
+  - "${classname: ${model.scheduler.scheduler._target_}}"

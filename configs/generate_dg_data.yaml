@@ -9,13 +9,18 @@ extras:
   ignore_warnings: True
 
 BATCH_SIZE: 64
-DATASETS_DIR: ${paths.data_dir}/dg/dg_datasets/${envs_name}/
+DATASETS_DIR: ${paths.data_dir}/dg/dg_datasets/${folder_name}/
 
 # Desired sizes of the datasets
 # If the datasets are meant to have unique observations, do not surpass the sizes (4500, 1000, 900).
-SIZE_TRAIN: 4500
-SIZE_VAL: 1000
-SIZE_TEST: 900
+SIZE_TRAIN: 128
+SIZE_VAL: 128
+SIZE_TEST: 128
+
+# SIZE_TRAIN: 4500
+# SIZE_VAL: 1000
+# SIZE_TEST: 900
+
 # SIZE_TRAIN: 40000
 # SIZE_VAL: 20000
 # SIZE_TEST: 10000
@@ -23,12 +28,26 @@ SIZE_TEST: 900
 ## FACTORS: hue, lightness, texture, position, scale
 BALANCE: False
 train_val_randperm: True # If each training and validation environment is to be shuffled randomly. In such case there will be no label correspondence between the two environments.
-envs_name: randnobal
+folder_name: test_data_pipeline
+file_name: singlevar
 
 # 2 train/val environments
+# train_val_especs:
+#   train_val_1: [0,0,2,8,4]
+#   train_val_2: [4,3,1,6,3]
+
+# # 6 test environments
+# test_especs:
+#   test_0: [0,0,2,8,4]
+#   test_1: [2,0,2,8,4]
+#   test_2: [2,1,2,8,4]
+#   test_3: [2,1,2,1,4]
+#   test_4: [2,1,2,1,1]
+#   test_5: [2,1,0,1,1]
+
 train_val_especs:
   train_val_1: [0,0,2,8,4]
-  train_val_2: [4,3,1,6,3]
+  train_val_2: [4,0,2,8,4]
 
 # 6 test environments
 test_especs:

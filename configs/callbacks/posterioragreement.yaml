@@ -1,0 +1,23 @@
+# @package _global_
+
+# We pass the dset_list from a specific configuration
+defaults:
+  - components@callbacks.posterioragreement.dataset: pa_diagvib_trainval.yaml
+
+callbacks:
+  posterioragreement:
+    _target_: posterioragreement.lightning_callback.PA_Callback
+
+    log_every_n_epochs: 1
+    pa_epochs: 50
+    beta0: 1.0
+    pairing_strategy: label
+    pairing_csv: ${data.dataset_dir}${data.dataset_name}_${callbacks.posterioragreement.pairing_strategy}_pairing.csv
+    # optimizer: Optional[torch.optim.Optimizer] = None
+    cuda_devices: 4
+    batch_size: ${data.batch_size}
+    num_workers: ${data.num_workers}
+
+    dataset:
+      _target_: posterioragreement.datautils.MultienvDataset
+      dset_list: ???

@@ -1,0 +1,15 @@
+# @package _global_
+
+defaults:
+  - /data/adv@datamodule: cifar10.yaml
+  - override /model/adv/classifier@datamodule.classifier: bpda.yaml
+  - override /data/adv/attack@datamodule.attack: FMN.yaml
+
+datamodule:
+  cache: True # IMPORTANT
+  batch_size: 1000
+  num_workers: 40
+  pin_memory: True
+
+  attack:
+    steps: 1000

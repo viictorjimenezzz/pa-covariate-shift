@@ -1,7 +1,7 @@
 import torch
 from torch import Tensor
-from torch.utils.data import Dataset, TensorDataset
-from typing import List, Tuple
+from torch.utils.data import Dataset, TensorDataset, Subset
+from typing import List, Optional
 
 class MultienvDataset(Dataset):
     """
@@ -9,17 +9,20 @@ class MultienvDataset(Dataset):
     """
 
     def __init__(self, dset_list: List[Dataset]):
-        len_ds = len(dset_list[0])
+        len_ds = min([len(ds) for ds in dset_list])
+
+        same_size = True
         for ds in dset_list:
             if len(ds) != len_ds:
-                raise ValueError("All datasets must have the same size.")
-            
+                same_size = False
+                break
+
         self.dset_list = dset_list
         self.num_envs = len(dset_list)
-        self.permutation = [torch.arange(len(self.dset_list[0])).tolist()]*self.num_envs
+        self.permutation = [torch.arange(len(ds)).tolist() for ds in dset_list]
 
     def __len__(self):
-        return len(self.permutation[0])
+        return min([len(perm) for perm in self.permutation])
  
     def __getitem__(self, idx: int):
         return {str(i): dset[self.permutation[i][idx]] for i, dset in enumerate(self.dset_list)}
@@ -31,17 +34,10 @@ class MultienvDataset(Dataset):
         # Is there a way to do it without multiplicating the calls to __getitem__?
         output_list = [None]*self.num_envs
         for i, dset in enumerate(self.dset_list):
-            output_list[i] = tuple([torch.stack([dset.__getitem__(self.permutation[i][idx])[0] for idx in indices]), 
-                                    torch.tensor([dset.__getitem__(self.permutation[i][idx])[1] for idx in indices])])
-        
+            output_list[i] = tuple([torch.stack([self.__getitem__(idx)[str(i)][0] for idx in indices]), 
+                                    torch.tensor([self.__getitem__(idx)[str(i)][1] for idx in indices])])
+
         return output_list
-    
-    def Subset(self, indices: List[int]):
-        """
-        Returns a new MultienvDataset object with the subset of the original dataset.
-        """
-        subset_items = self.__getitems__(indices)
-        return MultienvDataset([TensorDataset(*env_subset) for env_subset in subset_items])
     
     def __getlabels__(self, indices: List[int]):
         """
@@ -50,9 +46,16 @@ class MultienvDataset(Dataset):
 
         output_list = [None]*self.num_envs
         for i, dset in enumerate(self.dset_list):
-            output_list[i] = torch.tensor([dset.__getitem__(self.permutation[i][idx])[1] for idx in indices])
-        
+            output_list[i] = torch.tensor([self.__getitem__(idx)[str(i)][1] for idx in indices]) 
+
         return output_list
+    
+    def Subset(self, indices: List[int]):
+        """
+        Returns a new MultienvDataset object with the subset of the original dataset.
+        """
+        subset_items = self.__getitems__(indices)
+        return MultienvDataset([TensorDataset(*env_subset) for env_subset in subset_items])
 
 class LogitsDataset(Dataset):
     """
@@ -69,6 +72,9 @@ class LogitsDataset(Dataset):
         assert all(logits[0].size(0) == logit.size(0) for logit in logits), "Size mismatch between logits"
         assert all(y.size(0) == logit.size(0) for logit in logits), "Size mismatch between y and logits"
 
+    def __len__(self):
+        return self.logits[0].size(0)
+
     def __additem__(self, logits: List[Tensor], y: Tensor) -> None:
         """
         This method is slow, because it's concatenating tensors, so it should be avoided whenever possible.
@@ -81,6 +87,9 @@ class LogitsDataset(Dataset):
 
     def __getitem__(self, index: int):
         return {str(i): tuple([self.logits[i][index], self.y[index]]) for i in range(self.num_envs)}
-
-    def __len__(self):
-        return self.logits[0].size(0)
+    
+    def __getitems__(self, indices: List[int]):
+        """
+        When I request several items, I prefer to get a tensor for each dataset.
+        """
+        return [tuple([self.logits[i][indices], self.y[indices]]) for i in range(self.num_envs)]

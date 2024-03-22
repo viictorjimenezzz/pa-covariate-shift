@@ -42,9 +42,11 @@ def dg_pa_dataframe(
 
         data["name"].append(run.name)
         data["shift_ratio"].append(config["data/dg/shift_ratio"])
-        data["model_name"].append(config["model/dg/classifier/exp_name"])
+        #data["model_name"].append(config["model/dg/classifier/exp_name"]) # no logits
+        data["model_name"].append(config["data/dg/classifier/exp_name"]) # logits
         data["shift_factor"].append(config["data/dg/envs_index"][1]) # for original
-        data["AFR"].append(max(retrieve_from_history(run, f"val/AFR {afr}")))
+        data["AFR_true"].append(max(retrieve_from_history(run, f"val/AFR true")))
+        data["AFR_pred"].append(max(retrieve_from_history(run, f"val/AFR pred")))
         data["acc_pa"].append(max(retrieve_from_history(run, "val/acc_pa")))
         logpa_epoch = retrieve_from_history(run, "val/logPA")
         data["logPA"].append(max(logpa_epoch))

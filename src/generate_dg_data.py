@@ -1,10 +1,11 @@
 import hydra
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 from pytorch_lightning import seed_everything
 
 import os
 import numpy as np
 import pandas as pd
+import json
 
 import pyrootutils
 pyrootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
@@ -105,7 +106,7 @@ def main(cfg: DictConfig):
     os.makedirs(DATASETS_DIR, exist_ok=True)
 
     TO_BALANCE = cfg.get("BALANCE")
-    envs_name = cfg.get("envs_name")
+    file_name = cfg.get("file_name")
 
     SIZE_TRAIN = cfg.get("SIZE_TRAIN")
     SIZE_VAL = cfg.get("SIZE_VAL")
@@ -117,7 +118,7 @@ def main(cfg: DictConfig):
     ## TRAINING & VALIDATION ---------------------------------------------
     # hue, lightness, texture, position, scale
     train_val_especs = cfg.get("train_val_especs")
-    train_val_envs = list(train_val_especs.keys())
+    train_val_envs = list(train_val_especs.keys()) # number of environments
     tran_val_randperm = cfg.get("train_val_randperm")
     
     sizes = [SIZE_TRAIN, SIZE_VAL]
@@ -152,7 +153,7 @@ def main(cfg: DictConfig):
                 }
             )
 
-            path = DATASETS_DIR + task + "_" + envs_name + str(t) + ".csv"
+            path = DATASETS_DIR + task + "_" + file_name + str(t) + ".csv"
             df.to_csv(path, index=False)
             if TO_BALANCE:
                 balance_dataset(path, path, batch_size = cfg.get("BATCH_SIZE"))
@@ -183,7 +184,7 @@ def main(cfg: DictConfig):
                 }
             )
 
-        path = DATASETS_DIR + "test_" + envs_name + str(t) + ".csv"
+        path = DATASETS_DIR + "test_" + file_name + str(t) + ".csv"
         df.to_csv(path, index=False)
         if t == 0 and TO_BALANCE: # we balance the first, and then copy the permutation to the rest
             balance_dataset(path, path, batch_size = cfg.get("BATCH_SIZE"))
@@ -194,6 +195,11 @@ def main(cfg: DictConfig):
             df = pd.read_csv(path)
             df['permutation'] = master_permutation
             df.to_csv(path, index=False)
+
+        # Finally, we also store the configuration that generated such dataset:
+        dict_cfg = OmegaConf.to_container(cfg, resolve=True)
+        with open(DATASETS_DIR + "config.json", 'w') as json_file:
+            json.dump(dict_cfg, json_file, indent=4)
 
 
 if __name__ == "__main__":

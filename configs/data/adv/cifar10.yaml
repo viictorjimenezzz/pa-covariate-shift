@@ -2,7 +2,7 @@ defaults:
   - /model/adv/cifar10@_here_
   - attack: null
 
-_target_: src.data.cifar10_datamodule.CIFAR10DataModule
+_target_: src.data.cifar10_datamodules.CIFAR10DataModule
 batch_size: ???
 adversarial_ratio: 1.
 data_dir: ${paths.data_dir}/adv/adv_datasets

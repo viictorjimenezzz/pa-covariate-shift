@@ -25,7 +25,7 @@ class GaussianAttack(CAttackEvasion):
         super(CAttackEvasion, self).__init__(classifier)
 
         self.attacked_classifier = classifier
-        self.noise_std = epsilons/3
+        self.epsilon = epsilons
 
     def _run(self):
         return
@@ -44,8 +44,8 @@ class GaussianAttack(CAttackEvasion):
 
     def run(self, X, Y):
         X = CArray(X).atleast_2d()
-        noise = CArray(randn(X.shape[0], X.shape[1])*self.noise_std)
-        adv_X = X + noise
+        noise = CArray(randn(X.shape[0], X.shape[1])*self.epsilon/3).clip(-self.epsilon,self.epsilon)
+        adv_X = X + noise.abs()
 
         Y = CArray(Y).atleast_2d()
         adv_ds = CDataset(adv_X.deepcopy(), Y.deepcopy())

@@ -43,7 +43,7 @@ class PosteriorAgreementModule(pl.LightningModule):
         self.kernel.beta.data.clamp_(min=0.0)
         self.kernel.reset()
         
-        env_names = batch["envs"]
+        env_names = list(batch.keys())
         x1, x2 = batch[env_names[0]][0], batch[env_names[1]][0]
 
         with torch.no_grad():
@@ -56,12 +56,17 @@ class PosteriorAgreementModule(pl.LightningModule):
     
     def training_step(self, train_batch: Any, batch_idx: int):
         o1, o2, loss = self.model_step(train_batch)
+        env_names = list(train_batch.keys())
+
+        import ipdb; ipdb.set_trace()
+        print("METRIC sums env0", [torch.sum(train_batch['0'][0][0]) for i in range(16)])
+        print(f"\nTRAIN MODULE: batch idx {batch_idx}", torch.sum(train_batch['0'][0][0]), len(o1), o1, o2)
 
         if self.current_epoch == 0:  # AFR does not change during the epochs
             y_pred = torch.argmax(o1.data, 1)
             y_pred_adv = torch.argmax(o2.data, 1)
-            y_true = train_batch[train_batch["envs"][0]][1]
-            assert torch.equal(y_true, train_batch[train_batch["envs"][1]][1]), "The true label tensors are not equal."
+            y_true = train_batch[env_names[0]][1]
+            assert torch.equal(y_true, train_batch[env_names[1]][1]), "The true label tensors are not equal."
 
             # Second, compute the AFR
             values = {
@@ -78,13 +83,13 @@ class PosteriorAgreementModule(pl.LightningModule):
             self.betas.append(self.kernel.beta.item())
 
     def on_validation_start(self):
-        if self.trainer.is_last_batch:
+        if self.trainer.is_last_batch:            
             self.model.eval()
             self.kernel.reset()
 
     def validation_step(self, batch: Any, bidx: int):
         if self.trainer.is_last_batch: # last batch for the trainer
-            env_names = batch["envs"]
+            env_names = list(batch.keys())
             x1, x2 = batch[env_names[0]][0], batch[env_names[1]][0]
             o1, o2 = self.model(x1), self.model(x2)
             self.kernel.evaluate(self.betas[-1], o1, o2)

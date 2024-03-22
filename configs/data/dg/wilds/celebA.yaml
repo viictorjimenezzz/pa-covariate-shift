@@ -1,0 +1,64 @@
+dataset_name: celebA
+n_classes: 2
+
+# train: 162770
+# val: 19867
+# test: 19962
+
+# MALE: 0-1
+# train: 0-1 (94509, 68261)
+# val:  0-1 (11409, 8458)
+# test: 0-1 (12247, 7715)
+
+# In the labels, we have spurious correlations: (MALE, Y), where Y: blonde/no blonde.
+# (0,0): 89931
+# (0,1): 28234
+# (1,0): 82685
+# (1,1): 1749
+
+transform:
+  # Important to load the right transform for the data.
+  # SOURCE: WILDS code
+  # https://github.com/p-lambda/wilds/blob/472677590de351857197a9bf24958838c39c272b/examples/configs/datasets.py
+  _target_: src.data.components.wilds_transforms.initialize_transform
+  dataset:
+    original_resolution: [178, 218]
+  transform_name: image_base
+  config:
+    target_resolution: null
+  is_training: ???
+  additional_transform_name: null
+
+
+# The domains are the labels (two hair colours)
+train_config:
+  env1:
+    split_name: train
+    group_by_fields: ["y"]
+    values:
+      y: [0]
+  env2:
+    split_name: train
+    group_by_fields: ["y"]
+    values:
+      y: [1]
+
+val_config:
+  env1:
+    split_name: val
+    group_by_fields: ["y"]
+    values:
+      male: [0]
+  env2:
+    split_name: val
+    group_by_fields: ["y"]
+    values:
+      male: [1]
+
+test_config:
+  env1:
+    split_name: test
+    group_by_fields: ["male", "y"]
+    values:
+      male: [0, 1]
+      y: [0, 1]

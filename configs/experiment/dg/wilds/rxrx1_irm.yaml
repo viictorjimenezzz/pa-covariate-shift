@@ -1,0 +1,41 @@
+# @package _global_
+
+# Source: WILDS paper & code
+# https://arxiv.org/pdf/2012.07421.pdf
+# https://github.com/p-lambda/wilds/blob/472677590de351857197a9bf24958838c39c272b/examples/configs/datasets.py
+
+defaults:
+  - /experiment/dg/wilds/wilds.yaml
+  - override /model/dg@model: irm.yaml
+
+# The original batch size is 72, we will use 18 with 4 gradient accumulation steps
+data:
+  batch_size: 18
+trainer:
+  max_epochs: 90
+  accumulate_grad_batches: 4
+
+model:
+  lamb: 1.0
+
+  optimizer:
+    _target_: torch.optim.Adam
+    lr: 0.001
+    weight_decay: 0.00001
+    momentum: 0.0
+  net:
+    pretrained: true
+    net: resnet50
+    n_classes: ${data.n_classes}
+
+  scheduler:
+    interval: step
+    frequency: 1
+
+    scheduler:
+      _target_: transformers.get_cosine_schedule_with_warmup
+      _partial_: true
+      num_warmup_steps: ${eval:'${trainer.accumulate_grad_batches} * 5415'} # 5415 is the number of warmup steps in the original code
+      num_training_steps: ${eval:'0000 * ${trainer.max_epochs}'} # number_steps * number_of_epochs
+
+tags: ["dg", "wilds", "${data.dataset_name}", "irm", "${model.net.net}", "${name_logger}"]

@@ -78,11 +78,17 @@ def create_dataframe_from_wandb_runs(
             )
         )
 
-        if "data/attack/epsilons" in config or "data/adv/attack/epsilons" in config:
+        # if attack == "PGD":
+        #     varx = "epsilons"
+        # else: # gaussian
+        #     varx = "noise_std"
+        varx = "epsilons"
+
+        if "data/attack/" + varx in config or "data/adv/attack/" + varx in config:
             data["linf"].append(
                 config.get(
-                    "data/attack/epsilons",
-                    config.get("data/adv/attack/epsilons"),
+                    "data/attack/" + varx,
+                    config.get("data/adv/attack/" + varx),
                 )
             )
         # pause because wandb sometimes is not able to retrieve the results
@@ -91,14 +97,15 @@ def create_dataframe_from_wandb_runs(
             data["AFR"].append(
                 max(
                     [
-                        row["val/AFR pred"]
+                        row["val/AFR true"]
                         for row in run.scan_history()
-                        if row["val/AFR pred"] is not None
+                        if row["val/AFR true"] is not None
                     ]
                 )
             )
         except:
             continue
+
         data["logPA"].append(history["val/logPA"].max())
 
     df = pd.DataFrame(data)

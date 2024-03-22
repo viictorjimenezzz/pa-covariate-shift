@@ -8,7 +8,7 @@ from src.plot.dg.utils import dg_pa_dataframe
 
 entity='malvai'
 project='cov_pa'
-group = 'pa_lightningdebug'
+group = 'dg_pa_diagvib'
 df_dir = 'results/dataframes/dg/' + group + '/'
 pic_dir = 'results/plots/dg/' + group + '/'
 
@@ -27,7 +27,8 @@ for exp_name in exp_names:
     df_list.append(df)
     
 df = pd.concat(df_list, axis=0)
-logpa(df, pic_dir, show_acc=False, picformat="pdf")
+df["model_name"] = df["name"].apply(lambda x: "_".join(x.split("=")[1].split("_")[:2])) # for logits, as I get "$model_name" from wandb
+logpa(df, pic_dir, show_acc=True, picformat="png")
 
     
 
