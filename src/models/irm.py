@@ -31,7 +31,7 @@ class IRM(LightningModule):
         self.loss = loss
         self.save_hyperparameters(ignore=["net"])
 
-    def compute_penalty(self, logits, y):
+    def compute_penalty(self, logits: torch.Tensor, y: torch.Tensor):
         """
         Computes the additional penalty term to achieve invariant representation.
         """
@@ -41,7 +41,7 @@ class IRM(LightningModule):
         gradient = grad(loss, [dummy_w], create_graph=True)[0]
         return gradient**2
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch: dict, batch_idx: int):
         loss = 0
         ys, preds = [], []
         for env in list(batch.keys()):
@@ -61,7 +61,7 @@ class IRM(LightningModule):
             "preds": torch.cat(preds, dim=0)
         }
     
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch: dict, batch_idx: int):
         loss = 0
         ys, preds = [], []
         for env in list(batch.keys()):
@@ -81,7 +81,7 @@ class IRM(LightningModule):
             "preds": torch.cat(preds, dim=0)
         }
     
-    def test_step(self, batch, batch_idx):
+    def test_step(self, batch: dict, batch_idx: int):
         assert len(batch.keys()) == 1, "The test batch should have only one environment."
         x, y = batch
 

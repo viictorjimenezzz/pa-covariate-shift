@@ -1,6 +1,6 @@
 from src.models.erm import ERM
 import torch
-from torch import nn, Tensor, optim
+from torch import nn, optim
 
 from torch.distributions.beta import Beta # to sample mixup weight (lambda)
 from torch.distributions.bernoulli import Bernoulli # to select SA strategy (s)
@@ -44,20 +44,20 @@ class LISA(ERM):
 
         self.save_hyperparameters(ignore=['net'])
 
-    def to_one_hot(self, target, C):
+    def to_one_hot(self, target: torch.Tensor, C: int):
         """Converts a tensor of labels into a one-hot-encoded tensor."""
 
         one_hot = torch.zeros(target.size(0), C).to(self.device)
         one_hot.scatter_(1, target.unsqueeze(1), 1)
         return one_hot.to(self.device)
 
-    def from_one_hot(self, one_hot):
+    def from_one_hot(self, one_hot: torch.Tensor):
         """Converts one-hot-encoded tensor to a tensor of labels."""
     
         _, indices = torch.max(one_hot, 1)
         return indices.to(self.device)
 
-    def mix_up(self, mix_alpha: float, x: Tensor, y: Tensor, x2: Tensor = None, y2: Tensor = None):
+    def mix_up(self, mix_alpha: float, x: : torch.Tensor, y: : torch.Tensor, x2: : torch.Tensor = None, y2: : torch.Tensor = None):
         """y_1 and y_2 should be one-hot encoded.
             Function adapted from the LISA repo to work with pytorch.
         """
@@ -87,7 +87,7 @@ class LISA(ERM):
         mixed_y = l_y * y1 + (1 - l_y) * y2
         return mixed_x, mixed_y
     
-    def cut_mix(self, mix_alpha: float, x, y):
+    def cut_mix(self, mix_alpha: float, x: torch.Tensor, y: torch.Tensor):
         def _rand_bbox(size, lam):
             W = size[2]
             H = size[3]
@@ -116,7 +116,7 @@ class LISA(ERM):
 
         return x, lam*target_a + (1-lam)*target_b
     
-    def pair_lisa(self, cat: Tensor):
+    def pair_lisa(self, cat: torch.Tensor):
         """
         It pairs observations with different attributes. It is important to note that the
         number of non-paired observations is not maximized, as in such case we would require that

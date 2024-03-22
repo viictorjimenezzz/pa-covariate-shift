@@ -1,3 +1,4 @@
+from typing import Union
 import torch
 from torch import nn, optim
 from omegaconf import OmegaConf, DictConfig
@@ -34,7 +35,7 @@ class ERM(LightningModule):
         else:
             return batch
     
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch: Union[dict, tuple], batch_idx: int):
         x, y = self._extract_batch(batch)
 
         logits = self.model(x)
@@ -45,7 +46,7 @@ class ERM(LightningModule):
             "preds": torch.argmax(logits, dim=1)
         }
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch: Union[dict, tuple], batch_idx: int):
         x, y = self._combined_loader_to_single(batch) if isinstance(batch, dict) else batch
 
         logits = self.model(x)
@@ -56,7 +57,7 @@ class ERM(LightningModule):
             "preds": torch.argmax(logits, dim=1)
         }
 
-    def test_step(self, batch, batch_idx):
+    def test_step(self, batch: Union[dict, tuple], batch_idx: int):
         x, y = batch
 
         logits = self.model(x)
