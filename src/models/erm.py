@@ -47,7 +47,7 @@ class ERM(LightningModule):
         }
 
     def validation_step(self, batch: Union[dict, tuple], batch_idx: int):
-        x, y = self._combined_loader_to_single(batch) if isinstance(batch, dict) else batch
+        x, y = self._extract_batch(batch)
 
         logits = self.model(x)
         return {
@@ -57,7 +57,7 @@ class ERM(LightningModule):
             "preds": torch.argmax(logits, dim=1)
         }
 
-    def test_step(self, batch: Union[dict, tuple], batch_idx: int):
+    def test_step(self, batch: tuple, batch_idx: int):
         x, y = batch
 
         logits = self.model(x)
