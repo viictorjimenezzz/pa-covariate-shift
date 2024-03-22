@@ -108,7 +108,7 @@ PyWavelets==1.4.1
 PyYAML==6.0.1
 regex==2023.12.25
 requests==2.25.1
-rich==13.4.2
+rich==13.7.1
 robustbench==1.1
 safetensors==0.4.2
 SciencePlots==2.1.0
