@@ -150,6 +150,7 @@ configs/local/default.yaml
 /logs/
 /outputs/
 .env
+slurm-*
 
 # Aim logging
 .aim
