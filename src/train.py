@@ -47,6 +47,9 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
     # set seed for random number generators in pytorch, numpy and python.random
     pl.seed_everything(cfg.seed, workers=True)
 
+    log.info("Instantiating loggers...")
+    logger: List[Logger] = utils.instantiate_loggers(cfg.get("logger"))
+
     log.info(f"Instantiating datamodule <{cfg.data._target_}>")
     datamodule: LightningDataModule = hydra.utils.instantiate(cfg.data)
 
@@ -57,9 +60,6 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
     callbacks: List[Callback] = utils.instantiate_callbacks(
         cfg.get("callbacks")
     )
-
-    log.info("Instantiating loggers...")
-    logger: List[Logger] = utils.instantiate_loggers(cfg.get("logger"))
 
     log.info(f"Instantiating trainer <{cfg.trainer._target_}>")
     trainer: Trainer = hydra.utils.instantiate(
@@ -90,23 +90,23 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
 
     # Store model checkpoint path
     path_ckpt_csv = cfg.paths.log_dir + "/ckpt_exp.csv"
-    ckpt_path = trainer.checkpoint_callback.best_model_path
 
+    # Multiple checkpointing callbacks possible:
+    ckpt_paths = [ckpt_callb.best_model_path for ckpt_callb in trainer.checkpoint_callbacks]
+    tracked_metric_ckpt = [ckpt_callb.monitor.split("/")[-1] for ckpt_callb in trainer.checkpoint_callbacks]
     if os.path.exists(path_ckpt_csv) == False:
         with open(path_ckpt_csv, "w", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow(["experiment_name", "experiment_id", "seed", "ckpt_path"])
-            writer.writerow(["place_holder", "place_holder", "place_holder", "place_holder"])
+            writer.writerow(["experiment_name", "experiment_id", "seed", "metric", "ckpt_path"])
+            writer.writerow(["place_holder", "place_holder", "place_holder", "place_holder", "place_holder"])
 
     pd_ckpt = pd.read_csv(path_ckpt_csv)
     if logger:
-        if logger[0].experiment.name not in pd_ckpt["experiment_name"].tolist():
-            with open(path_ckpt_csv, "a+", newline="") as file:
-                writer = csv.writer(file)
-                writer.writerow([logger[0].experiment.name, logger[0].experiment.id, cfg.seed, ckpt_path])
+        with open(path_ckpt_csv, "a+", newline="") as file:
+            writer = csv.writer(file)
+            for metric, ckpt_path in zip(tracked_metric_ckpt, ckpt_paths):
+                writer.writerow([logger[0].experiment.name, logger[0].experiment.id, cfg.seed, metric, ckpt_path])
         
-    # Print model checkpoint and experiment to resume for testing.
-    print("\nBest model checkpoint path: ", ckpt_path)
     if logger:
         print(f"\nExperiment id: {logger[0].experiment.id}")
     return metric_dict, object_dict
