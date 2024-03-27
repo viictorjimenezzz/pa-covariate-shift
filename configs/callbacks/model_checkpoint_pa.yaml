@@ -3,12 +3,12 @@
 model_checkpoint_PA:
   _target_: pytorch_lightning.callbacks.ModelCheckpoint
   dirpath: ${paths.output_dir}/checkpoints
-  filename: "pa_epoch_{epoch:03d}"
-  monitor: "val/logPA"
+  filename: pa_epoch_{epoch:03d}
+  monitor: PA(0,1)/logPA
   mode: "max"
   save_last: False
   auto_insert_metric_name: False
-  every_n_epochs: ${callbacks.pa_lightning.log_every_n_epochs} # check every n training epochs
+  every_n_epochs: ${callbacks.posterioragreement.log_every_n_epochs}
 
   verbose: False # verbosity mode
   save_top_k: 1 # save k best models (determined by above metric)

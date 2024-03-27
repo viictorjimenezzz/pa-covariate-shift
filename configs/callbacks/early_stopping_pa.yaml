@@ -2,7 +2,7 @@
 
 early_stopping_PA:
   _target_: pytorch_lightning.callbacks.EarlyStopping
-  monitor: "val/logPA"
+  monitor: "PA(0,1)/logPA"
   min_delta: 0. # minimum change in the monitored quantity to qualify as an improvement
   patience: 100 #${trainer.max_epochs}/${callbacks.pa_lightning.log_every_n_epochs} # patience in epochs
   mode: "max"
