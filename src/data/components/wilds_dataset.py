@@ -16,7 +16,7 @@ def WILDS_multiple_to_single(multiple_env_config: DictConfig) -> dict:
 
     combined_values = {}
     all_group_by_fields = set()
-
+    
     # Collect all possible group_by_fields and initialize combined_values
     for _, envconf in multiple_env_config.items():
         for field in envconf['group_by_fields']:
@@ -34,13 +34,11 @@ def WILDS_multiple_to_single(multiple_env_config: DictConfig) -> dict:
     for field in combined_values:
         combined_values[field] = sorted(list(set(combined_values[field])))
 
-    # Construct new dictionary assuming template of combined fields
-    env1_dict = {
-        'split_name': 'train',
+    return {
+        'split_name': multiple_env_config['env1']['split_name'],
         'group_by_fields': list(all_group_by_fields),
         'values': combined_values
     }
-    return env1_dict
 
 class WILDSDatasetEnv(Dataset):
     """
