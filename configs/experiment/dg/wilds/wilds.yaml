@@ -26,7 +26,7 @@ logger:
   wandb:
     tags: ${tags}
     entity: malvai
-    project: cov_pa
+    project: WILDS
     group: group-name
     save_dir: ${paths.output_dir}/dg
     name: ${name_logger}
