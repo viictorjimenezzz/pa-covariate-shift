@@ -1,4 +1,4 @@
-posterioragreement @ git+https://github.com/viictorjimenezzz/posterioragreement.git@main
+pametric @ git+https://github.com/viictorjimenezzz/pa-metric.git@main
 diagvibsix @ git+https://github.com/viictorjimenezzz/diagvibsix.git@59cb3760c097a1068621c015e688543d2c854f98
 aiohttp==3.8.5
 aiosignal==1.3.1
