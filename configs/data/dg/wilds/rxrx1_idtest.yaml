@@ -283,12 +283,204 @@ val_config:
       experiment: [49]
       site: [1, 2]
 
-# For ID testing, same 33 environments as in training, but as a single dataset.
+# For ID testing, same 33 environments as in training
 # Site 2 only
 test_config:
   env1:
     split_name: id_test
     group_by_fields: ["experiment", "site"]
     values:
-      experiment: [0, 1, 2, 3, 4, 5, 6, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 35, 36, 37, 38, 39, 40, 41, 46, 47, 48]
+      experiment: [0]
+      site: [2]
+  env2:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [1]
+      site: [2]
+  env3:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [2]
+      site: [2]
+  env4:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [3]
+      site: [2]
+  env5:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [4]
+      site: [2]
+  env6:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [5]
+      site: [2]
+  env7:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [6]
+      site: [2]
+  env8:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [11]
+      site: [2]
+  env9:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [12]
+      site: [2]
+  env10:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [13]
+      site: [2]
+  env11:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [14]
+      site: [2]
+  env12:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [15]
+      site: [2]
+  env13:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [16]
+      site: [2]
+  env14:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [17]
+      site: [2]
+  env15:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [18]
+      site: [2]
+  env16:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [19]
+      site: [2]
+  env17:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [20]
+      site: [2]
+  env18:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [21]
+      site: [2]
+  env19:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [22]
+      site: [2]
+  env20:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [23]
+      site: [2]
+  env21:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [24]
+      site: [2]
+  env22:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [25]
+      site: [2]
+  env23:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [26]
+      site: [2]
+  env24:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [35]
+      site: [2]
+  env25:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [36]
+      site: [2]
+  env26:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [37]
+      site: [2]
+  env27:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [38]
+      site: [2]
+  env28:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [39]
+      site: [2]
+  env29:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [40]
+      site: [2]
+  env30:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [41]
+      site: [2]
+  env31:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [46]
+      site: [2]
+  env32:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [47]
+      site: [2]
+  env33:
+    split_name: id_test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [48]
       site: [2]

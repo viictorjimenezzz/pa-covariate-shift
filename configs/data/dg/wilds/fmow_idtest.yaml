@@ -538,11 +538,41 @@ val_config:
       region: [5]
       year: [13]
 
-# ID testing, in a single environment
+# ID testing: we are only interested in the region domains to see if there are performance drops.
 test_config:
   env1:
     split_name: id_test
     group_by_fields: ["region", "year"]
     values:
-      region: [0, 1, 2, 3, 4, 5]
+      region: [0]
+      year: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  env2:
+    split_name: id_test
+    group_by_fields: ["region", "year"]
+    values:
+      region: [1]
+      year: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  env3:
+    split_name: id_test
+    group_by_fields: ["region", "year"]
+    values:
+      region: [2]
+      year: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  env4:
+    split_name: id_test
+    group_by_fields: ["region", "year"]
+    values:
+      region: [3]
+      year: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  env5:
+    split_name: id_test
+    group_by_fields: ["region", "year"]
+    values:
+      region: [4]
+      year: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  env6:
+    split_name: id_test
+    group_by_fields: ["region", "year"]
+    values:
+      region: [5]
       year: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]

@@ -538,11 +538,41 @@ val_config:
       region: [5]
       year: [13]
 
-# OOD testing, in a single environment
+# OOD testing: only regions matter for testing
 test_config:
   env1:
     split_name: test
     group_by_fields: ["region", "year"]
     values:
-      region: [0, 1, 2, 3, 4, 5]
+      region: [0]
+      year: [14, 15]
+  env2:
+    split_name: test
+    group_by_fields: ["region", "year"]
+    values:
+      region: [1]
+      year: [14, 15]
+  env3:
+    split_name: test
+    group_by_fields: ["region", "year"]
+    values:
+      region: [2]
+      year: [14, 15]
+  env4:
+    split_name: test
+    group_by_fields: ["region", "year"]
+    values:
+      region: [3]
+      year: [14, 15]
+  env5:
+    split_name: test
+    group_by_fields: ["region", "year"]
+    values:
+      region: [4]
+      year: [14, 15]
+  env6:
+    split_name: test
+    group_by_fields: ["region", "year"]
+    values:
+      region: [5]
       year: [14, 15]

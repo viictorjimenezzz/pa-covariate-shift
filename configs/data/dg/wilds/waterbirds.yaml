@@ -52,4 +52,9 @@ test_config:
     split_name: test
     group_by_fields: ["background"]
     values:
-      background: [0, 1]
+      background: [0]
+  env2:
+    split_name: test
+    group_by_fields: ["background"]
+    values:
+      background: [1]

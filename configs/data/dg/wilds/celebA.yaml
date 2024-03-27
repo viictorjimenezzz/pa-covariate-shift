@@ -61,4 +61,10 @@ test_config:
     group_by_fields: ["male", "y"]
     values:
       male: [0, 1]
-      y: [0, 1]
+      y: [0]
+  env2:
+    split_name: test
+    group_by_fields: ["male", "y"]
+    values:
+      male: [0, 1]
+      y: [1]

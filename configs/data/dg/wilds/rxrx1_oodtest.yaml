@@ -284,10 +284,17 @@ val_config:
 
 # For OOD testing: 8,  9, 10, 28, 29, 30, 31, 32, 33, 34, 43, 44, 45, 50
 # Sites 1 and 2. I specify them in the config dict to avoid confusion, although it's not necessary.
+# In this case I will compute accuracy for the two sites separately, so I only consider two environments.
 test_config:
   env1:
     split_name: test
     group_by_fields: ["experiment", "site"]
     values:
       experiment: [8, 9, 10, 28, 29, 30, 31, 32, 33, 34, 43, 44, 45, 50]
-      site: [1, 2]
+      site: [1]
+  env2:
+    split_name: test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [8, 9, 10, 28, 29, 30, 31, 32, 33, 34, 43, 44, 45, 50]
+      site: [2]
