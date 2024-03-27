@@ -62,7 +62,7 @@ def test(cfg: DictConfig) -> Tuple[dict, dict]:
     assert len(selected_ckpt) == 1, "There are duplicate experiments in the csv file."
     
     ckpt_path = selected_ckpt["ckpt_path"].item()
-    if 'wandb' in cfg.logger.keys():
+    if 'wandb' in cfg.logger.keys() and cfg.logger['wandb'] != None:
         cfg.logger.wandb.id = selected_ckpt['experiment_id'].item() # log in the same experiment
 
     log.info("Instantiating loggers...")
