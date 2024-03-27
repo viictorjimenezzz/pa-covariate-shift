@@ -1,4 +1,6 @@
 defaults:
   - accuracy.yaml
+  - accuracy_domains.yaml
+  - debugging.yaml
   - rich_progress_bar.yaml
   - _self_
