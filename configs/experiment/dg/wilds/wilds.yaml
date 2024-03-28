@@ -12,7 +12,7 @@ trainer:
   gradient_clip_val: 0.0
 
   multiple_trainloader_mode: ${data.multiple_trainloader_mode}
-  accumulate_grad_batches: 0
+  accumulate_grad_batches: 1
   replace_sampler_ddp: true
 
 data:

@@ -11,7 +11,7 @@ defaults:
 # The original batch size is 16
 trainer:
   max_epochs: 300
-  accumulate_grad_batches: 0
+  accumulate_grad_batches: null
 
 model:
   ppred: 0.5
