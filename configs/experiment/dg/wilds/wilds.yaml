@@ -3,6 +3,7 @@
 defaults:
   - /data/dg@data: wilds_multienv.yaml
   - /trainer: ddp.yaml
+  - override /logger: wandb.yaml
 
 name_logger: ???
 
@@ -26,7 +27,7 @@ logger:
   wandb:
     tags: ${tags}
     entity: malvai
-    project: WILDS
+    project: WILDS - PA OOD Model Selection
     group: group-name
     save_dir: ${paths.output_dir}/dg
     name: ${name_logger}
