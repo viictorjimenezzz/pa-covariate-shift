@@ -13,9 +13,8 @@ from pytorch_lightning import (
 from pytorch_lightning.loggers import Logger
 
 # Add resolvers to evaluate operations in the .yaml configuration files
-OmegaConf.register_new_resolver("eval", eval)
-OmegaConf.register_new_resolver("len", len)
-OmegaConf.register_new_resolver("classname", lambda classpath: classpath.split(".")[-1].lower())
+from src.utils.omegaconf import register_resolvers
+register_resolvers()
 
 import pyrootutils
 pyrootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
