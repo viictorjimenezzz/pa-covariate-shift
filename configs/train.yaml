@@ -2,7 +2,7 @@
 
 defaults:
   - _self_
-  - logger: none.yaml # TODO: See if passing null from the CLI also works
+  - logger: none.yaml
   - callbacks: default.yaml
   - trainer: default.yaml
   - paths: default.yaml
@@ -45,4 +45,8 @@ compile: False
 ckpt_path: null
 
 # seed for random number generators in pytorch, numpy and python.random
-seed: 123
+seed: ???
+
+# additional argumants that might be required for intermediate calculations inside the 
+# configuration files but are not used to initialize any object
+auxiliary_args: null
