@@ -1,0 +1,34 @@
+# @package _global_
+
+defaults:
+  - /data/dg@data: diagvib_multienv.yaml
+  - /trainer: ddp.yaml
+  - override /logger: wandb.yaml
+
+name_logger: ???
+
+trainer:
+  min_epochs: 1
+  max_epochs: 100
+  gradient_clip_val: 0.0
+
+  multiple_trainloader_mode: ${data.multiple_trainloader_mode}
+  accumulate_grad_batches: null
+  replace_sampler_ddp: true
+
+data:
+  datasets_dir: ${paths.data_dir}/dg/dg_datasets/test_data_pipeline/
+  batch_size: 64
+  num_workers: 2
+  pin_memory: true
+    
+logger:
+  wandb:
+    tags: ${tags}
+    entity: malvai
+    project: DiagVib-6 Paper
+    group: group-name
+    save_dir: ${paths.output_dir}/dg
+    name: ${name_logger}
+
+task_name: dg_diagvibsix

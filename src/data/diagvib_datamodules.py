@@ -1,19 +1,21 @@
-from typing import List, Optional, Callable
+from typing import List, Optional
 
 import os
 import os.path as osp
 
-from torch.utils.data import DataLoader, Subset, ConcatDataset
+from torch.utils.data import DataLoader
 
+import torch.distributed as dist
+from torch.utils.data import DataLoader
+from torch.utils.data.distributed import DistributedSampler
 from pytorch_lightning import LightningDataModule
+from pytorch_lightning.trainer.supporters import CombinedLoader
+
 from diagvibsix.data.dataset.preprocess_mnist import get_processed_mnist
 
-from src.data.components import MultienvDataset
-from src.data.components.collate_functions import MultiEnv_collate_fn
+from src.data.components import MultienvDatasetTest
 from src.data.components.diagvib_dataset import DiagVib6DatasetPA, select_dataset_spec
-from src.pa_metric.pairing import PosteriorAgreementDatasetPairing
 
-import torch.distributed
 
 class DiagVibDataModuleMultienv(LightningDataModule):
     """
@@ -35,193 +37,140 @@ class DiagVibDataModuleMultienv(LightningDataModule):
     """
     def __init__(
         self,
+        n_classes: int,
         envs_index: List[int] = [1],
         envs_name: str = 'env',
         datasets_dir: str = osp.join(".", "data", "datasets"),
         disjoint_envs: bool = False,
         train_val_sequential: bool = False,
         mnist_preprocessed_path: str = osp.join(".", "data", "dg", "mnist_processed.npz"),
-        collate_fn: Optional[Callable] = None,
         batch_size: Optional[int] = 64,
         num_workers: Optional[int] = 0,
         pin_memory: Optional[bool] = False,
+        multiple_trainloader_mode: Optional[str] ='max_size_cycle',
     ):
         super().__init__()
-        self.save_hyperparameters()
-
-        self.num_envs = len(envs_index)
-        self.envs_index = envs_index
-        self.envs_name = envs_name
-        self.datasets_dir = datasets_dir
-        self.mnist_preprocessed_path = mnist_preprocessed_path
-        self.collate_fn = collate_fn
-
-        self.train_val_sequential = train_val_sequential
-        self.disjoint_envs = disjoint_envs
+        self.save_hyperparameters(logger=False)
+        self.hparams.num_envs = len(envs_index)
 
     @property
     def num_classes(self):
-        return 10
+        return self.hparams.n_classes
 
     def prepare_data(self):
         """Checks if the MNIST data is available. If not, downloads and processes it."""
         
-        _ = get_processed_mnist(osp.dirname(self.mnist_preprocessed_path) + os.sep)
+        _ = get_processed_mnist(osp.dirname(self.hparams.mnist_preprocessed_path) + os.sep)
         pass
 
     def setup(self, stage: Optional[str] = None):
 
-        # TRAINING DATASET
-        self.train_ds_list = []
-        for env_count in range(self.num_envs):
-            index = self.envs_index[env_count]
-            if not self.disjoint_envs:
-                split_numsplit = [0,1]
-            else:
-                split_numsplit = [env_count, self.num_envs]
+        if stage == "fit":
+            self.train_dset_list = []
+            for env_count in range(self.hparams.num_envs):
+                index = self.hparams.envs_index[env_count]
+                if not self.hparams.disjoint_envs:
+                    split_numsplit = [0,1]
+                else:
+                    split_numsplit = [env_count, self.hparams.num_envs]
 
-            dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.datasets_dir, dataset_name='train_' + self.envs_name + str(index))
-            self.train_ds_list.append(
-                DiagVib6DatasetPA(
-                mnist_preprocessed_path = self.mnist_preprocessed_path,
-                dataset_specs_path=dataset_specs_path,
-                cache_filepath=cache_filepath,
-                split_numsplit=split_numsplit,
-                train_val_sequential=self.train_val_sequential,
-                t='train')
+                dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.hparams.datasets_dir, dataset_name='train_' + self.hparams.envs_name + str(index))
+                self.train_dset_list.append(
+                        DiagVib6DatasetPA(
+                            mnist_preprocessed_path = self.hparams.mnist_preprocessed_path,
+                            dataset_specs_path=dataset_specs_path,
+                            cache_filepath=cache_filepath,
+                            split_numsplit=split_numsplit,
+                            train_val_sequential=self.hparams.train_val_sequential,
+                            t='train'
+                        )
                 )
-            
-        self.train_ds = MultienvDataset(self.train_ds_list)
+                
+            self.val_dset_list = []
+            for env_count in range(self.hparams.num_envs):
+                index = self.hparams.envs_index[env_count]
+                if not self.hparams.disjoint_envs:
+                    split_numsplit = [0,1]
+                else:
+                    split_numsplit = [env_count, self.hparams.num_envs]
 
-        # VALIDATION DATASET
-        val_exists = True
-        self.val_ds_list = []
-        for env_count in range(self.num_envs):
-            index = self.envs_index[env_count]
-            if not self.disjoint_envs:
-                split_numsplit = [0,1]
-            else:
-                split_numsplit = [env_count, self.num_envs]
+                dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.hparams.datasets_dir, dataset_name='val_' + self.hparams.envs_name + str(index))
+                if dataset_specs_path == None and not os.path.exists(cache_filepath):
+                    """
+                    If there is no validation dataset, the datamodule will not yield error.
+                    Nevertheless, the callbacks for the training will have to be disabled. Use: --callbacks=none
+                    """
+                    print("\nNo configuration or .pkl file has been provided for validation.\n")
+                    break
+                else:
+                    self.val_dset_list.append(
+                        DiagVib6DatasetPA(
+                            mnist_preprocessed_path = self.hparams.mnist_preprocessed_path,
+                            dataset_specs_path=dataset_specs_path,
+                            cache_filepath=cache_filepath,
+                            split_numsplit=split_numsplit,
+                            train_val_sequential=self.hparams.train_val_sequential,
+                            t='val'
+                        )
+                    )
 
-            dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.datasets_dir, dataset_name='val_' + self.envs_name + str(index))
-            if dataset_specs_path == None and not os.path.exists(cache_filepath):
-                """
-                If there is no validation dataset, the datamodule will not yield error.
-                Nevertheless, the callbacks for the training will have to be disabled. Use: --callbacks=none
-                """
-                print("\nNo configuration or .pkl file has been provided for validation.\n")
-                val_exists = False
-                break
-            else:
-                self.val_ds_list.append(DiagVib6DatasetPA(
-                    mnist_preprocessed_path = self.mnist_preprocessed_path,
-                    dataset_specs_path=dataset_specs_path,
-                    cache_filepath=cache_filepath,
-                    split_numsplit=split_numsplit,
-                    train_val_sequential=self.train_val_sequential,
-                    t='val'))
-            
-        if val_exists:
-            self.val_ds = MultienvDataset(self.val_ds_list)
         else:
-            self.val_ds = None
+            self.test_dset_list = []
+            for env_count in range(self.hparams.num_envs):
+                index = self.hparams.envs_index[env_count]
+                if not self.hparams.disjoint_envs:
+                    split_numsplit = [0,1]
+                else:
+                    split_numsplit = [env_count, self.hparams.num_envs]
 
+                dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.hparams.datasets_dir, dataset_name='test_' + self.hparams.envs_name + str(index))
+
+                # Apply shift ratio for the test:
+                self.test_dset_list.append(
+                   DiagVib6DatasetPA(
+                            mnist_preprocessed_path = self.hparams.mnist_preprocessed_path,
+                            dataset_specs_path=dataset_specs_path,
+                            cache_filepath=cache_filepath,
+                            split_numsplit=split_numsplit,
+                            train_val_sequential=self.hparams.train_val_sequential,
+                            t='test'
+                    )
+                )
+                
+            self.test_dset = MultienvDatasetTest(self.test_dset_list)
+                
     def train_dataloader(self):
-        return DataLoader(
-            dataset=self.train_ds,
-            batch_size=self.hparams.batch_size,
-            num_workers=self.hparams.num_workers,
-            pin_memory=self.hparams.pin_memory,
-            drop_last=True, # for LISA
-            shuffle=True,
-            collate_fn=self.collate_fn,
-        )
+        return {
+                str(i): DataLoader(
+                    dataset=ds,
+                    batch_size=self.hparams.batch_size,
+                    num_workers=self.hparams.num_workers,
+                    pin_memory=self.hparams.pin_memory,
+                    sampler = DistributedSampler(ds, drop_last=True, shuffle=True) if dist.is_initialized() else DistributedSampler(ds, drop_last=True, shuffle=True, num_replicas=1, rank=0),
+                ) for i, ds in enumerate(self.train_dset_list)
+        }
 
     def val_dataloader(self):
-        if self.val_ds is not None:
-            return DataLoader(
-                dataset=self.val_ds,
-                batch_size=self.hparams.batch_size,
-                num_workers=self.hparams.num_workers,
-                pin_memory=self.hparams.pin_memory,
-                drop_last=False, # for LISA
-                shuffle=False,
-                collate_fn=self.collate_fn
-            ) 
-        
+        # CombinedLoader is equivalent to a dictionary of DataLoaders.
+        if len(self.val_dset_list) > 0:
+            return CombinedLoader({
+                str(i): DataLoader(
+                    dataset=ds,
+                    batch_size=self.hparams.batch_size,
+                    num_workers=self.hparams.num_workers,
+                    pin_memory=self.hparams.pin_memory,
+                    sampler = DistributedSampler(ds, drop_last=True, shuffle=False) if dist.is_initialized() else DistributedSampler(ds, drop_last=True, shuffle=False, num_replicas=1, rank=0),
+                ) for i, ds in enumerate(self.val_dset_list)
+            }, self.hparams.multiple_trainloader_mode)
 
-class DiagVibDataModulePA(DiagVibDataModuleMultienv):
-    """
-    See parent class for full information about the arguments. This subclass is used to generate the dataloader for the PA optimization, consisting of a single environment each time 
-    """
-    def __init__(self, 
-                 shift_ratio: float = 1.0,
-                 *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.num_envs = 2
-        self.shift_ratio = shift_ratio
-        self.save_hyperparameters()
-
-    def setup(self, stage: Optional[str] = None):
-        dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.datasets_dir, dataset_name= self.envs_name + str(self.envs_index[0]))
-        self.ds1 = DiagVib6DatasetPA(
-            mnist_preprocessed_path = self.mnist_preprocessed_path,
-            dataset_specs_path=dataset_specs_path,
-            cache_filepath=cache_filepath,
-            t='test')
-        
-        dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.datasets_dir, dataset_name= self.envs_name + str(self.envs_index[1]))
-        self.ds2 = DiagVib6DatasetPA(
-            mnist_preprocessed_path = self.mnist_preprocessed_path,
-            dataset_specs_path=dataset_specs_path,
-            cache_filepath=cache_filepath,
-            t='test')
-        
-        self.ds2_shifted = self._apply_shift_ratio(self.ds1, self.ds2)
-        self.train_ds = PosteriorAgreementDatasetPairing(MultienvDataset([self.ds1, self.ds2_shifted]))
-        
-    def train_dataloader(self):
-        return DataLoader(
-                dataset=self.train_ds,
-                batch_size=self.hparams.batch_size,
-                num_workers=self.hparams.num_workers,
-                pin_memory=self.hparams.pin_memory,
-                collate_fn=MultiEnv_collate_fn,
-                shuffle=True,
-                drop_last=False
-            )
-    
-    def val_dataloader(self):
-        return self.train_dataloader() # I don't need to shuffle but it's irrelevant if I do.
-
-    def _apply_shift_ratio(self, ds1, ds2):
-        """Generates the two-environment dataset adding (1-shift_ratio)*len(ds2) samples of ds1 to ds2.
-
-        Args:
-            ds1: First environment dataset.
-            ds2: Second environment dataset.
-
-        Returns:
-            Concatenated dataset with the shifted samples.
+    def test_dataloader(self):
         """
-        size = len(ds1)
-        if size != len(ds2):
-            raise ValueError("Both test datasets must have the same size.")
-        
-        num_samples_1 = int(size*(1 - self.shift_ratio))
-
-        sampled_1 = Subset(ds1, range(num_samples_1)) # first (1-SR)*size_1 samples are from ds1
-        sampled_2 = Subset(ds2, range(num_samples_1, size)) # complete with last samples of ds2
-
-        return ConcatDataset([sampled_1, sampled_2])
-    
-
-from src.data.components.logits_pa import LogitsPA
-
-class DiagVibDataModulePAlogits(LogitsPA, DiagVibDataModulePA):
-    def __init__(self, classifier: torch.nn.Module, *args, **kwargs):
-        super().__init__(classifier)
-        DiagVibDataModulePA.__init__(self, *args, **kwargs)
-
-if __name__ == "__main__":
-    LightningDataModule()
+        Here we can set `shuffle=False`, because only one dataset is used.
+        """
+        return DataLoader(
+                dataset=self.test_dset,
+                batch_size=self.hparams.batch_size,
+                num_workers=self.hparams.num_workers,
+                pin_memory=self.hparams.pin_memory,
+                sampler = DistributedSampler(self.test_dset, drop_last=False, shuffle=False, num_replicas=1, rank=0)
+        )

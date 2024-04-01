@@ -252,7 +252,6 @@ class DiagVib6DatasetPA(TorchDatasetWrapper):
             with open(cache_filepath, 'rb') as f:
                 self.dataset = pickle.load(f)
         else:
-            
             if is_csv:
                 self.dataset = DatasetCSV_PA(
                     mnist_preprocessed_path=mnist_preprocessed_path,
