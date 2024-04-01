@@ -1,0 +1,55 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - logger: none.yaml
+  - callbacks: default_test_datashift.yaml
+  - trainer: gpu.yaml
+  - paths: default.yaml
+  - extras: default.yaml
+  - hydra: default.yaml
+
+  # experiment configs allow for version control of specific hyperparameters
+  # e.g. best hyperparameters for given model and datamodule
+  - experiment: null
+
+  # config for hyperparameter optimization
+  - hparams_search: null
+
+  # optional local config for machine/user specific settings
+  # it's optional since it doesn't need to exist and is excluded from version control
+  - optional local: default.yaml
+
+  # debugging config (enable through command line, e.g. `python train.py debug=default)
+  - debug: null
+
+data: ???
+model: ???
+experiment_name: ???
+
+logger:
+  wandb:
+    name: exp=${experiment_name}_envs=${list_at_idx:${data.envs_index},0}&${list_at_idx:${data.envs_index},1}_sr=${auxiliary_args.pa_datashift.shift_ratio}
+    # name: exp=${experiment_name}_envs=${list_at_idx:${auxiliary_args.pa_datashift.envs_index},0}&${list_at_idx:${auxiliary_args.pa_datashift.envs_index},1}_sr=${auxiliary_args.pa_datashift.shift_ratio}
+
+trainer:
+  limit_test_batches: 1.0
+  max_epochs: 1
+
+# task name, determines output directory path
+task_name: ???
+
+# tags to help you identify your experiments
+# you can overwrite this in experiment configs
+# overwrite from command line with `python train.py tags="[first_tag, second_tag]"`
+tags: [test]
+
+# compile model for faster training with pytorch 2.0
+compile: False
+
+# seed for random number generators in pytorch, numpy and python.random
+seed: ???
+
+# additional argumants that might be required for intermediate calculations inside the 
+# configuration files but are not used to initialize any object
+auxiliary_args: null
