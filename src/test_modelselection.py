@@ -1,9 +1,7 @@
 from typing import List, Optional, Tuple
 
 import hydra
-import os
 import pandas as pd
-import csv
 import pytorch_lightning as pl
 from omegaconf import OmegaConf, DictConfig
 from pytorch_lightning import (
@@ -17,7 +15,7 @@ from pytorch_lightning.loggers import Logger
 # Add resolvers to evaluate operations in the .yaml configuration files
 OmegaConf.register_new_resolver("eval", eval)
 OmegaConf.register_new_resolver("len", len)
-OmegaConf.register_new_resolver("classname", lambda classpath: classpath.split(".")[-1])
+OmegaConf.register_new_resolver("classname", lambda classpath: classpath.split(".")[-1].lower())
 
 import pyrootutils
 pyrootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
@@ -27,13 +25,10 @@ from src import utils
 
 log = utils.get_pylogger(__name__)
 
-# TO DELETE AFTER IT'S BEEN DEBUGGED
-import torch
-import os
-
 @utils.task_wrapper
 def test(cfg: DictConfig) -> Tuple[dict, dict]:
-    """Tests the model.
+    """Tests the model for model selection, by loading the checkpoint associated with a specific experiment, seed 
+    and checkpoint_metric.
 
     This method is wrapped in optional @task_wrapper decorator which applies extra utilities
     before and after the call.
@@ -54,7 +49,11 @@ def test(cfg: DictConfig) -> Tuple[dict, dict]:
     pl.seed_everything(cfg.seed, workers=True)
 
     # We load the experiment configuration: experiment_name, seed and metric.
-    path_ckpt_csv = cfg.paths.log_dir + "/ckpt_exp.csv"
+    csv_name = "ckpt_exp"
+    if 'wandb' in cfg.logger.keys() and cfg.logger['wandb'] != None:
+        csv_name = cfg.logger.wandb.project
+    
+    path_ckpt_csv = cfg.paths.log_dir + f"/{csv_name}.csv"
     experiment_df = pd.read_csv(path_ckpt_csv)
     selected_ckpt = experiment_df[
         (experiment_df['experiment_name'] == cfg.name_logger) & (experiment_df['seed'] == str(cfg.seed)) & (experiment_df['metric'] == cfg.checkpoint_metric)
@@ -102,6 +101,9 @@ def test(cfg: DictConfig) -> Tuple[dict, dict]:
     trainer = hydra.utils.instantiate(
         cfg.trainer, callbacks=callbacks, logger=logger
     )
+    
+    # Add metric attribute to the trainer:
+    trainer.checkpoint_metric = cfg.checkpoint_metric
 
     trainer.test(
         model = model.load_from_checkpoint(ckpt_path, net=hydra.utils.instantiate(cfg.model.net)),
@@ -114,7 +116,7 @@ def test(cfg: DictConfig) -> Tuple[dict, dict]:
 
 
 @hydra.main(
-    version_base="1.3", config_path="../configs", config_name="test.yaml"
+    version_base="1.3", config_path="../configs", config_name="test_modelselection.yaml"
 )
 def main(cfg: DictConfig) -> Optional[float]:
     # train the model
