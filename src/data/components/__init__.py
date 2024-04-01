@@ -1,6 +1,6 @@
 import torch
 from torch import Tensor
-from torch.utils.data import Dataset, TensorDataset, Subset
+from torch.utils.data import Dataset, TensorDataset, Subset, ConcatDataset
 from typing import List, Optional
 
 class MultienvDataset(Dataset):
@@ -56,6 +56,26 @@ class MultienvDataset(Dataset):
         """
         subset_items = self.__getitems__(indices)
         return MultienvDataset([TensorDataset(*env_subset) for env_subset in subset_items])
+
+
+class MultienvDatasetTest(MultienvDataset):
+    """
+    Subclass of `MultienvDataset` that concatenates the dataset list and returns the elements and also a
+    `domain_tag` indicating the environment from which the observation came from.
+    """
+
+    def __init__(self, dset_list: List[Dataset]):
+        super().__init__(dset_list)
+        self.dset_list = [ConcatDataset(dset_list)]
+        self.permutation = [torch.arange(len(self.dset_list[0])).tolist()]
+        self.domain_tag = torch.cat([
+            i*torch.ones(len(ds), dtype=int)
+            for i, ds in enumerate(dset_list)
+        ])
+
+    def __getitem__(self, idx: int):
+        return self.dset_list[0][self.permutation[0][idx]], self.domain_tag[self.permutation[0][idx]]
+
 
 class LogitsDataset(Dataset):
     """
