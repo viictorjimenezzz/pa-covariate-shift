@@ -94,7 +94,7 @@ def balance_dataset(load_path: str, save_path: str, batch_size: int, delete_rema
 @hydra.main(
     version_base="1.3",
     config_path="../configs",
-    config_name="generate_dg_data",
+    config_name="generate_diagvib_data",
 )
 def main(cfg: DictConfig):
     utils.extras(cfg) # print conf tree
@@ -127,9 +127,9 @@ def main(cfg: DictConfig):
         SIZE = sizes[tv]
         task = tasks[tv]
 
-        four = np.ones(int(SIZE/2))*4
-        nine = np.ones(int(SIZE/2))*9
-        task_label = np.concatenate([four, nine]).astype(int)
+        lab1 = np.ones(int(SIZE/2))*cfg.get("shape")[0]
+        lab2 = np.ones(int(SIZE/2))*cfg.get("shape")[1]
+        task_label = np.concatenate([lab1, lab2]).astype(int)
         shape = task_label.copy()
 
         for t in range(len(train_val_envs)):
@@ -160,9 +160,9 @@ def main(cfg: DictConfig):
 
 
     # TEST ---------------------------------------------
-    four = np.ones(int(SIZE_TEST/2))*4
-    nine = np.ones(int(SIZE_TEST/2))*9
-    task_label = np.concatenate([four, nine]).astype(int)
+    lab1 = np.ones(int(SIZE_TEST/2))*4
+    lab2 = np.ones(int(SIZE_TEST/2))*9
+    task_label = np.concatenate([lab1, lab2]).astype(int)
     shape = task_label.copy()
 
     # hue, lightness, texture, position, scale
