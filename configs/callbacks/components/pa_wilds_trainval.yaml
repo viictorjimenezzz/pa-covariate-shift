@@ -1,28 +1,29 @@
 # We turn a (train,val,test)_config into a single environment configuration.
+_target_: pametric.datautils.MultienvDataset
 dset_list:
-    - _target_: src.data.components.wilds_dataset.WILDSDatasetEnv
-      dataset:
-        _target_: wilds.get_dataset
-        dataset: ${data.dataset_name}
-        download: false
-        unlabeled: false 
-        root_dir: ${data.dataset_dir}
-      transform: ${data.transform}
+  - _target_: src.data.components.wilds_dataset.WILDSDatasetEnv
+    dataset:
+      _target_: wilds.get_dataset
+      dataset: ${data.dataset_name}
+      download: false
+      unlabeled: false 
+      root_dir: ${data.dataset_dir}
+    transform: ${data.transform}
 
-      env_config:
-        _target_: src.data.components.wilds_dataset.WILDS_multiple_to_single
-        multiple_env_config: ${data.train_config} # training data
+    env_config:
+      _target_: src.data.components.wilds_dataset.WILDS_multiple_to_single
+      multiple_env_config: ${data.val_config} # training data
+  
+
+  - _target_: src.data.components.wilds_dataset.WILDSDatasetEnv
+    dataset:
+      _target_: wilds.get_dataset
+      dataset: ${data.dataset_name}
+      download: false
+      unlabeled: false 
+      root_dir: ${data.dataset_dir}
+    transform: ${data.transform}
     
-
-    - _target_: src.data.components.wilds_dataset.WILDSDatasetEnv
-      dataset:
-        _target_: wilds.get_dataset
-        dataset: ${data.dataset_name}
-        download: false
-        unlabeled: false 
-        root_dir: ${data.dataset_dir}
-      transform: ${data.transform}
-      
-      env_config:
-        _target_: src.data.components.wilds_dataset.WILDS_multiple_to_single
-        multiple_env_config: ${data.val_config} # training data
+    env_config:
+      _target_: src.data.components.wilds_dataset.WILDS_multiple_to_single
+      multiple_env_config: ${data.train_config} # training data
