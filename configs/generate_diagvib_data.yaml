@@ -1,0 +1,62 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - paths: default.yaml
+
+extras:
+  print_config: True
+  ignore_warnings: True
+
+BATCH_SIZE: 64
+DATASETS_DIR: ${paths.data_dir}/dg/dg_datasets/${folder_name}/
+
+# Desired sizes of the datasets
+# If the datasets are meant to have unique observations, do not surpass the sizes (4500, 1000, 900).
+
+# SIZE_TRAIN: 4500
+# SIZE_VAL: 1000
+# SIZE_TEST: 900
+
+SIZE_TRAIN: 40000
+SIZE_VAL: 20000
+SIZE_TEST: 10000
+
+## FACTORS: hue, lightness, texture, position, scale
+BALANCE: True # If each label is to be balanced so that each batch contains the same number of each label, and then LISA can perform perfect label interpolation.
+train_val_randperm: False # If each training (also validation) environment is to be shuffled randomly. In such case there will be no label correspondence between the two environments.
+folder_name: paper
+file_name: env
+
+# Classification task: shape
+shape: [4, 9]
+
+# PAPER ------------------------------------------------------------------------------------------------------------
+# 2 train/val environments
+train_val_especs:
+  train_val_1: [0,3,0,4,2]
+  train_val_2: [4,3,0,4,2]
+
+# 6 test environments
+test_especs:
+  test_0: [0,3,0,4,2]
+  test_1: [4,3,0,4,2]
+  test_2: [4,2,0,4,2]
+  test_3: [4,2,0,7,2]
+  test_4: [4,2,0,7,3]
+  test_5: [4,2,1,7,3]
+# -----------------------------------------------------------------------------------------------------------------
+
+# # 2 train/val environments
+# train_val_especs:
+#   train_val_1: [0,0,2,8,4]
+#   train_val_2: [4,3,1,6,3]
+
+# # 6 test environments
+# test_especs:
+#   test_0: [0,0,2,8,4]
+#   test_1: [2,0,2,8,4]
+#   test_2: [2,1,2,8,4]
+#   test_3: [2,1,2,1,4]
+#   test_4: [2,1,2,1,1]
+#   test_5: [2,1,0,1,1]
