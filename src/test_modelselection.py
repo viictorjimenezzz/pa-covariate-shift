@@ -12,16 +12,14 @@ from pytorch_lightning import (
 )
 from pytorch_lightning.loggers import Logger
 
+import pyrootutils
+pyrootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
+
 # Add resolvers to evaluate operations in the .yaml configuration files
 from src.utils.omegaconf import register_resolvers
 register_resolvers()
 
-import pyrootutils
-pyrootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
-
-
 from src import utils
-
 log = utils.get_pylogger(__name__)
 
 @utils.task_wrapper

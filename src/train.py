@@ -4,6 +4,7 @@ import hydra
 import os
 import pandas as pd
 import csv
+import torch.distributed as dist
 import pytorch_lightning as pl
 from omegaconf import OmegaConf, DictConfig
 from pytorch_lightning import (
@@ -14,16 +15,14 @@ from pytorch_lightning import (
 )
 from pytorch_lightning.loggers import Logger
 
-# Add resolvers to evaluate operations in the .yaml configuration files
-OmegaConf.register_new_resolver("eval", eval)
-OmegaConf.register_new_resolver("len", len)
-OmegaConf.register_new_resolver("classname", lambda classpath: classpath.split(".")[-1])
-
 import pyrootutils
 pyrootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 
-from src import utils
+# Add resolvers to evaluate operations in the .yaml configuration files
+from src.utils.omegaconf import register_resolvers
+register_resolvers()
 
+from src import utils
 log = utils.get_pylogger(__name__)
 
 # TODO: Remove after debugging
@@ -89,26 +88,32 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
     metric_dict = {**train_metrics}
 
     # Store model checkpoint path
-    path_ckpt_csv = cfg.paths.log_dir + "/ckpt_exp.csv"
+    csv_name = "ckpt_exp"
+    if 'wandb' in cfg.logger.keys() and cfg.logger['wandb'] != None:
+        csv_name = cfg.logger.wandb.project
+    path_ckpt_csv = cfg.paths.log_dir + f"/{csv_name}.csv"
 
-    # Multiple checkpointing callbacks possible:
-    ckpt_paths = [ckpt_callb.best_model_path for ckpt_callb in trainer.checkpoint_callbacks]
-    tracked_metric_ckpt = [ckpt_callb.monitor.split("/")[-1] for ckpt_callb in trainer.checkpoint_callbacks]
-    if os.path.exists(path_ckpt_csv) == False:
-        with open(path_ckpt_csv, "w", newline="") as file:
-            writer = csv.writer(file)
-            writer.writerow(["experiment_name", "experiment_id", "seed", "metric", "ckpt_path"])
-            writer.writerow(["place_holder", "place_holder", "place_holder", "place_holder", "place_holder"])
+    # On rank 0, we log the experiment.
+    is_rank_0 = dist.get_rank() == 0 if dist.is_initialized() else True
+    if is_rank_0:
+        # Multiple checkpointing callbacks possible:
+        ckpt_paths = [ckpt_callb.best_model_path for ckpt_callb in trainer.checkpoint_callbacks]
+        tracked_metric_ckpt = [ckpt_callb.monitor.split("/")[-1] for ckpt_callb in trainer.checkpoint_callbacks]
+        if os.path.exists(path_ckpt_csv) == False:
+            with open(path_ckpt_csv, "w", newline="") as file:
+                writer = csv.writer(file)
+                writer.writerow(["experiment_name", "experiment_id", "seed", "metric", "ckpt_path"])
+                writer.writerow(["place_holder", "place_holder", "place_holder", "place_holder", "place_holder"])
 
-    pd_ckpt = pd.read_csv(path_ckpt_csv)
-    if logger:
-        with open(path_ckpt_csv, "a+", newline="") as file:
-            writer = csv.writer(file)
-            for metric, ckpt_path in zip(tracked_metric_ckpt, ckpt_paths):
-                writer.writerow([logger[0].experiment.name, logger[0].experiment.id, cfg.seed, metric, ckpt_path])
-        
-    if logger:
-        print(f"\nExperiment id: {logger[0].experiment.id}")
+        pd_ckpt = pd.read_csv(path_ckpt_csv)
+        if logger:
+            with open(path_ckpt_csv, "a+", newline="") as file:
+                writer = csv.writer(file)
+                for metric, ckpt_path in zip(tracked_metric_ckpt, ckpt_paths):
+                    writer.writerow([logger[0].experiment.name, logger[0].experiment.id, cfg.seed, metric, ckpt_path])
+            
+        if logger:
+            print(f"\nExperiment id: {logger[0].experiment.id}")
     return metric_dict, object_dict
 
 
