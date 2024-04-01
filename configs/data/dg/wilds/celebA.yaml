@@ -25,7 +25,7 @@ transform:
     original_resolution: [178, 218]
   transform_name: image_base
   config:
-    target_resolution: null
+    target_resolution: [224, 224]
   is_training: ???
   additional_transform_name: null
 
