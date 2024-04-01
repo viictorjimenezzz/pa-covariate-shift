@@ -20,7 +20,6 @@ model:
     _target_: torch.optim.Adam
     lr: 0.001
     weight_decay: 0.00001
-    momentum: 0.0
   net:
     pretrained: true
     net: resnet50
