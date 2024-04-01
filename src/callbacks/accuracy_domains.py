@@ -63,7 +63,10 @@ class AccuracyDomains_Callback(Callback):
         }
         for env in batch.keys(): 
             assert int(env) in range(self.n_domains_train), f"Environment {env} not in range {self.n_domains_train}."
-            mask = self._mask_each_domain(batch, int(env))
+            if "domain_tag" in outputs.keys():
+                mask = (outputs["domain_tag"] == int(env))
+            else:
+                mask = self._mask_each_domain(batch, int(env))
             metrics_dict[f'train/acc_{env}'] = self.train_acc[f'acc_{env}'].to(pl_module.device)(preds[mask], y[mask])
 
         pl_module.log_dict(metrics_dict, prog_bar=False, on_step=True, on_epoch=True, logger=True, sync_dist=True)
@@ -76,20 +79,28 @@ class AccuracyDomains_Callback(Callback):
         }
         for env in batch.keys(): 
             assert int(env) in range(self.n_domains_val), f"Environment {env} not in range {self.n_domains_val}."
-            mask = self._mask_each_domain(batch, int(env))
+            if "domain_tag" in outputs.keys():
+                mask = (outputs["domain_tag"] == int(env))
+            else:
+                mask = self._mask_each_domain(batch, int(env))
             metrics_dict[f'val/acc_{env}'] = self.val_acc[f'acc_{env}'].to(pl_module.device)(preds[mask], y[mask])
 
         pl_module.log_dict(metrics_dict, prog_bar=False, on_step=True, on_epoch=True, logger=True, sync_dist=True)
 
     def on_test_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
         y, preds = outputs["targets"], outputs["preds"]
+        metric_name = trainer.checkpoint_metric
 
         metrics_dict = {
-            'test/acc_average': self.test_acc_average.to(pl_module.device)(preds, y)
+            f'test/acc_average_{metric_name}': self.test_acc_average.to(pl_module.device)(preds, y)
         }
-        for env in batch.keys(): 
+
+        for env in torch.unique(outputs["domain_tag"]): 
             assert int(env) in range(self.n_domains_test), f"Environment {env} not in range {self.n_domains_test}."
-            mask = self._mask_each_domain(batch, int(env))
-            metrics_dict[f'test/acc_{env}'] = self.test_acc[f'acc_{env}'].to(pl_module.device)(preds[mask], y[mask])
+            if "domain_tag" in outputs.keys():
+                mask = (outputs["domain_tag"] == int(env))
+            else:
+                mask = self._mask_each_domain(batch, int(env))
+            metrics_dict[f'test/acc_{env}_{metric_name}'] = self.test_acc[f'acc_{env}'].to(pl_module.device)(preds[mask], y[mask])
 
         pl_module.log_dict(metrics_dict, prog_bar=False, on_step=True, on_epoch=True, logger=True, sync_dist=False) # SINGLE DEVICE

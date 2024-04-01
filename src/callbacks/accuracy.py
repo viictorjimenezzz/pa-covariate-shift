@@ -62,13 +62,14 @@ class Accuracy_Callback(Callback):
 
     def on_test_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
         y, preds = outputs["targets"], outputs["preds"]
+        metric_name = trainer.checkpoint_metric
 
         metrics_dict = {
-            "test/loss": outputs["loss"],
-            "test/acc": self.test_acc.to(pl_module.device)(preds, y),
-            "test/f1": self.test_f1.to(pl_module.device)(preds, y),
-            "test/sensitivity": self.test_sensitivity.to(pl_module.device)(preds, y),
-            "test/specificity": self.test_specificity.to(pl_module.device)(preds, y),
-            "test/precision": self.test_precision.to(pl_module.device)(preds, y),
+            f"test/loss_{metric_name}": outputs["loss"],
+            f"test/acc_{metric_name}": self.test_acc.to(pl_module.device)(preds, y),
+            f"test/f1_{metric_name}": self.test_f1.to(pl_module.device)(preds, y),
+            f"test/sensitivity_{metric_name}": self.test_sensitivity.to(pl_module.device)(preds, y),
+            f"test/specificity_{metric_name}": self.test_specificity.to(pl_module.device)(preds, y),
+            f"test/precision_{metric_name}": self.test_precision.to(pl_module.device)(preds, y),
         }
         pl_module.log_dict(metrics_dict, prog_bar=False, on_step=True, on_epoch=True, logger=True, sync_dist=False) # SINGLE DEVICE
