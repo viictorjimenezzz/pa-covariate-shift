@@ -1,16 +1,9 @@
-from pytorch_lightning import LightningModule, LightningDataModule
-from pytorch_lightning.core.optimizer import LightningOptimizer
 import torch
-import os.path as osp
 from torch import nn, argmax, optim
 from torch.autograd import grad
-from torchmetrics import Accuracy, F1Score, Recall, Specificity, Precision
-
-# For the PA metric
-from src.pa_metric_torch import PosteriorAgreement
-from src.data.diagvib_datamodules import DiagVibDataModulePA
-from src.data.components.collate_functions import MultiEnv_collate_fn
-from copy import deepcopy
+from omegaconf import OmegaConf, DictConfig
+from pytorch_lightning import LightningModule, LightningDataModule
+from pytorch_lightning.core.optimizer import LightningOptimizer
 
 class IRM(LightningModule):
     """Invariant Risk Minimization (IRM) module."""
@@ -29,7 +22,7 @@ class IRM(LightningModule):
 
         self.model = net
         self.loss = loss
-        self.save_hyperparameters(ignore=["net"])
+        self.save_hyperparameters(ignore=["net", "loss"])
 
     def compute_penalty(self, logits: torch.Tensor, y: torch.Tensor):
         """
@@ -49,7 +42,7 @@ class IRM(LightningModule):
 
             logits = self.model(x)
             penalty = self.compute_penalty(logits, y)
-            loss += self.loss(logits, y) + self.lamb*penalty
+            loss += self.loss(logits, y) + self.hparams.lamb*penalty
             
             ys.append(y)
             preds.append(argmax(logits, dim=1))
@@ -69,7 +62,7 @@ class IRM(LightningModule):
 
             logits = self.model(x)
             penalty = self.compute_penalty(logits, y)
-            loss += self.loss(logits, y) + self.lamb*penalty
+            loss += self.loss(logits, y) + self.hparams.lamb*penalty
             
             ys.append(y)
             preds.append(argmax(logits, dim=1))
@@ -82,16 +75,16 @@ class IRM(LightningModule):
         }
     
     def test_step(self, batch: dict, batch_idx: int):
-        assert len(batch.keys()) == 1, "The test batch should have only one environment."
-        x, y = batch
+        (x, y), domain_tag = batch
 
         logits = self.model(x)
-        penalty = self.compute_penalty(logits, y)
+        # penalty = self.compute_penalty(logits, y)
         return {
-            "loss": self.loss(logits, y) + self.lamb*penalty,
+            "loss": self.loss(logits, y), #+ self.hparams.lamb*penalty,
             "logits": logits,
             "targets": y,
-            "preds": argmax(logits, dim=1)
+            "preds": argmax(logits, dim=1),
+            "domain_tag": domain_tag
         }
             
     def configure_optimizers(self):

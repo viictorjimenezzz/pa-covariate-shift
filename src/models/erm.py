@@ -4,7 +4,6 @@ from torch import nn, optim
 from omegaconf import OmegaConf, DictConfig
 from pytorch_lightning import LightningModule
 from pytorch_lightning.core.optimizer import LightningOptimizer
-from torchmetrics import Accuracy, F1Score, Recall, Specificity, Precision
 
 class ERM(LightningModule):
     """Vanilla ERM traning scheme for fitting a NN to the training data"""
@@ -21,7 +20,7 @@ class ERM(LightningModule):
 
         self.model = net
         self.loss = loss
-        self.save_hyperparameters(ignore=["net"])
+        self.save_hyperparameters(ignore=["net", "loss"])
 
     def _extract_batch(self, batch: Union[dict, tuple]):
         """
@@ -58,14 +57,15 @@ class ERM(LightningModule):
         }
 
     def test_step(self, batch: tuple, batch_idx: int):
-        x, y = batch
+        (x, y), domain_tag = batch
 
         logits = self.model(x)
         return {
             "loss": self.loss(input=logits, target=y),
             "logits": logits,
             "targets": y,
-            "preds": torch.argmax(logits, dim=1)
+            "preds": torch.argmax(logits, dim=1),
+            "domain_tag": domain_tag
         }
 
     def configure_optimizers(self):

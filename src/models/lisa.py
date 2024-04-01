@@ -1,13 +1,13 @@
+from typing import Optional
 from src.models.erm import ERM
 import torch
 from torch import nn, optim
+from omegaconf import DictConfig
 
 from torch.distributions.beta import Beta # to sample mixup weight (lambda)
 from torch.distributions.bernoulli import Bernoulli # to select SA strategy (s)
 
 from copy import deepcopy
-
-from src.models.utils import 
 
 class LISA(ERM):
     """
@@ -42,7 +42,7 @@ class LISA(ERM):
         super().__init__(n_classes, net, loss, optimizer, scheduler)
         assert mixup_strategy in ["mixup", "cutmix"], "The mixup strategy must be either 'mixup' or 'cutmix'."
 
-        self.save_hyperparameters(ignore=['net'])
+        self.save_hyperparameters(ignore=["net", "loss"])
 
     def to_one_hot(self, target: torch.Tensor, C: int):
         """Converts a tensor of labels into a one-hot-encoded tensor."""
@@ -57,7 +57,7 @@ class LISA(ERM):
         _, indices = torch.max(one_hot, 1)
         return indices.to(self.device)
 
-    def mix_up(self, mix_alpha: float, x: : torch.Tensor, y: : torch.Tensor, x2: : torch.Tensor = None, y2: : torch.Tensor = None):
+    def mix_up(self, mix_alpha: float, x: torch.Tensor, y: torch.Tensor, x2: Optional[torch.Tensor] = None, y2: Optional[torch.Tensor] = None):
         """y_1 and y_2 should be one-hot encoded.
             Function adapted from the LISA repo to work with pytorch.
         """
@@ -126,13 +126,21 @@ class LISA(ERM):
 
         cat_original = cat.clone().detach()
         ind_original = torch.arange(len(cat_original)).to(self.device)
-        B_1 = torch.empty(0, dtype=torch.int8).to(self.device)
-        B_2 = torch.empty(0, dtype=torch.int8).to(self.device)
+        B_1 = torch.empty(0).to(dtype=torch.long, device=self.device)
+        B_2 = torch.empty(0).to(dtype=torch.long, device=self.device)
         for cat_it in range(len(torch.unique(cat_original))-1):
             # new category list
-            remove_indexes = torch.cat((B_1, B_2)).to(dtype=torch.long)
-            mask = torch.ones(cat_original.size(0), dtype=torch.bool).to(self.device)
-            mask[remove_indexes] = False
+            remove_indexes = torch.cat((B_1, B_2)).to(dtype=torch.long, device=self.device)
+            mask = torch.ones(cat_original.size(0)).to(dtype=torch.bool, device=self.device)
+
+            # For some reason this gives error when deterministic = True
+            # mask[remove_indexes] = False
+
+            # BUG fix:
+            remove_mask = torch.zeros_like(mask, dtype=torch.bool)
+            remove_mask.scatter_(dim=0, index=remove_indexes, src=torch.ones_like(remove_indexes, dtype=torch.bool))
+            mask = ~remove_mask
+            
             cat = cat_original[mask]
 
             # select smallest category
@@ -178,6 +186,7 @@ class LISA(ERM):
         # build datasets to be mixed
         B1 = torch.empty(0, dtype=torch.long).to(self.device)
         B2 = torch.empty(0, dtype=torch.long).to(self.device)
+        domain_tag = torch.empty(0, dtype=torch.long).to(self.device)
         if int(s.item()) == 1: # LISA-L
             # group data by label
             for label in y.unique():
@@ -188,6 +197,11 @@ class LISA(ERM):
                 # accumulate indexes wrt all observations
                 B1 = torch.cat((B1, torch.index_select(all_inds[mask], 0, B1_lab)))
                 B2 = torch.cat((B2, torch.index_select(all_inds[mask], 0, B2_lab)))
+                domain_tag = torch.cat((
+                    domain_tag, 
+                    envs_int[mask][B1_lab],
+                    envs_int[mask][B2_lab]
+                ))
 
         else: # LISA-D
             # group data by environment
@@ -196,10 +210,13 @@ class LISA(ERM):
                 B1_lab, B2_lab = self.pair_lisa(y[mask]) # indexes wrt mask
                 #print("LISA-D, samples with the same domain:", len(y[mask]))
 
-                # accumulate indexes wrt all observations                    
+                # accumulate indexes wrt all observations        
                 B1 = torch.cat((B1, torch.index_select(all_inds[mask], 0, B1_lab)))
                 B2 = torch.cat((B2, torch.index_select(all_inds[mask], 0, B2_lab)))
-
+                domain_tag = torch.cat((
+                    domain_tag,
+                    env*torch.ones(len(B1_lab) + len(B2_lab), dtype=torch.long).to(self.device)
+                ))
 
         if self.hparams.mixup_strategy == "cutmix":
             joined_indexes = torch.cat([B1, B2]).sort()[0]
@@ -219,7 +236,39 @@ class LISA(ERM):
             )
             mixed_y = self.from_one_hot(mixed_y)
 
-        return mixed_x, mixed_y
+        return mixed_x, mixed_y, domain_tag
 
     def _extract_batch(self, batch: dict):
-        return self.selective_augmentation(batch)
+        """
+        We add a `domain_tag` to calculate domain-specific metrics.
+        """
+        x, y = super()._extract_batch(batch)
+        domain_tag = torch.cat([
+            int(env)*torch.ones(len(batch[env][1]), dtype=torch.long).to(self.device)
+            for env in batch.keys()
+        ])
+        return x, y, domain_tag
+
+    def training_step(self, batch: dict, batch_idx: int):
+        x, y, domain_tag = self.selective_augmentation(batch)
+
+        logits = self.model(x)
+        return {
+            "loss": self.loss(input=logits, target=y),
+            "logits": logits,
+            "targets": y,
+            "preds": torch.argmax(logits, dim=1),
+            "domain_tag": domain_tag
+        }
+
+    def validation_step(self, batch: dict, batch_idx: int):
+        x, y, domain_tag = self._extract_batch(batch)
+
+        logits = self.model(x)
+        return {
+            "loss": self.loss(input=logits, target=y),
+            "logits": logits,
+            "targets": y,
+            "preds": torch.argmax(logits, dim=1),
+            "domain_tag": domain_tag
+        }
