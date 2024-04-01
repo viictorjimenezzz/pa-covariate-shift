@@ -10,7 +10,7 @@ n_classes: 2
 # val:  0-1 (11409, 8458)
 # test: 0-1 (12247, 7715)
 
-# In the labels, we have spurious correlations: (MALE, Y), where Y: blonde/no blonde.
+# In the labels, we have spurious correlations: (MALE, Y), where Y = {not_blonde, blonde}.
 # (0,0): 89931
 # (0,1): 28234
 # (1,0): 82685
@@ -48,12 +48,12 @@ val_config:
     split_name: val
     group_by_fields: ["y"]
     values:
-      male: [0]
+      y: [0]
   env2:
     split_name: val
     group_by_fields: ["y"]
     values:
-      male: [1]
+      y: [1]
 
 test_config:
   env1:
