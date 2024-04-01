@@ -12,14 +12,16 @@ source activate $1
 # python3 src/train.py \
 srun python3 src/train.py \
     --multirun \
-    experiment=dg/wilds/camelyon17_lisa \
-    +data/dg/wilds@data=camelyon17_oracle \
+    callbacks=default_train_modelselection \
+    +callbacks@callbacks.posterioragreement=pametric_label \
+    +callbacks/components@callbacks.posterioragreement.dataset=pa_wilds_trainval \
+    experiment=dg/wilds/camelyon17_irm \
+    +data/dg/wilds@data=camelyon17_idval \
+    +auxiliary_args.dataconfname=camelyon17_idval \
+    name_logger=irm_idval_debug3 \
     data.transform.is_training=true \
-    name_logger=lisa_oracle \
     seed=0 \
     trainer=ddp \
     trainer.max_epochs=10 \
     trainer.deterministic=true \
-    +trainer.fast_dev_run=false \
-    logger=wandb \
-    logger.wandb.group=camelyon17 \
+    logger.wandb.group=camelyon17

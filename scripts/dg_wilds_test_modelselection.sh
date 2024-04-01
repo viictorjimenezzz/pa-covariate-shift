@@ -8,13 +8,13 @@
 # activate conda env
 source activate $1
 
-# python3 src/test.py \
-srun python3 src/test.py \
+# python3 src/test_modelselection.py \
+srun python3 src/test_modelselection.py \
     --multirun \
-    experiment=dg/wilds/camelyon17_irm \
+    experiment=dg/wilds/camelyon17_erm \
     +data/dg/wilds@data=camelyon17_oracle \
     data.transform.is_training=false \
-    name_logger=irm_oracle \
+    name_logger=dg_wilds_erm_camelyon17_oracle_last \
     checkpoint_metric=acc,logPA \
     seed=0 \
     trainer=gpu \
