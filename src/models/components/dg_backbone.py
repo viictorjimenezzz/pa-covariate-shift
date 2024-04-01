@@ -101,19 +101,55 @@ class DGBackbone(nn.Module):
         return h
 
 
-def get_lm_model(exp_name: str, net: nn.Module, log_dir: str) -> nn.Module:
-    ckpt_path = os.path.join(log_dir, "ckpt_exp.csv")
-    df_ckpt = pd.read_csv(ckpt_path)
-    ckpt_path = df_ckpt[
-        df_ckpt["experiment_name"] == exp_name
-    ].ckpt_path.values[0]
+# def get_lm_model(exp_name: str, net: nn.Module, ckpt_path: str) -> nn.Module:
+#     df_ckpt = pd.read_csv(ckpt_path)
+#     ckpt_path = df_ckpt[
+#         df_ckpt["experiment_name"] == exp_name
+#     ].ckpt_path.values[0]
 
-    ckpt_lightning = torch.load(ckpt_path, map_location=torch.device("cpu"))
-    weights = ckpt_lightning["state_dict"].copy()
-    for key in ckpt_lightning["state_dict"].keys():
-        if "model" in key:
-            weights[key[6:]] = weights.pop(key)
+#     ckpt_lightning = torch.load(ckpt_path, map_location=torch.device("cpu"))
+#     weights = ckpt_lightning["state_dict"].copy()
+#     for key in ckpt_lightning["state_dict"].keys():
+#         if "model" in key:
+#             weights[key[6:]] = weights.pop(key)
 
-    net.load_state_dict(weights)
+#     net.load_state_dict(weights)
 
-    return net
+#     return net
+
+
+def get_feature_extractor(net: DGBackbone) -> nn.Module:
+    """
+    Modifies the DGBackbone network to return a feature extractor that outputs
+    features from the network before any classifier layers. This is used for
+    applications like pairwise NN matching between observations of two datasets.
+    """
+    base_net = net.net
+
+    if hasattr(base_net, 'fc'):  # ResNet
+        features = nn.Sequential(
+            *(list(base_net.children())[:-1]),
+            nn.AdaptiveAvgPool2d((1, 1)),
+            nn.Flatten(start_dim=1)
+        )
+    elif hasattr(base_net, 'classifier'):  # DenseNet or EfficientNet
+        # For DenseNet, the features are under 'features'
+        if 'densenet' in str(type(base_net)):
+            features = nn.Sequential(
+                base_net.features,
+                nn.ReLU(inplace=True),
+                nn.AdaptiveAvgPool2d((1, 1)),
+                nn.Flatten(start_dim=1)
+            )
+        else:  # EfficientNet
+            features = nn.Sequential(
+                base_net.features,
+                nn.AdaptiveAvgPool2d((1, 1)),
+                nn.Flatten(start_dim=1)
+            )
+    else:
+        raise ValueError("Unsupported network architecture")
+
+    features.eval()
+    return features
+
