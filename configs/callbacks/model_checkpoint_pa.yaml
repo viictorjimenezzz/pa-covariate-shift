@@ -8,6 +8,7 @@ model_checkpoint_PA:
   monitor: PA(0,1)/logPA
   auto_insert_metric_name: False
   every_n_epochs: ${callbacks.posterioragreement.log_every_n_epochs}
+  save_last: true
 
   verbose: False # verbosity mode
   save_top_k: 1 # save k best models (determined by above metric)
