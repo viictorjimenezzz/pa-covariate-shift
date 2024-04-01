@@ -11,6 +11,7 @@ from pytorch_lightning.trainer.supporters import CombinedLoader
 
 from wilds import get_dataset
 from src.data.components.wilds_dataset import WILDSDatasetEnv
+from src.data.components import MultienvDatasetTest
 
 class WILDSDataModule(LightningDataModule):
     def __init__(
@@ -74,9 +75,9 @@ class WILDSDataModule(LightningDataModule):
                 )
                 self.train_dset_list.append(env_dset)
             
+            self.val_dset_list = []
             if self.hparams.val_config is not None:
                 self.num_val_envs = len(self.hparams.val_config.keys())
-                self.val_dset_list = []
                 for env in self.hparams.val_config.keys():
                     env_dset = WILDSDatasetEnv(
                         dataset=self.dataset,
@@ -86,9 +87,9 @@ class WILDSDataModule(LightningDataModule):
                     self.val_dset_list.append(env_dset)
 
         if stage == "test":
+            self.test_dset_list = []
             if self.hparams.test_config is not None:
                 self.num_test_envs = len(self.hparams.test_config.keys())
-                self.test_dset_list = []
                 for env in self.hparams.test_config.keys():
                     env_dset = WILDSDatasetEnv(
                         dataset=self.dataset,
@@ -96,6 +97,8 @@ class WILDSDataModule(LightningDataModule):
                         transform=self.hparams.transform
                     )
                     self.test_dset_list.append(env_dset)
+
+                self.test_dset = MultienvDatasetTest(self.test_dset_list)
                 
     def train_dataloader(self):
         # Dictionary of dataloaders for the training.
@@ -107,14 +110,15 @@ class WILDSDataModule(LightningDataModule):
                     pin_memory=self.hparams.pin_memory,
                     sampler = DistributedSampler(ds, drop_last=True, shuffle=True) if dist.is_initialized() else DistributedSampler(ds, drop_last=True, shuffle=True, num_replicas=1, rank=0),
                 ) for i, ds in enumerate(self.train_dset_list)
-            }
+        }
 
     def val_dataloader(self):
         """
         We set `shuffle=True` because each dataset has different size, and we want that the probability of each sample to be selected
         within each dataset is the same.
         """
-        if self.val_dset_list is not None:
+        # CombinedLoader is equivalent to a dictionary of DataLoaders.
+        if len(self.val_dset_list) > 0:
             return CombinedLoader({
                 str(i): DataLoader(
                     dataset=ds,
@@ -127,14 +131,12 @@ class WILDSDataModule(LightningDataModule):
         
     def test_dataloader(self):
         """
-        Here we can set `shuffle=False`, because only one dataset/environment is used.
+        Here we can set `shuffle=False`, because only one dataset is used.
         """
-        if self.test_dset_list is not None:
-            assert len(self.test_dset_list) == 1, "The test dataloader must only contain one environment."
-            return DataLoader(
-                    dataset=self.test_dset_list[0],
-                    batch_size=self.hparams.batch_size,
-                    num_workers=self.hparams.num_workers,
-                    pin_memory=self.hparams.pin_memory,
-                    sampler = DistributedSampler(self.test_dset_list[0], drop_last=False, shuffle=False, num_replicas=1, rank=0)
-            )
+        return DataLoader(
+                dataset=self.test_dset,
+                batch_size=self.hparams.batch_size,
+                num_workers=self.hparams.num_workers,
+                pin_memory=self.hparams.pin_memory,
+                sampler = DistributedSampler(self.test_dset, drop_last=False, shuffle=False, num_replicas=1, rank=0)
+        )
