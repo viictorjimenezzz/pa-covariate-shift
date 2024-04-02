@@ -102,15 +102,15 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
         if os.path.exists(path_ckpt_csv) == False:
             with open(path_ckpt_csv, "w", newline="") as file:
                 writer = csv.writer(file)
-                writer.writerow(["experiment_name", "experiment_id", "seed", "metric", "ckpt_path"])
-                writer.writerow(["place_holder", "place_holder", "place_holder", "place_holder", "place_holder"])
+                writer.writerow(["group", "experiment_name", "experiment_id", "seed", "metric", "ckpt_path"])
+                writer.writerow(["place_holder", "place_holder", "place_holder", "place_holder", "place_holder", "place_holder"])
 
         pd_ckpt = pd.read_csv(path_ckpt_csv)
         if logger:
             with open(path_ckpt_csv, "a+", newline="") as file:
                 writer = csv.writer(file)
                 for metric, ckpt_path in zip(tracked_metric_ckpt, ckpt_paths):
-                    writer.writerow([logger[0].experiment.name, logger[0].experiment.id, cfg.seed, metric, ckpt_path])
+                    writer.writerow([logger[0].experiment.group, logger[0].experiment.name, logger[0].experiment.id, cfg.seed, metric, ckpt_path])
             
         if logger:
             print(f"\nExperiment id: {logger[0].experiment.id}")
