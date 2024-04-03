@@ -19,7 +19,7 @@ trainer:
 data:
   dataset_dir: ${paths.data_dir}/dg/dg_datasets/wilds/
   batch_size: 16
-  num_workers: 2
+  num_workers: 1
   pin_memory: true
   multiple_trainloader_mode: max_size_cycle # vs min_size, depends on how to deal with spurious datasets.
     
