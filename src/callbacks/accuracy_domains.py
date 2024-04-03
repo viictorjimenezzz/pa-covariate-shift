@@ -67,6 +67,9 @@ class AccuracyDomains_Callback(Callback):
                 mask = (outputs["domain_tag"] == int(env))
             else:
                 mask = self._mask_each_domain(batch, int(env))
+
+            if mask.sum().item() == 0:
+                continue
             metrics_dict[f'train/acc_{env}'] = self.train_acc[f'acc_{env}'].to(pl_module.device)(preds[mask], y[mask])
 
         pl_module.log_dict(metrics_dict, prog_bar=False, on_step=True, on_epoch=True, logger=True, sync_dist=True)
@@ -83,6 +86,9 @@ class AccuracyDomains_Callback(Callback):
                 mask = (outputs["domain_tag"] == int(env))
             else:
                 mask = self._mask_each_domain(batch, int(env))
+
+            if mask.sum().item() == 0:
+                continue
             metrics_dict[f'val/acc_{env}'] = self.val_acc[f'acc_{env}'].to(pl_module.device)(preds[mask], y[mask])
 
         pl_module.log_dict(metrics_dict, prog_bar=False, on_step=True, on_epoch=True, logger=True, sync_dist=True)
@@ -101,6 +107,9 @@ class AccuracyDomains_Callback(Callback):
                 mask = (outputs["domain_tag"] == int(env))
             else:
                 mask = self._mask_each_domain(batch, int(env))
+
+            if mask.sum().item() == 0:
+                continue
             metrics_dict[f'test/acc_{env}_{metric_name}'] = self.test_acc[f'acc_{env}'].to(pl_module.device)(preds[mask], y[mask])
 
         pl_module.log_dict(metrics_dict, prog_bar=False, on_step=True, on_epoch=True, logger=True, sync_dist=False) # SINGLE DEVICE
