@@ -12,7 +12,7 @@ from copy import deepcopy
 class LISA(ERM):
     """
     Implements selective augmentation on top of ERM.
-    
+
     Instead of performing mixup in the collate function for both intra-label or intra-domain SA, 
     the mixup is performed on the fly in the module for the selected SA strategy s.
 
@@ -165,6 +165,13 @@ class LISA(ERM):
         Implements mixup and selective augmentation.
         """
         x, y, envs = self._extract_batch(batch)
+
+        # If there is a BatchSizeFinder callback, the LISA LightningModule has been given an attribute _BSF_oom_trial
+        # to signal that the resulting data must be paired perfectly, so that an upper bound of the batch memory
+        # requirements is obtained.
+        if hasattr(self, '_BSF_oom_trial'):
+            if self._BSF_oom_trial:
+                return x, y, envs
              
         envs = envs.tolist()
         all_inds = torch.arange(len(envs)).to(self.device)
