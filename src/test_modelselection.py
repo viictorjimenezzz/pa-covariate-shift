@@ -104,7 +104,11 @@ def test(cfg: DictConfig) -> Tuple[dict, dict]:
     trainer.checkpoint_metric = cfg.checkpoint_metric
 
     trainer.test(
-        model = model.load_from_checkpoint(ckpt_path, net=hydra.utils.instantiate(cfg.model.net)),
+        model = model.load_from_checkpoint(
+            ckpt_path,
+            net=hydra.utils.instantiate(cfg.model.net),
+            loss=hydra.utils.instantiate(cfg.model.loss)
+        ),
         datamodule=datamodule,
     )
 
