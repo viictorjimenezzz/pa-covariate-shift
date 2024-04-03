@@ -28,9 +28,7 @@ class ERM(LightningModule):
         equivalent to using a `MultiEnv_collate_fn` or a `SingleEnv_collate_fn`.
         """
         if isinstance(batch, dict):
-            x = torch.cat([batch[env][0] for env in batch.keys()], dim=0)
-            y = torch.cat([batch[env][1] for env in batch.keys()])
-            return x, y
+            return torch.cat([batch[env][0] for env in batch.keys()], dim=0), torch.cat([batch[env][1] for env in batch.keys()])
         else:
             return batch
     
