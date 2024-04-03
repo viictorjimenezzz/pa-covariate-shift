@@ -164,15 +164,9 @@ class LISA(ERM):
         """
         Implements mixup and selective augmentation.
         """
-        # get data and convert env to tensor
-        x = torch.cat([batch[env][0] for env in batch.keys()])
-        y = torch.cat([batch[env][1] for env in batch.keys()])
-        envs = [
-            env
-            for env in batch.keys()
-            for _ in range(len(batch[env][1]))
-        ]
-
+        x, y, envs = self._extract_batch(batch)
+             
+        envs = envs.tolist()
         all_inds = torch.arange(len(envs)).to(self.device)
         env_to_int = {item: i for i, item in enumerate(set(envs))}
         envs_int = torch.tensor([env_to_int[item] for item in envs], dtype=torch.int8).to(self.device) # envs in a tensor
@@ -182,42 +176,35 @@ class LISA(ERM):
             s = torch.tensor([0.0]).to(self.device)
         else:
             s = Bernoulli(torch.tensor([self.hparams.ppred]).to(self.device)).sample() # select strategy
-
+            
         # build datasets to be mixed
-        B1 = torch.empty(0, dtype=torch.long).to(self.device)
-        B2 = torch.empty(0, dtype=torch.long).to(self.device)
-        domain_tag = torch.empty(0, dtype=torch.long).to(self.device)
+        B1, B2, domain_tag = [], [], []
         if int(s.item()) == 1: # LISA-L
             # group data by label
             for label in y.unique():
                 mask = y.eq(label)
                 B1_lab, B2_lab = self.pair_lisa(envs_int[mask]) # indexes wrt mask
-                #print("LISA-L, samples with the same label:", len(envs_int[mask]))
 
-                # accumulate indexes wrt all observations
-                B1 = torch.cat((B1, torch.index_select(all_inds[mask], 0, B1_lab)))
-                B2 = torch.cat((B2, torch.index_select(all_inds[mask], 0, B2_lab)))
-                domain_tag = torch.cat((
-                    domain_tag, 
-                    envs_int[mask][B1_lab],
-                    envs_int[mask][B2_lab]
-                ))
+                B1.append(all_inds[mask][B1_lab])
+                B2.append(all_inds[mask][B2_lab])
+                domain_tag += [envs_int[mask][B1_lab], envs_int[mask][B2_lab]]
 
         else: # LISA-D
             # group data by environment
             for env in envs_int.unique():
                 mask = envs_int.eq(env)
                 B1_lab, B2_lab = self.pair_lisa(y[mask]) # indexes wrt mask
-                #print("LISA-D, samples with the same domain:", len(y[mask]))
 
-                # accumulate indexes wrt all observations        
-                B1 = torch.cat((B1, torch.index_select(all_inds[mask], 0, B1_lab)))
-                B2 = torch.cat((B2, torch.index_select(all_inds[mask], 0, B2_lab)))
-                domain_tag = torch.cat((
-                    domain_tag,
-                    env*torch.ones(len(B1_lab) + len(B2_lab), dtype=torch.long).to(self.device)
-                ))
+                B1.append(all_inds[mask][B1_lab])
+                B2.append(all_inds[mask][B2_lab])
+                domain_tag.append(
+                    list(env_to_int.keys())[env]*torch.ones(len(B1_lab) + len(B2_lab)).to(dtype=torch.long, device=self.device)
+                )
 
+        B1 = torch.cat(B1, dim=0).to(dtype=torch.long, device=self.device)
+        B2 = torch.cat(B2, dim=0).to(dtype=torch.long, device=self.device)
+        domain_tag = torch.cat(domain_tag, dim=0).to(dtype=torch.long, device=self.device)
+        
         if self.hparams.mixup_strategy == "cutmix":
             joined_indexes = torch.cat([B1, B2]).sort()[0]
             mixed_x, mixed_y = self.cut_mix(
@@ -252,6 +239,7 @@ class LISA(ERM):
     def training_step(self, batch: dict, batch_idx: int):
         x, y, domain_tag = self.selective_augmentation(batch)
 
+        # This is for debugging LISA in waterbirds
         logits = self.model(x)
         return {
             "loss": self.loss(input=logits, target=y),
