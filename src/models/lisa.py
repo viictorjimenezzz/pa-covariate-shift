@@ -3,16 +3,15 @@ from src.models.erm import ERM
 import torch
 from torch import nn, optim
 from omegaconf import DictConfig
+from pytorch_lightning.utilities.memory import garbage_collection_cuda
 
 from torch.distributions.beta import Beta # to sample mixup weight (lambda)
 from torch.distributions.bernoulli import Bernoulli # to select SA strategy (s)
 
-from copy import deepcopy
-
 class LISA(ERM):
     """
     Implements selective augmentation on top of ERM.
-
+    
     Instead of performing mixup in the collate function for both intra-label or intra-domain SA, 
     the mixup is performed on the fly in the module for the selected SA strategy s.
 
@@ -247,6 +246,7 @@ class LISA(ERM):
         x, y, domain_tag = self.selective_augmentation(batch)
 
         # This is for debugging LISA in waterbirds
+        garbage_collection_cuda()
         logits = self.model(x)
         return {
             "loss": self.loss(input=logits, target=y),
@@ -259,6 +259,7 @@ class LISA(ERM):
     def validation_step(self, batch: dict, batch_idx: int):
         x, y, domain_tag = self._extract_batch(batch)
 
+        garbage_collection_cuda()
         logits = self.model(x)
         return {
             "loss": self.loss(input=logits, target=y),

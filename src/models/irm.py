@@ -2,8 +2,9 @@ import torch
 from torch import nn, argmax, optim
 from torch.autograd import grad
 from omegaconf import OmegaConf, DictConfig
-from pytorch_lightning import LightningModule, LightningDataModule
+from pytorch_lightning import LightningModule
 from pytorch_lightning.core.optimizer import LightningOptimizer
+from pytorch_lightning.utilities.memory import garbage_collection_cuda
 
 class IRM(LightningModule):
     """Invariant Risk Minimization (IRM) module."""
@@ -40,6 +41,7 @@ class IRM(LightningModule):
         for env in list(batch.keys()):
             x, y = batch[env]
 
+            garbage_collection_cuda()
             logits = self.model(x)
             penalty = self.compute_penalty(logits, y)
             loss += self.loss(logits, y) + self.hparams.lamb*penalty
@@ -60,6 +62,7 @@ class IRM(LightningModule):
         for env in list(batch.keys()):
             x, y = batch[env]
 
+            garbage_collection_cuda()
             logits = self.model(x)
             penalty = self.compute_penalty(logits, y)
             loss += self.loss(logits, y) + self.hparams.lamb*penalty
@@ -77,6 +80,7 @@ class IRM(LightningModule):
     def test_step(self, batch: dict, batch_idx: int):
         (x, y), domain_tag = batch
 
+        garbage_collection_cuda()
         logits = self.model(x)
         # penalty = self.compute_penalty(logits, y)
         return {

@@ -4,6 +4,7 @@ from torch import nn, optim
 from omegaconf import OmegaConf, DictConfig
 from pytorch_lightning import LightningModule
 from pytorch_lightning.core.optimizer import LightningOptimizer
+from pytorch_lightning.utilities.memory import garbage_collection_cuda
 
 class ERM(LightningModule):
     """Vanilla ERM traning scheme for fitting a NN to the training data"""
@@ -35,6 +36,7 @@ class ERM(LightningModule):
     def training_step(self, batch: Union[dict, tuple], batch_idx: int):
         x, y = self._extract_batch(batch)
 
+        garbage_collection_cuda()
         logits = self.model(x)
         return {
             "loss": self.loss(input=logits, target=y),
@@ -46,6 +48,7 @@ class ERM(LightningModule):
     def validation_step(self, batch: Union[dict, tuple], batch_idx: int):
         x, y = self._extract_batch(batch)
 
+        garbage_collection_cuda()
         logits = self.model(x)
         return {
             "loss": self.loss(input=logits, target=y),
@@ -57,6 +60,7 @@ class ERM(LightningModule):
     def test_step(self, batch: tuple, batch_idx: int):
         (x, y), domain_tag = batch
 
+        garbage_collection_cuda()
         logits = self.model(x)
         return {
             "loss": self.loss(input=logits, target=y),
