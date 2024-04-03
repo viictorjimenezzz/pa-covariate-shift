@@ -1,6 +1,6 @@
 # @package _global_
 
-_target_: pametric.lightning.PA_Callback
+_target_: pametric.lightning.callbacks.PA_Callback
 
 log_every_n_epochs: 1
 pa_epochs: 50
