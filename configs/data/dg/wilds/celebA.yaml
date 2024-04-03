@@ -30,7 +30,6 @@ transform:
   additional_transform_name: null
 
 
-# The domains are the labels (two hair colours)
 train_config:
   env1:
     split_name: train

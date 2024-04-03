@@ -79,6 +79,7 @@ class WILDSDatasetEnv(Dataset):
         
         self.inds_to_select = torch.sort(torch.cat(inds_to_select))[0].tolist()
         # The WILDS dataset yields: (<PIL.Image.Image image mode=RGB size=96x96 at 0x2B6393445F70>, tensor(1), tensor([0, 0, 1, 1]))
+
         self.dataset = dataset
         if transform is None:
             self.transform = transforms.Compose(
@@ -93,6 +94,12 @@ class WILDSDatasetEnv(Dataset):
     def __getitem__(self, idx):
         selected_idx = self.inds_to_select[idx]
         image, label = self.dataset[selected_idx][0], self.dataset[selected_idx][1]
+
+        """
+        We will modify celebA dataset so that the target is "male/female", whereas the domain information is y (no_blonde/blonde).
+        """
+        if self.dataset.dataset_name == "celebA":
+            label = self.dataset[selected_idx][2][0]
         
         if self.transform:
             image = self.transform(image)
@@ -107,7 +114,7 @@ class WILDSDatasetEnv(Dataset):
  
 # # waterbirds missing
 # dataset = get_dataset(
-#                     dataset="waterbirds", 
+#                     dataset="celebA", 
 #                     download=False, 
 #                     unlabeled=False, 
 #                     root_dir="data/dg/dg_datasets/wilds"
@@ -118,10 +125,10 @@ class WILDSDatasetEnv(Dataset):
 # wilds_dataset = WILDSDatasetEnv(
 #     dataset=dataset,
 #     env_config={
-#         "split_name": "val",
-#         "group_by_fields": ["hospital"],
-#         "values": {"hospital": [0]}
-#     },
-#     transform=get_transform("camelyon17", 224)
+#         "split_name": "train",
+#         "group_by_fields": ["y"],
+#         "values": {"y": [0]}
+#     }
 # )
 
+# import ipdb; ipdb.set_trace()
