@@ -13,3 +13,6 @@ def register_resolvers():
     OmegaConf.register_new_resolver("dict_at_key", lambda dict, key: dict[key]) # get 'dict' element with key 'key'
     OmegaConf.register_new_resolver("percent_integer", lambda percent, value: int(value*percent/100.0)) # compute integer percentage of a value
     OmegaConf.register_new_resolver("num_training_steps", lambda n_epochs, len_data, effective_batch_size: n_epochs*(len_data//effective_batch_size)) # compute number of training steps
+
+    # Resolver for the diagvib size selection: the min_{shape}(sizes_mnist[shape]) // num_envs
+    OmegaConf.register_new_resolver("env_size_mnist", lambda sizes_mnist, shapes, num_envs: min([sizes_mnist[s] for s in shapes])//num_envs)
