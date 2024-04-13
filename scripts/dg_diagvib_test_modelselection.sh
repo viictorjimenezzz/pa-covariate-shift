@@ -13,7 +13,7 @@ source activate $1
 srun python3 src/test_datashift.py \
     --multirun \
     experiment=dg/diagvibsix/diagvibsix_irm \
-    experiment_name=erm \
+    experiment_name=irm_paper \
     checkpoint_metric=acc \
     data.n_classes=2 \
     data.envs_index=[1],[2],[3],[4],[5]  \

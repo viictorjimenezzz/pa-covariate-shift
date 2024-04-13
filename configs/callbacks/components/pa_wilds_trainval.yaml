@@ -12,7 +12,7 @@ dset_list:
 
     env_config:
       _target_: src.data.components.wilds_dataset.WILDS_multiple_to_single
-      multiple_env_config: ${data.val_config} # training data
+      multiple_env_config: ${data.val_config} # validation data
   
 
   - _target_: src.data.components.wilds_dataset.WILDSDatasetEnv

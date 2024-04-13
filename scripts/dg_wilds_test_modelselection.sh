@@ -8,18 +8,19 @@
 # activate conda env
 source activate $1
 
-# python3 src/test_modelselection.py \
-srun python3 src/test_modelselection.py \
+# srun python3 src/test_modelselection.py \
+python3 src/test_modelselection.py \
     --multirun \
-    experiment=dg/wilds/camelyon17_erm \
+    experiment=dg/wilds/camelyon17_lisa \
     +data/dg/wilds@data=camelyon17_oracle \
     data.transform.is_training=false \
-    name_logger=dg_wilds_erm_camelyon17_oracle_last \
-    checkpoint_metric=acc,logPA \
+    name_logger=lisa_oracle_bsf_10 \
+    checkpoint_metric=acc,logPA,AFR_pred \
     seed=0 \
     trainer=gpu \
     +trainer.fast_dev_run=false \
     trainer.deterministic=true \
-    logger=wandb \
     logger.wandb.group=camelyon17 \
-    # trainer.limit_test_batches=0.000189 \
+    # trainer.limit_test_batches=0.00000189 \
+   
+    
