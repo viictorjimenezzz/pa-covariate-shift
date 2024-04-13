@@ -49,7 +49,7 @@ def test(cfg: DictConfig) -> Tuple[dict, dict]:
     path_ckpt_csv = cfg.paths.log_dir + f"/{csv_name}.csv"
     experiment_df = pd.read_csv(path_ckpt_csv)
     selected_ckpt = experiment_df[
-        (experiment_df['experiment_name'] == cfg.name_logger) & (experiment_df['seed'] == str(cfg.seed))
+        (experiment_df['experiment_name'] == cfg.experiment_name) & (experiment_df['seed'] == str(cfg.seed))
     ]
     assert len(selected_ckpt) == 1, "There are duplicate experiments in the csv file."
     
@@ -99,7 +99,11 @@ def test(cfg: DictConfig) -> Tuple[dict, dict]:
     trainer.checkpoint_metric = cfg.checkpoint_metric
 
     trainer.test(
-        model = model.load_from_checkpoint(ckpt_path, net=hydra.utils.instantiate(cfg.model.net)),
+        model = model.load_from_checkpoint(
+            ckpt_path,
+            net=hydra.utils.instantiate(cfg.model.net),
+            loss=hydra.utils.instantiate(cfg.model.loss)
+        ),
         datamodule=datamodule,
     )
 

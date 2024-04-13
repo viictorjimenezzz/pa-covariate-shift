@@ -4,7 +4,7 @@ defaults:
   - rich_progress_bar.yaml
   
   # PA only for label pairing
-  - /callbacks@posterioragreement: pametric_label.yaml # PA metric with label pairing 
+  # - /callbacks@posterioragreement: pametric_label.yaml # PA metric with label pairing 
 
   - _self_
 
