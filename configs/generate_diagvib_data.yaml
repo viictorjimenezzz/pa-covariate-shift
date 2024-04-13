@@ -3,10 +3,9 @@
 defaults:
   - _self_
   - paths: default.yaml
+  - data/dg/diagvib/modelselection/hue_oodval_2.yaml
 
-folder_name: hue_oodval_10
-filename: env
-datasets_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_msel/${folder_name}/
+datasets_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_modelselection/${folder_name}/
 
 # Desired sizes of the datasets
 # If the datasets are meant to have unique observations, do not surpass the sizes S_i = min_{shape}(SIZE_i)//num_envs, for i = {train, val, test}
@@ -23,37 +22,10 @@ size_test: ${env_size_mnist:${SIZE_test},${shape},1} # test environments have al
 # size_val: 20000
 # size_test: 10000
 
-shape: [0,1,2,3,4,5,6,7,8,9]
+shape: ???
 
 # hue, lightness, texture, position, scale
-dataset_specifications:
-  train:
-    size: ${size_train}
-    randperm: False # Set to False if we want label correspondence between environments.
-    shape: ${shape}
-    envs: 
-      - [0,3,0,4,4]
-      - [4,3,0,4,4]
-
-  val:
-    size: ${size_val}
-    randperm: False
-    shape: ${shape}
-    envs:
-      - [1,3,0,4,4]
-      - [3,3,0,4,4]
-      - [5,3,0,4,4]
-
-  test:
-    size: ${size_test}
-    randperm: False # always False
-    shape: ${shape}
-    envs:
-      - [2,3,0,4,4] 
-      - [2,3,0,4,0]
-      - [2,3,0,0,0]
-      - [2,0,0,0,0]
-      - [2,0,4,0,0]
+dataset_specifications: ???
 
 extras:
   print_config: True

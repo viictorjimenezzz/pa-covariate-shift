@@ -5,7 +5,10 @@ defaults:
   - /trainer: ddp.yaml
   - override /logger: wandb.yaml
 
-name_logger: ???
+  # - /data/dg/diagvib/modelselection@data: hue_idval_2.yaml # on the script
+
+# specifications about the dataset
+diagvib_dataset: ???
 
 trainer:
   min_epochs: 1
@@ -17,7 +20,14 @@ trainer:
   replace_sampler_ddp: true
 
 data:
-  datasets_dir: ${paths.data_dir}/dg/dg_datasets/test_data_pipeline/
+  datasets_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_modelselection/${diagvib_dataset.folder_name}/
+  n_classes: ${len:${diagvib_dataset.shape}}
+  envs_index_train: ${arange_list:${diagvib_dataset.dataset_specifications.train.envs}}
+  envs_index_val: ${arange_list:${diagvib_dataset.dataset_specifications.val.envs}}
+  envs_index_test: ${arange_list:${diagvib_dataset.dataset_specifications.test.envs}}
+  envs_name: ${diagvib_dataset.filename}
+  disjoint_envs: True
+  train_val_sequential: False
   batch_size: 64
   num_workers: 2
   pin_memory: true
@@ -26,9 +36,9 @@ logger:
   wandb:
     tags: ${tags}
     entity: malvai
-    project: DiagVib-6 Paper
-    group: group-name
+    project: DiagVib-6 OOD Model Selection # Paper
+    group: ${diagvib_dataset.folder_name}
     save_dir: ${paths.output_dir}/dg
-    name: ${name_logger}
 
 task_name: dg_diagvibsix
+checkpoint_metric: acc
