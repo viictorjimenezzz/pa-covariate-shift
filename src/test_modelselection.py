@@ -54,13 +54,20 @@ def test(cfg: DictConfig) -> Tuple[dict, dict]:
     experiment_df = pd.read_csv(path_ckpt_csv)
     group_conf = cfg.logger.wandb.group if 'wandb' in cfg.logger.keys() and cfg.logger['wandb'] != None else "???"
     selected_ckpt = experiment_df[
-        (experiment_df['group'] == group_conf) & (experiment_df['experiment_name'] == cfg.name_logger) & (experiment_df['seed'] == str(cfg.seed)) & (experiment_df['metric'] == cfg.checkpoint_metric)
+        (experiment_df['group'] == group_conf) & (experiment_df['experiment_name'] == cfg.experiment_name) & (experiment_df['seed'] == str(cfg.seed)) & (experiment_df['metric'] == cfg.checkpoint_metric)
     ]
+    assert len(selected_ckpt) > 0, "No experiment found in the csv file."
     assert len(selected_ckpt) == 1, "There are duplicate experiments in the csv file."
-    
     ckpt_path = selected_ckpt["ckpt_path"].item()
-    if 'wandb' in cfg.logger.keys() and cfg.logger['wandb'] != None:
-        cfg.logger.wandb.id = selected_ckpt['experiment_id'].item() # log in the same experiment
+    
+    # Here we decide whether we want to include the test in the same id as the original experiment
+    # or in a separate experiment.
+    current_id = selected_ckpt['experiment_id'].item()
+    cfg.logger.wandb.id = current_id + "_" + str(cfg.logger.wandb.name[-1])
+    if cfg.auxiliary_args is not None:
+        if "new_id" in cfg.auxiliary_args.keys() and cfg.auxiliary_args["new_id"] == False:
+            cfg.logger.wandb.id = current_id # log in the same experiment
+            cfg.logger.wandb.name = None
 
     log.info("Instantiating loggers...")
     logger: List[Logger] = utils.instantiate_loggers(cfg.get("logger"))

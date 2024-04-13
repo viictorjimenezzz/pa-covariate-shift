@@ -26,6 +26,7 @@ defaults:
 data: ???
 model: ???
 checkpoint_metric: ???
+experiment_name: None
 
 trainer:
   limit_test_batches: 1.0

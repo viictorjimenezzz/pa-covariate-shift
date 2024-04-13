@@ -1,5 +1,5 @@
 defaults:
-  - accuracy_domains.yaml # Accuracy with domain distinction (for datashift)
+  # - accuracy_domains.yaml # Accuracy with domain distinction (for datashift)
   - accuracy.yaml # General accuracy metrics to compare with benchmark
   - model_checkpoint_pa.yaml # max{logPA} checkpoiting
   - model_checkpoint_afr.yaml # max{AFR pred} checkpoiting

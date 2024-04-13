@@ -39,6 +39,8 @@ logger:
     project: DiagVib-6 OOD Model Selection # Paper
     group: ${diagvib_dataset.folder_name}
     save_dir: ${paths.output_dir}/dg
+    # For the tests only. Override in script file during training.
+    name: ${ifelse:${experiment_name},""}_test${str:${list_at_idx:${data.envs_index_test},0}}
 
 task_name: dg_diagvibsix
 checkpoint_metric: acc
