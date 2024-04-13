@@ -2,8 +2,9 @@
 
 _target_: src.callbacks.batch_size_finder_lisa.LISABatchSizeFinder
 mode: binsearch
+percent_max_size: 0.9
 steps_per_trial: 10
 init_val: 10
-max_trials: 2 #10
+max_trials: 10
 batch_arg_name: batch_size
 

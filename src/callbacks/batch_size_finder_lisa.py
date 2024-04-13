@@ -1,10 +1,9 @@
 from typing import Optional
 from pytorch_lightning import Trainer, LightningModule
-from pametric.lightning.callbacks import MultienvBatchSizeFinder
-
-class LISABatchSizeFinder(MultienvBatchSizeFinder):
+from pytorch_lightning.callbacks import BatchSizeFinder
+class LISABatchSizeFinder(BatchSizeFinder):
     """
-    Particular case of MultienvBatchSizeFinder that avoids OOM errors during LISA training.
+    Particular case of BatchSizeFinder that avoids OOM errors during LISA training.
 
     Detailed explanation: 
     
@@ -13,16 +12,23 @@ class LISABatchSizeFinder(MultienvBatchSizeFinder):
     In order to guarantee that the batch size is never too large for the GPU, we need to consider the number of environments
     and impose a perfect pairing as an upper bound constraint. 
 
-    Most of the work has already implemented in the `pametric` callback, but we need to override some configurations and also define
-    an attribute in the LightningModule that will make LISA aware of the OOM trial and just concatenate the environment batches (i.e.
-    return a perfect pairing) instead of performing the usual selective augmentation pairing.
+    We will define an attribute in the LightningModule that will make LISA aware of the OOM trial and just 
+    concatenate the environment batches (i.e. return a perfect pairing) instead of performing the usual 
+    selective augmentation pairing.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, percent_max_size: Optional[float] = 0.9,**kwargs):
+        """
+        Args:
+            percent_max_size (Optional[float]): Percent of the maximum batch size found by the binsearch algorithm
+                (if applicable) that will be used as an effective batch size. It should be lower than 1.0, as there is no
+                guarantee that additional parameters stored in the GPU won't cause an OOM error.
+        """
         super().__init__(**kwargs)
 
         # We override _steps_per_trial to be only 1, since we will generate an artificial batch with perfect pairing.
         self._steps_per_trial = 1
+        self._percent_max_size = percent_max_size
 
     def scale_batch_size(self, trainer: Trainer, pl_module: LightningModule) -> None:
         """
@@ -32,11 +38,4 @@ class LISABatchSizeFinder(MultienvBatchSizeFinder):
         super().scale_batch_size(trainer, pl_module)
         pl_module._BSF_oom_trial = False
 
-    def on_validation_start(self, trainer: Trainer, pl_module: LightningModule):
-        """
-        We will change the validation batch size because the environment structure might be different from training.
-        """
-        if trainer.sanity_checking or trainer.state.fn != "validate":
-            return
-
-        self.scale_batch_size(trainer, pl_module)
+        self.optimal_batch_size = int(self.optimal_batch_size*self._percent_max_size)
