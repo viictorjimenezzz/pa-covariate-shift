@@ -6,7 +6,7 @@ log_every_n_epochs: 1
 pa_epochs: 50
 beta0: 1.0
 pairing_strategy: label
-pairing_csv: ${data.dataset_dir}${auxiliary_args.dataconfname}_trainval_${callbacks.posterioragreement.pairing_strategy}.csv
+# pairing_csv: ${data.dataset_dir}${auxiliary_args.dataconfname}_trainval_${callbacks.posterioragreement.pairing_strategy}.csv
 cuda_devices: 4
 batch_size: ${data.batch_size}
 num_workers: ${data.num_workers}

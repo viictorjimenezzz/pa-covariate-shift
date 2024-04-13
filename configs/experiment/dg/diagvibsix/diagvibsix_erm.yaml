@@ -29,7 +29,7 @@ model:
 tags: 
   - "dg"
   - "diagvibsix"
-  - "${diagvib_folder: ${data.datasets_dir}}"
+  - "${diagvib_folder: ${data.dataset_dir}}"
   - "erm"
   - "${model.net.net}"
   - "${classname: ${model.optimizer._target_}}"

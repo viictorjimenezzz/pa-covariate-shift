@@ -20,7 +20,7 @@ trainer:
   replace_sampler_ddp: true
 
 data:
-  datasets_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_modelselection/${diagvib_dataset.folder_name}/
+  dataset_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_modelselection/${diagvib_dataset.folder_name}/
   n_classes: ${len:${diagvib_dataset.shape}}
   envs_index_train: ${arange_list:${diagvib_dataset.dataset_specifications.train.envs}}
   envs_index_val: ${arange_list:${diagvib_dataset.dataset_specifications.val.envs}}
