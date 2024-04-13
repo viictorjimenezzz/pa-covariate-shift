@@ -1,6 +1,0 @@
-defaults:
-  - accuracy_domains.yaml # Accuracy with domain distinction (for datashift)
-  - accuracy.yaml
-  - debugging.yaml
-  - rich_progress_bar.yaml
-  - _self_
