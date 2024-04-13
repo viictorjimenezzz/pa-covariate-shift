@@ -1,0 +1,52 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data/dg: diagvib_two.yaml
+  - override /model/dg: optimize.yaml
+  - override /callbacks:
+    - model_summary.yaml
+    - rich_progress_bar.yaml
+  - override /trainer: ddp.yaml
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+name: test_diagvib_optimization
+
+model:
+  dg:
+    optimizer:
+      _target_: torch.optim.Adam
+    classifier:
+      exp_name: ${name}
+      net:
+        net: resnet18
+        pretrained: false
+
+tags: ["diagvib", "adam", "1000_epochs", "${model.dg.classifier.exp_name}"]
+
+seed: 12345
+
+trainer:
+  min_epochs: 500
+  max_epochs: 500
+  log_every_n_steps: 10
+  devices: 1
+
+data:
+  dg:
+    ds1_env: ???
+    ds2_env: ???
+    batch_size: 100
+    num_workers: 40
+    pin_memory: True
+
+logger:
+  wandb:
+    tags: ${tags}
+    project: adv_pa_new
+    group: dg_pa
+    save_dir: ${paths.output_dir}/adv
+    name: model=${model.dg.classifier.exp_name}_${data.dg.ds2_env}_sr=${data.dg.shift_ratio}

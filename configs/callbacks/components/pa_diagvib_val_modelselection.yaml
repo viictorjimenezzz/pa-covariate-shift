@@ -1,0 +1,16 @@
+# We assume we have two validation datasets, otherwise it might yield error:
+# - If there are more, selection will be based on the first two.
+# - If there are less, it will yield an error.
+
+_target_: pametric.datautils.MultienvDataset
+dset_list:
+  - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
+    mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
+    seed: ${seed}
+    cache_filepath: ${data.datasets_dir}val_${diagvib_dataset.filename}0.pkl
+    
+  - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
+    mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
+    seed: ${seed}
+    cache_filepath: ${data.datasets_dir}val_${diagvib_dataset.filename}1.pkl
+    

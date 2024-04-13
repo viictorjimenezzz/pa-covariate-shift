@@ -1,0 +1,40 @@
+# @package _global_
+
+# SOURCE: LISA paper & code
+# https://arxiv.org/pdf/2201.00299.pdf
+# https://github.com/huaxiuyao/LISA/blob/c857a6b296b5d130898f0d51a6d693411c39e651/domain_shifts/config.py
+
+defaults:
+  - /experiment/dg/wilds/wilds.yaml
+  - /model/dg@model: lisa.yaml
+
+# The original batch size is 16
+trainer:
+  max_epochs: 200 #50 originally
+  accumulate_grad_batches: null
+
+model:
+  ppred: 0.5
+  mix_alpha: 2.0
+  mixup_strategy: cutmix
+
+  optimizer:
+    _target_: torch.optim.SGD
+    lr: 0.0001
+    weight_decay: 0.0001
+    momentum: 0.0
+  net:
+    pretrained: true
+    net: resnet50
+    n_classes: ${data.n_classes}
+
+  scheduler: null
+
+tags: 
+  - "dg"
+  - "wilds"
+  - "${data.dataset_name}"
+  - "lisa"
+  - "${model.net.net}"
+  - "${name_logger}"
+  - "${classname: ${model.optimizer._target_}}"

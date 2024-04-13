@@ -1,0 +1,14 @@
+# @package _global_
+
+defaults:
+  - ./adv/optimize_beta.yaml # same base config
+
+# Switch to logits dataloader and pass the classifier originally defined for the model
+data:
+  adv:
+    _target_: src.data.cifar10_datamodule.CIFAR10DataModulePAlogits # use logits dataloader instead
+
+# Remove the classifier from the model instantiation, so that nn.Identity() is used
+model:
+  adv:
+    classifier: null

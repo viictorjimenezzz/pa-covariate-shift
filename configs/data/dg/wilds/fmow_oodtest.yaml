@@ -1,0 +1,578 @@
+# ID (in distribution) validation and testing
+
+dataset_name: fmow
+n_classes: 62
+
+# In general, the features of the dataset are the following:
+# REGION: (Africa, Americas, Oceania, Asia, Europe)
+# 0-5 (103299, 162333, 33239, 157711, 13253, 251)
+
+# YEAR: 0-15 (2002-2017)
+
+# SPLITS BY YEAR, REGION:
+# train: 0-10 (2002-2012), 0-5 (17809, 34816, 1582, 20973, 1641, 42)
+# val: 11-13 (2013-2015), 0-5 (4121, 7732, 803, 6562, 693, 4)
+# id_val: 0-10 (2002-2012), 0-5 (2693, 5268, 1990, 3076, 251, 5)
+# test: 14-15 (2016-2017), 0-5 (4963, 5858, 2593, 8024, 666, 4)
+# id_test: 0-10 (2002-2012), 0-5 (2615, 7765, 7974, 11104, 11322, 11327)
+
+transform:
+  # Important to load the right transform for the data.
+  # SOURCE: WILDS code
+  # https://github.com/p-lambda/wilds/blob/472677590de351857197a9bf24958838c39c272b/examples/configs/datasets.py
+  _target_: src.data.components.wilds_transforms.initialize_transform
+  dataset:
+    original_resolution: [224, 224]
+  transform_name: image_base
+  config:
+    target_resolution: null
+  is_training: ???
+  additional_transform_name: null
+
+train_config:
+  env1:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [0]
+      year: [0]
+  env2:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [0]
+      year: [1]
+  env3:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [0]
+      year: [2]
+  env4:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [0]
+      year: [3]
+  env5:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [0]
+      year: [4]
+  env6:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [0]
+      year: [5]
+  env7:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [0]
+      year: [6]
+  env8:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [0]
+      year: [7]
+  env9:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [0]
+      year: [8]
+  env10:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [0]
+      year: [9]
+  env11:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [0]
+      year: [10]
+  env12:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [1]
+      year: [0]
+  env13:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [1]
+      year: [1]
+  env14:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [1]
+      year: [2]
+  env15:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [1]
+      year: [3]
+  env16:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [1]
+      year: [4]
+  env17:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [1]
+      year: [5]
+  env18:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [1]
+      year: [6]
+  env19:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [1]
+      year: [7]
+  env20:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [1]
+      year: [8]
+  env21:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [1]
+      year: [9]
+  env22:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [1]
+      year: [10]
+  env23:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [2]
+      year: [0]
+  env24:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [2]
+      year: [1]
+  env25:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [2]
+      year: [2]
+  env26:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [2]
+      year: [3]
+  env27:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [2]
+      year: [4]
+  env28:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [2]
+      year: [5]
+  env29:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [2]
+      year: [6]
+  env30:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [2]
+      year: [7]
+  env31:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [2]
+      year: [8]
+  env32:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [2]
+      year: [9]
+  env33:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [2]
+      year: [10]
+  env34:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [3]
+      year: [0]
+  env35:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [3]
+      year: [1]
+  env36:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [3]
+      year: [2]
+  env37:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [3]
+      year: [3]
+  env38:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [3]
+      year: [4]
+  env39:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [3]
+      year: [5]
+  env40:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [3]
+      year: [6]
+  env41:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [3]
+      year: [7]
+  env42:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [3]
+      year: [8]
+  env43:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [3]
+      year: [9]
+  env44:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [3]
+      year: [10]
+  env45:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [4]
+      year: [0]
+  env46:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [4]
+      year: [1]
+  env47:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [4]
+      year: [2]
+  env48:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [4]
+      year: [3]
+  env49:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [4]
+      year: [4]
+  env50:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [4]
+      year: [5]
+  env51:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [4]
+      year: [6]
+  env52:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [4]
+      year: [7]
+  env53:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [4]
+      year: [8]
+  env54:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [4]
+      year: [9]
+  env55:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [4]
+      year: [10]
+  env56:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [5]
+      year: [0]
+  env57:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [5]
+      year: [1]
+  env58:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [5]
+      year: [2]
+  env59:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [5]
+      year: [3]
+  env60:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [5]
+      year: [4]
+  env61:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [5]
+      year: [5]
+  env62:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [5]
+      year: [6]
+  env63:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [5]
+      year: [7]
+  env64:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [5]
+      year: [8]
+  env65:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [5]
+      year: [9]
+  env66:
+    split_name: train
+    group_by_fields: ["region", "year"]
+    values:
+      region: [5]
+      year: [10]
+
+# For OOD validation
+val_config:
+  env1:
+    split_name: val
+    group_by_fields: ["region", "year"]
+    values:
+      region: [0]
+      year: [11]
+  env2:
+    split_name: val
+    group_by_fields: ["region", "year"]
+    values:
+      region: [0]
+      year: [12]
+  env3:
+    split_name: val
+    group_by_fields: ["region", "year"]
+    values:
+      region: [0]
+      year: [13]
+  env4:
+    split_name: val
+    group_by_fields: ["region", "year"]
+    values:
+      region: [1]
+      year: [11]
+  env5:
+    split_name: val
+    group_by_fields: ["region", "year"]
+    values:
+      region: [1]
+      year: [12]
+  env6:
+    split_name: val
+    group_by_fields: ["region", "year"]
+    values:
+      region: [1]
+      year: [13]
+  env7:
+    split_name: val
+    group_by_fields: ["region", "year"]
+    values:
+      region: [2]
+      year: [11]
+  env8:
+    split_name: val
+    group_by_fields: ["region", "year"]
+    values:
+      region: [2]
+      year: [12]
+  env9:
+    split_name: val
+    group_by_fields: ["region", "year"]
+    values:
+      region: [2]
+      year: [13]
+  env10:
+    split_name: val
+    group_by_fields: ["region", "year"]
+    values:
+      region: [3]
+      year: [11]
+  env11:
+    split_name: val
+    group_by_fields: ["region", "year"]
+    values:
+      region: [3]
+      year: [12]
+  env12:
+    split_name: val
+    group_by_fields: ["region", "year"]
+    values:
+      region: [3]
+      year: [13]
+  env13:
+    split_name: val
+    group_by_fields: ["region", "year"]
+    values:
+      region: [4]
+      year: [11]
+  env14:
+    split_name: val
+    group_by_fields: ["region", "year"]
+    values:
+      region: [4]
+      year: [12]
+  env15:
+    split_name: val
+    group_by_fields: ["region", "year"]
+    values:
+      region: [4]
+      year: [13]
+  env16:
+    split_name: val
+    group_by_fields: ["region", "year"]
+    values:
+      region: [5]
+      year: [11]
+  env17:
+    split_name: val
+    group_by_fields: ["region", "year"]
+    values:
+      region: [5]
+      year: [12]
+  env18:
+    split_name: val
+    group_by_fields: ["region", "year"]
+    values:
+      region: [5]
+      year: [13]
+
+# OOD testing: only regions matter for testing
+test_config:
+  env1:
+    split_name: test
+    group_by_fields: ["region", "year"]
+    values:
+      region: [0]
+      year: [14, 15]
+  env2:
+    split_name: test
+    group_by_fields: ["region", "year"]
+    values:
+      region: [1]
+      year: [14, 15]
+  env3:
+    split_name: test
+    group_by_fields: ["region", "year"]
+    values:
+      region: [2]
+      year: [14, 15]
+  env4:
+    split_name: test
+    group_by_fields: ["region", "year"]
+    values:
+      region: [3]
+      year: [14, 15]
+  env5:
+    split_name: test
+    group_by_fields: ["region", "year"]
+    values:
+      region: [4]
+      year: [14, 15]
+  env6:
+    split_name: test
+    group_by_fields: ["region", "year"]
+    values:
+      region: [5]
+      year: [14, 15]

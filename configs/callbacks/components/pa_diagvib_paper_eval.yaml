@@ -1,0 +1,33 @@
+# Use this to do a single run (i.e. during training) in which beta is
+# optimized with (0, 1), and then evaluated with (0, 1:5).
+_target_: pametric.datautils.MultienvDataset
+dset_list:
+  - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
+    mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
+    cache_filepath: data/dg/dg_datasets/paper/test_env0.pkl
+    seed: ${seed}
+
+  - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
+    mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
+    cache_filepath: data/dg/dg_datasets/paper/test_env1.pkl
+    seed: ${seed}
+  
+  - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
+    mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
+    cache_filepath: data/dg/dg_datasets/paper/test_env2.pkl
+    seed: ${seed}
+  
+  - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
+    mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
+    cache_filepath: data/dg/dg_datasets/paper/test_env3.pkl
+    seed: ${seed}
+  
+  - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
+    mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
+    cache_filepath: data/dg/dg_datasets/paper/test_env4.pkl
+    seed: ${seed}
+  
+  - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
+    mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
+    cache_filepath: data/dg/dg_datasets/paper/test_env5.pkl
+    seed: ${seed}

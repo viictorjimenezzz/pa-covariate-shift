@@ -1,0 +1,34 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - paths: default.yaml
+  
+  # Tests on the DataModules
+  # - tests@data: /data_pipeline/test_sampler.yaml # passed cpu
+  # - tests@data: /data_pipeline/test_dataloaders_cifar10.yaml # passed cpu
+  # - tests@data: /data_pipeline/test_dataloaders_diagvib.yaml # passed cpu
+
+  # Tests on the Trainers for DDP
+  # - tests@ddp: /ddp/test_ddp.yaml
+
+  # Tests on the PA module
+  # - tests@pa_module: /pa_module/test_pa_module.yaml # passed cpu
+
+  # Tests on the PA metric
+  # - tests@pa_metric: /pa_metric/test_basemetric.yaml # passed cpu
+  # - tests@pa_metric: /pa_metric/test_pametric_cpu.yaml # passed cpu
+  # - tests@pa_metric: /pa_metric/test_pametric_ddp.yaml
+  # - tests@pa_metric: /pa_metric/test_pametric_logits.yaml # passed cpu
+  # - tests@pa_metric: /pa_metric/test_accuracymetric.yaml # STILL NOT TESTED
+
+  # Tests on the PA callback
+  - tests@pa_callback: /pa_callback/test_callback.yaml # passed cpu
+
+
+
+paths:
+  results_tests: ${paths.root_dir}/results/tests/
+
+seed: 1234
+

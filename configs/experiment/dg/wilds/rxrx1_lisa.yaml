@@ -1,0 +1,51 @@
+# @package _global_
+
+# SOURCE: LISA paper & code
+# https://arxiv.org/pdf/2201.00299.pdf
+# https://github.com/huaxiuyao/LISA/blob/c857a6b296b5d130898f0d51a6d693411c39e651/domain_shifts/config.py
+
+defaults:
+  - /experiment/dg/wilds/wilds.yaml
+  - /model/dg@model: lisa.yaml
+
+# The original batch size is 72, we will use 4 with 18 gradient accumulation steps
+data:
+  batch_size: 4
+trainer:
+  max_epochs: 90
+  accumulate_grad_batches: 18
+
+model:
+  ppred: 1.0
+  mix_alpha: 2.0
+  mixup_strategy: cutmix
+
+  optimizer:
+    _target_: torch.optim.Adam
+    lr: 0.001
+    weight_decay: 0.00001
+    amsgrad: true
+
+  net:
+    pretrained: true
+    net: resnet50
+    n_classes: ${data.n_classes}
+
+  scheduler: null
+    # interval: step
+    # frequency: 1
+
+    # scheduler:
+    #   _target_: transformers.get_cosine_schedule_with_warmup
+    #   _partial_: true
+    #   num_warmup_steps: 0 #${eval:'${trainer.accumulate_grad_batches} * 5415'} # 5415 is the number of warmup steps in the original code
+    #   num_training_steps: ${eval:'0000 * ${trainer.max_epochs}'} # number_steps * number_of_epochs
+
+tags: 
+  - "dg"
+  - "wilds"
+  - "${data.dataset_name}"
+  - "lisa"
+  - "${model.net.net}"
+  - "${name_logger}"
+  - "${classname: ${model.optimizer._target_}}"

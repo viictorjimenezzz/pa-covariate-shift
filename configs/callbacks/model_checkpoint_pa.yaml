@@ -1,0 +1,16 @@
+# https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.callbacks.ModelCheckpoint.html
+
+model_checkpoint_PA:
+  _target_: pametric.lightning.callbacks.PA_ModelCheckpoint
+  patience: ${percent_integer:20,${trainer.max_epochs}} # 20% of max_epochs
+  dirpath: ${paths.output_dir}/checkpoints
+  filename: pa_epoch_{epoch:03d}
+  monitor: PA(0,1)/logPA
+  auto_insert_metric_name: False
+  every_n_epochs: ${callbacks.posterioragreement.log_every_n_epochs}
+  save_last: true
+
+  verbose: False # verbosity mode
+  save_top_k: 1 # save k best models (determined by above metric)
+  save_weights_only: True # if True, then only the model’s weights will be saved
+  train_time_interval: null # checkpoints are monitored at the specified time interval

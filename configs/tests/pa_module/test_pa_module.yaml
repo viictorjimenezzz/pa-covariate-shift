@@ -1,0 +1,85 @@
+# @package _global_
+
+defaults:
+  # Datamodules
+  - /data/dg@datamodules.pa: diagvib_PA.yaml
+  - /data/dg@datamodules.pa_logits: diagvib_PA.yaml
+
+  # Trainers
+  - /trainer@trainer.cpu: cpu.yaml
+  - /trainer@trainer.ddp: ddp.yaml
+
+  # PA module
+  - /model/dg@pa_lightningmodule.pa: optimize.yaml
+  - /model/dg@pa_lightningmodule.pa_logits: optimize.yaml
+
+  # Classifier for logits is the same going to the PA when needed.
+  - /model/dg/net@pa_lightningmodule.pa.classifier
+exp_name: lisa_rebuttalL
+shift_ratio: 1.0
+
+trainer:
+  cpu:
+    min_epochs: 10
+    max_epochs: 10
+  # Use more epochs in DDP and compare with the truncated vector.
+  ddp:
+    min_epochs: 40
+    max_epochs: 40
+
+pa_lightningmodule:
+  # When using the PA datamodule
+  pa:
+    optimizer:
+      _target_: torch.optim.Adam
+    classifier:
+      exp_name: ${pa_module.exp_name}
+      net:
+        net: resnet18
+        pretrained: false
+    num_classes: 2
+  
+  # When using the PA_logits datamodule
+  pa_logits:
+    optimizer: ${pa_module.pa_lightningmodule.pa.optimizer}
+    classifier: null # because we are using logits
+    num_classes: ${pa_module.pa_lightningmodule.pa.num_classes}
+
+datamodules:
+  data_name: diagvib
+
+  pa:
+    _target_: src.data.diagvib_datamodules.DiagVibDataModulePA
+    shift_ratio: ${pa_module.shift_ratio}
+
+    envs_index: [0,1]
+    envs_name: train_singlevar # remember it is necessary to write 'train', 'test' or 'val'
+    datasets_dir: ${paths.data_dir}/dg/dg_datasets/test_data_pipeline/
+    disjoint_envs: True
+    train_val_sequential: True
+
+    collate_fn:
+      _target_: hydra.utils.get_method
+      path: src.data.components.collate_functions.MultiEnv_collate_fn
+    batch_size: 64 # Same as the one that was passed to the model.
+    num_workers: 2
+    pin_memory: True
+
+
+  pa_logits:
+    _target_: src.data.diagvib_datamodules.DiagVibDataModulePAlogits
+    shift_ratio: ${pa_module.shift_ratio}
+
+    # Same classifier as the one sent to the PA module (when using the PA datamodule)
+    classifier: ${pa_module.pa_lightningmodule.pa.classifier}
+
+    envs_index: ${pa_module.datamodules.pa.envs_index}
+    envs_name: ${pa_module.datamodules.pa.envs_name}
+    datasets_dir: ${pa_module.datamodules.pa.datasets_dir}
+    disjoint_envs: ${pa_module.datamodules.pa.disjoint_envs}
+    train_val_sequential: ${pa_module.datamodules.pa.train_val_sequential}
+
+    collate_fn: ${pa_module.datamodules.pa.collate_fn}
+    batch_size: ${pa_module.datamodules.pa.batch_size}
+    num_workers: ${pa_module.datamodules.pa.num_workers}
+    pin_memory: ${pa_module.datamodules.pa.pin_memory}

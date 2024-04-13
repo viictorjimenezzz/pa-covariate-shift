@@ -1,0 +1,53 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data/dg: diagvib_multienv.yaml
+  - override /model/dg: erm.yaml
+  - override /trainer: ddp.yaml
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+name: ???
+tags: ["diagvib", "erm", "${name}"]
+
+seed: 123
+
+trainer:
+  min_epochs: 100
+  max_epochs: 100
+  gradient_clip_val: 0.5
+
+model:
+  dg:
+    optimizer:
+      _target_: torch.optim.SGD
+      lr: 0.002
+    net:
+      pretrained: false
+      net: resnet18
+
+data:
+  dg:
+    datasets_dir: ${paths.data_dir}/dg/dg_datasets/test_data_pipeline/
+    collate_fn:
+      _target_: hydra.utils.get_method # to avoid instantiation of a callable
+      path: src.data.components.collate_functions.SingleEnv_collate_fn
+    batch_size: 4
+    num_workers: 0
+    pin_memory: true
+
+
+logger:
+  wandb:
+    tags: ${tags}
+    entity: entity-name
+    project: project-name
+    group: group-name
+    save_dir: ${paths.output_dir}/dg
+    name: ${name}
+
+

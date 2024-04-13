@@ -1,0 +1,18 @@
+defaults:
+  - accuracy_domains.yaml # Accuracy with domain distinction (for datashift)
+  - accuracy.yaml # General accuracy metrics to compare with benchmark
+  - model_checkpoint_pa.yaml # max{logPA} checkpoiting
+  - model_checkpoint_afr.yaml # max{AFR pred} checkpoiting
+  - model_checkpoint.yaml # max{val/acc} checkpoiting
+
+  # Same as always:
+  - model_summary.yaml
+  - rich_progress_bar.yaml
+  - _self_
+
+model_summary:
+  max_depth: -1
+
+# I include it as null here to be able to override it in the script .sh file.
+posterioragreement: null
+batch_size_finder: null

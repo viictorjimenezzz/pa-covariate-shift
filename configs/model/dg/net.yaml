@@ -1,0 +1,6 @@
+  net:
+    _target_: src.models.components.dg_backbone.DGBackbone
+    net: resnet18
+    pretrained: false
+    input_channels: 3
+    n_classes: 2  

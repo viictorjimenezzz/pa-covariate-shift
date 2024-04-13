@@ -1,0 +1,54 @@
+# @package _global_
+
+defaults:
+  # Data source
+  - /data/adv@datamodules.main: cifar10.yaml
+  - /data/adv@datamodules.pa: cifar10.yaml
+  - /data/adv@datamodules.pa_logits: cifar10.yaml
+
+  # Attack
+  - override /data/adv/attack@datamodules.main.attack: FMN.yaml
+  - override /data/adv/attack@datamodules.pa.attack: FMN.yaml
+  - override /data/adv/attack@datamodules.pa_logits.attack: FMN.yaml
+
+  # Defense
+  - override /model/adv/classifier@datamodules.main.classifier: bpda.yaml
+  - override /model/adv/classifier@datamodules.pa.classifier: bpda.yaml
+  - override /model/adv/classifier@datamodules.pa_logits.classifier: bpda.yaml # logits uses model twice
+
+expected_results:
+  main:
+    corresponding_labels: True # whether main dataset has corresponding labels
+    same_model_logits: True # wether main dataset is generated using the same classifier as the one used for logits
+  pa:
+    same_model_logits: True
+
+datamodules:
+  data_name: cifar10
+  main:
+    cache: True # IMPORTANT
+    batch_size: 1000
+    num_workers: 40
+    pin_memory: True
+
+    attack:
+      steps: 1000
+    
+  pa:
+    _target_: src.data.cifar10_datamodules.CIFAR10DataModulePA
+    cache: ${data.datamodules.main.cache}
+    batch_size: ${data.datamodules.main.batch_size}
+    num_workers: ${data.datamodules.main.num_workers}
+    pin_memory: ${data.datamodules.main.pin_memory}
+    attack:
+      steps: ${data.datamodules.main.attack.steps}
+
+  pa_logits:
+    _target_: src.data.cifar10_datamodules.CIFAR10DataModulePAlogits
+    cache: ${data.datamodules.main.cache}
+    batch_size: ${data.datamodules.main.batch_size}
+    num_workers: ${data.datamodules.main.num_workers}
+    pin_memory: ${data.datamodules.main.pin_memory}
+    attack:
+      steps: ${data.datamodules.main.attack.steps}
+  

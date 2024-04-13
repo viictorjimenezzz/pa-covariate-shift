@@ -1,0 +1,9 @@
+defaults:
+  - accuracy.yaml
+  - rich_progress_bar.yaml
+  - model_checkpoint.yaml # max{train/acc} checkpoiting, no validation performed
+  - _self_
+
+
+model_checkpoint:
+  monitor: "train/acc"

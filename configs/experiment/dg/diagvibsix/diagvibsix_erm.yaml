@@ -1,0 +1,36 @@
+# @package _global_
+
+defaults:
+  - /experiment/dg/diagvibsix/diagvibsix.yaml
+  - /model/dg@model: erm.yaml
+
+model:
+  optimizer:
+    _target_: torch.optim.Adam
+    lr: 0.002
+
+  net:
+    pretrained: false
+    net: resnet18
+    n_classes: ${data.n_classes}
+
+  scheduler:
+    monitor: val/loss
+    interval: epoch
+    frequency: 1
+  
+    scheduler:
+      _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+      _partial_: true
+      mode: min
+      factor: 0.1
+      patience: 10
+
+tags: 
+  - "dg"
+  - "diagvibsix"
+  - "${diagvib_folder: ${data.datasets_dir}}"
+  - "erm"
+  - "${model.net.net}"
+  - "${classname: ${model.optimizer._target_}}"
+

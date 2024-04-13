@@ -1,0 +1,8 @@
+defaults:
+  - classifier: null
+
+classifier:
+  _target_: src.models.components.adv.get_model
+  dataset: cifar10
+  threat_model: Linf
+  model_dir: ${paths.data_dir}/adv/model_checkpoints

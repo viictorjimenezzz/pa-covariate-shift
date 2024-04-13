@@ -1,0 +1,54 @@
+# @package _global_
+
+defaults:
+  - override /data/dg: diagvib_PA.yaml
+  - override /model/dg: optimize.yaml
+  - override /callbacks:
+    - model_summary.yaml
+    - rich_progress_bar.yaml
+  - override /trainer: ddp.yaml
+
+exp_name: ???
+
+model:
+  dg:
+    optimizer:
+      _target_: torch.optim.Adam
+    classifier:
+      exp_name: ${exp_name}
+      net:
+        net: resnet18
+        pretrained: false
+    num_classes: 2
+
+
+seed: 12345
+
+trainer:
+  min_epochs: 50
+  max_epochs: 50
+  #log_every_n_steps: 10
+  devices: 1
+
+data:
+  dg:
+    datasets_dir: ${paths.data_dir}/dg/dg_datasets/rebuttaltf/
+    collate_fn:
+      _target_: hydra.utils.get_method
+      path: src.data.components.collate_functions.MultiEnv_collate_fn
+    shift_ratio: ???
+    batch_size: 64
+    num_workers: 2
+    pin_memory: True
+
+
+tags: ["diagvib", "adam", "${trainer.max_epochs}_epochs", "${exp_name}"]
+
+logger:
+  wandb:
+    tags: ${tags}
+    entity: entity-name
+    project: project-name
+    group: group-name
+    save_dir: ${paths.output_dir}/dg
+    name: model=${exp_name}_${data.dg.envs_index[0]}_${data.dg.envs_index[1]}_sr=${data.dg.shift_ratio}

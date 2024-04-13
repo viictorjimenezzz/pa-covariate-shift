@@ -1,0 +1,19 @@
+# @package _global_
+
+_target_: pametric.lightning.callbacks.PA_Callback
+
+log_every_n_epochs: 1
+pa_epochs: 50
+beta0: 1.0
+pairing_strategy: label
+pairing_csv: ${data.dataset_dir}${auxiliary_args.dataconfname}_trainval_${callbacks.posterioragreement.pairing_strategy}.csv
+cuda_devices: 4
+batch_size: ${data.batch_size}
+num_workers: ${data.num_workers}
+
+# optimizer: Optional[torch.optim.Optimizer] = None
+
+# Override in the script file
+dataset: null
+
+feature_extractor: null # no feature extractor, only label pairing

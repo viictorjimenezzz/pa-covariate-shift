@@ -1,0 +1,15 @@
+_target_: src.data.diagvib_datamodules.DiagVibDataModuleMultienv
+
+n_classes: 10
+envs_name: ??? # env
+disjoint_envs: ??? # False
+train_val_sequential: ??? # False
+
+datasets_dir: ${paths.data_dir}/dg/dg_datasets/
+mnist_preprocessed_path : ${paths.data_dir}/dg/mnist_processed.npz
+
+batch_size: ???
+num_workers: 0
+pin_memory: False
+
+multiple_trainloader_mode: 'max_size_cycle'

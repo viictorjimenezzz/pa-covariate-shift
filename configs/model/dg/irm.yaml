@@ -1,0 +1,29 @@
+defaults:
+  - net.yaml
+
+_target_: src.models.irm.IRM
+
+lamb: 1.0
+
+loss:
+  _target_: torch.nn.CrossEntropyLoss
+
+n_classes: ${model.net.n_classes}
+
+optimizer:
+  _partial_: true
+  # _target_: torch.optim.Adam
+  # lr: 0.001
+  # weight_decay: 0.0
+
+scheduler:
+  # monitor: val/loss
+  # interval: epoch
+  # frequency: 1 # ${trainer.check_val_every_n_epoch}
+
+  scheduler:
+    _partial_: true
+  #   _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  #   mode: min
+  #   factor: 0.1
+  #   patience: 10

@@ -1,0 +1,36 @@
+# @package _global_
+
+# Source: LISA paper & WILDS code
+# https://arxiv.org/pdf/2201.00299.pdf
+# https://github.com/p-lambda/wilds/blob/472677590de351857197a9bf24958838c39c272b/examples/configs/datasets.py
+
+defaults:
+  - /experiment/dg/wilds/wilds.yaml
+  - /model/dg@model: erm.yaml
+
+# The original batch size is 64, we will use 16 with 4 gradient accumulation steps
+trainer:
+  max_epochs: 200
+  accumulate_grad_batches: 4 
+
+model:
+  optimizer:
+    _target_: torch.optim.SGD
+    lr: 0.001
+    weight_decay: 0.0
+    momentum: 0.9
+  net:
+    pretrained: true
+    net: resnet50
+    n_classes: ${data.n_classes}
+
+  scheduler: null
+
+tags: 
+  - "dg"
+  - "wilds"
+  - "${data.dataset_name}"
+  - "erm"
+  - "${model.net.net}"
+  - "${name_logger}"
+  - "${classname: ${model.optimizer._target_}}"

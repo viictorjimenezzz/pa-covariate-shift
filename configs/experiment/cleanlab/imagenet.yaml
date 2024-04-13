@@ -1,0 +1,9 @@
+# @package _global_
+
+defaults:
+  - /trainer: ddp.yaml
+  - override /logger: wandb.yaml
+
+data:
+  _target_: # acabar
+  ...

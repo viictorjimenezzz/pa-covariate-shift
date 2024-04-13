@@ -1,0 +1,337 @@
+dataset_name: rxrx1
+n_classes: 1139
+
+# EVERY EXPERIMENT SHOULD CONTAIN ONLY ONE SAMPLE FROM EVERY CLASS.
+
+# Variation of the OODtest for ERM baseline, in which 14 of the training experiments are replaced by
+# the 14 test environment experiments but only for site 1 as well.
+# The test size is thus reduced in half as we only test in site 2 now.
+# I choose to substitute the training experiments 0-13 for convention.
+
+transform:
+  # Important to load the right transform for the data.
+  # SOURCE: WILDS code
+  # https://github.com/p-lambda/wilds/blob/472677590de351857197a9bf24958838c39c272b/examples/configs/datasets.py
+  _target_: src.data.components.wilds_transforms.initialize_transform
+  dataset:
+    original_resolution: null
+  transform_name: rxrx1
+  config:
+    target_resolution: [256, 256]
+  is_training: ???
+  additional_transform_name: null
+
+# We substitute 0-13 by [8, 9, 10, 28, 29, 30, 31, 32, 33, 34, 43, 44, 45, 50]
+train_config:
+  env1:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [8]
+      site: [1]
+  env2:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [9]
+      site: [1]
+  env3:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [10]
+      site: [1]
+  env4:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [28]
+      site: [1]
+  env5:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [29]
+      site: [1]
+  env6:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [30]
+      site: [1]
+  env7:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [31]
+      site: [1]
+  env8:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [32]
+      site: [1]
+  env9:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [33]
+      site: [1]
+  env10:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [34]
+      site: [1]
+  env11:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [43]
+      site: [1]
+  env12:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [44]
+      site: [1]
+  env13:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [45]
+      site: [1]
+  env14:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [50]
+      site: [1]
+  env15:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [18]
+      site: [1]
+  env16:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [19]
+      site: [1]
+  env17:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [20]
+      site: [1]
+  env18:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [21]
+      site: [1]
+  env19:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [22]
+      site: [1]
+  env20:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [23]
+      site: [1]
+  env21:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [24]
+      site: [1]
+  env22:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [25]
+      site: [1]
+  env23:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [26]
+      site: [1]
+  env24:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [35]
+      site: [1]
+  env25:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [36]
+      site: [1]
+  env26:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [37]
+      site: [1]
+  env27:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [38]
+      site: [1]
+  env28:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [39]
+      site: [1]
+  env29:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [40]
+      site: [1]
+  env30:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [41]
+      site: [1]
+  env31:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [46]
+      site: [1]
+  env32:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [47]
+      site: [1]
+  env33:
+    split_name: train
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [48]
+      site: [1]
+
+# Same as before.
+val_config:
+  env1:
+    split_name: val
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [7]
+      site: [1, 2]
+  env2:
+    split_name: val
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [27]
+      site: [1, 2]
+  env3:
+    split_name: val
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [42]
+      site: [1, 2]
+  env4:
+    split_name: val
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [49]
+      site: [1, 2]
+
+# We remove site 1.
+test_config:
+  env1:
+    split_name: test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [8]
+      site: [2]
+  env2:
+    split_name: test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [9]
+      site: [2]
+  env3:
+    split_name: test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [10]
+      site: [2]
+  env4:
+    split_name: test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [28]
+      site: [2]
+  env5:
+    split_name: test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [29]
+      site: [2]
+  env6:
+    split_name: test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [30]
+      site: [2]
+  env7:
+    split_name: test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [31]
+      site: [2]
+  env8:
+    split_name: test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [32]
+      site: [2]
+  env9:
+    split_name: test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [33]
+      site: [2]
+  env10:
+    split_name: test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [34]
+      site: [2]
+  env11:
+    split_name: test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [43]
+      site: [2]
+  env12:
+    split_name: test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [44]
+      site: [2]
+  env13:
+    split_name: test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [45]
+      site: [2]
+  env14:
+    split_name: test
+    group_by_fields: ["experiment", "site"]
+    values:
+      experiment: [50]
+      site: [2]

@@ -1,0 +1,27 @@
+# @package _global_
+
+_target_: pametric.lightning.callbacks.PA_Callback
+
+log_every_n_epochs: 1
+pa_epochs: 50
+beta0: 1.0
+pairing_strategy: label_nn
+pairing_csv: ${data.dataset_dir}${auxiliary_args.dataconfname}_trainval_${callbacks.posterioragreement.pairing_strategy}.csv
+cuda_devices: 4
+batch_size: ${data.batch_size}
+num_workers: ${data.num_workers}
+
+# optimizer: Optional[torch.optim.Optimizer] = None
+
+# Override in the script file
+dataset: null
+
+feature_extractor:
+  _target_: src.models.components.dg_backbone.get_feature_extractor
+  # We use same net as the one that will be trained by our model:
+  net:
+    _target_: ${model.net._target_}
+    net: ${model.net.net}
+    pretrained: true # IMPORTANT
+    input_channels: ${model.net.input_channels}
+    n_classes: ${model.net.n_classes}
