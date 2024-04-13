@@ -7,6 +7,7 @@ def register_resolvers():
     """
     OmegaConf.register_new_resolver("eval", eval) # general: parse a str expression and evaluate it
     OmegaConf.register_new_resolver("len", len) # compute length
+    OmegaConf.register_new_resolver("arange_list", lambda lst: list(range(len(lst))))
     OmegaConf.register_new_resolver("classname", lambda classpath: classpath.split(".")[-1].lower()) # extract class name from DictConfig path
     OmegaConf.register_new_resolver("diagvib_folder", lambda classpath: classpath.split("/")[-2]) # extract from ".../diagvib_folder/"
     OmegaConf.register_new_resolver("list_at_idx", lambda list, idx: list[idx]) # get 'list' element at index 'idx'

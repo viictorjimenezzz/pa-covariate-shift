@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import os
 import os.path as osp
@@ -24,7 +24,7 @@ class DiagVibDataModuleMultienv(LightningDataModule):
 
     Args:
         num_envs: Number of environments that will be used.
-        envs_name: Stem name of the environment. The .pkl or .csv/.yml files must be named "train_{envs_name}{num_env}" (and "val_{envs_name}{num_env}"), where num_env=range(num_envs).
+        envs_index: Stem name of the environment. The .pkl or .csv/.yml files must be named "train_{envs_name}{num_env}" (and "val_{envs_name}{num_env}"), where num_env=range(num_envs).
         shift_ratio: Ratio of samples to be shifted from the first to the second environment.
         datasets_dir: Path to the directory containing the dataset configuration files or the cache.
         disjoint_envs: Boolean indicating whether the environments are generated from disjoint sample sets or not.
@@ -38,8 +38,10 @@ class DiagVibDataModuleMultienv(LightningDataModule):
     def __init__(
         self,
         n_classes: int,
-        envs_index: List[int] = [1],
         envs_name: str = 'env',
+        envs_index_train: Optional[List[int]] = [0],
+        envs_index_val: Optional[List[int]] = [0],
+        envs_index_test: Optional[List[int]] = [0],
         datasets_dir: str = osp.join(".", "data", "datasets"),
         disjoint_envs: bool = False,
         train_val_sequential: bool = False,
@@ -51,7 +53,10 @@ class DiagVibDataModuleMultienv(LightningDataModule):
     ):
         super().__init__()
         self.save_hyperparameters(logger=False)
-        self.hparams.num_envs = len(envs_index)
+
+        self.hparams.num_envs_train = len(self.hparams.envs_index_train)
+        self.hparams.num_envs_val = len(self.hparams.envs_index_val)
+        self.hparams.num_envs_test = len(self.hparams.envs_index_test)
 
     @property
     def num_classes(self):
@@ -67,12 +72,12 @@ class DiagVibDataModuleMultienv(LightningDataModule):
 
         if stage == "fit":
             self.train_dset_list = []
-            for env_count in range(self.hparams.num_envs):
-                index = self.hparams.envs_index[env_count]
+            for env_count in range(self.hparams.num_envs_train):
+                index = self.hparams.envs_index_train[env_count]
                 if not self.hparams.disjoint_envs:
                     split_numsplit = [0,1]
                 else:
-                    split_numsplit = [env_count, self.hparams.num_envs]
+                    split_numsplit = [env_count, self.hparams.num_envs_train]
 
                 dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.hparams.datasets_dir, dataset_name='train_' + self.hparams.envs_name + str(index))
                 self.train_dset_list.append(
@@ -87,12 +92,12 @@ class DiagVibDataModuleMultienv(LightningDataModule):
                 )
                 
             self.val_dset_list = []
-            for env_count in range(self.hparams.num_envs):
-                index = self.hparams.envs_index[env_count]
+            for env_count in range(self.hparams.num_envs_val):
+                index = self.hparams.envs_index_val[env_count]
                 if not self.hparams.disjoint_envs:
                     split_numsplit = [0,1]
                 else:
-                    split_numsplit = [env_count, self.hparams.num_envs]
+                    split_numsplit = [env_count, self.hparams.num_envs_val]
 
                 dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.hparams.datasets_dir, dataset_name='val_' + self.hparams.envs_name + str(index))
                 if dataset_specs_path == None and not os.path.exists(cache_filepath):
@@ -116,12 +121,12 @@ class DiagVibDataModuleMultienv(LightningDataModule):
 
         else:
             self.test_dset_list = []
-            for env_count in range(self.hparams.num_envs):
-                index = self.hparams.envs_index[env_count]
+            for env_count in range(self.hparams.num_envs_test):
+                index = self.hparams.envs_index_test[env_count]
                 if not self.hparams.disjoint_envs:
                     split_numsplit = [0,1]
                 else:
-                    split_numsplit = [env_count, self.hparams.num_envs]
+                    split_numsplit = [env_count, self.hparams.num_envs_test]
 
                 dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.hparams.datasets_dir, dataset_name='test_' + self.hparams.envs_name + str(index))
 

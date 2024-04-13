@@ -29,7 +29,8 @@ experiment_name: ???
 
 logger:
   wandb:
-    name: exp=${experiment_name}_envs=${list_at_idx:${data.envs_index},0}&${list_at_idx:${data.envs_index},1}_sr=${auxiliary_args.pa_datashift.shift_ratio}
+    name: exp=${experiment_name}_envs=${list_at_idx:${data.envs_index},0}_${checkpoint_metric}
+    # name: exp=${experiment_name}_envs=${list_at_idx:${data.envs_index},0}&${list_at_idx:${data.envs_index},1}_sr=${auxiliary_args.pa_datashift.shift_ratio}
     # name: exp=${experiment_name}_envs=${list_at_idx:${auxiliary_args.pa_datashift.envs_index},0}&${list_at_idx:${auxiliary_args.pa_datashift.envs_index},1}_sr=${auxiliary_args.pa_datashift.shift_ratio}
 
 trainer:
