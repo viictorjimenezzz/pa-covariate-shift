@@ -2,9 +2,11 @@
 
 defaults:
   - /experiment/dg/diagvibsix/diagvibsix.yaml
-  - /model/dg@model: erm.yaml
+  - /model/dg@model: irm.yaml
 
 model:
+  lamb: 1.0
+  
   optimizer:
     _target_: torch.optim.Adam
     lr: 0.002
@@ -30,7 +32,7 @@ tags:
   - "dg"
   - "diagvibsix"
   - "${diagvib_folder: ${data.datasets_dir}}"
-  - "erm"
+  - "irm"
   - "${model.net.net}"
   - "${classname: ${model.optimizer._target_}}"
 
