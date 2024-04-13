@@ -8,24 +8,18 @@
 # activate conda env
 source activate $1
 
-# python3 src/test_datashift.py \
-# data.envs_index_test = IMPORTANT, I CAN TEST MORE THAN ONE... LETS SEE...
-srun python3 src/test_datashift.py \
+# python3 src/test_modelselection.py \
+srun python3 src/test_modelselection.py \
     --multirun \
-    experiment=dg/diagvibsix/diagvibsix_irm \
-    experiment_name=irm_paper \
-    checkpoint_metric=acc \
-    data.n_classes=2 \
-    data.envs_index=[1],[2],[3],[4],[5]  \
-    data.envs_name=env \
-    data.disjoint_envs=False \
+    callbacks=default_test_modelselection \
+    +data/dg/diagvib/modelselection@diagvib_dataset=hue_idval_2,hue_idval_10,hue_oodval_2,hue_oodval_10 \
+    experiment=dg/diagvibsix/diagvibsix_erm \
+    experiment_name=erm,erm_10ep \
+    checkpoint_metric=acc,logPA,AFR_pred \
+    data.envs_index_test=[0],[1],[2],[3],[4] \
     seed=0 \
     trainer=gpu \
     trainer.deterministic=true \
     +trainer.fast_dev_run=false \
-    logger.wandb.group=paper_train \
+    +auxiliary_args.new_id=true \
     # trainer.limit_test_batches=0.0032 \
-    # +callbacks/components@callbacks.posterioragreement.dataset=pa_diagvib_paper_train \
-    # callbacks.posterioragreement.cuda_devices=0 \
-    # callbacks.posterioragreement.num_workers=0 \
-    # +auxiliary_args.pa_datashift.shift_ratio=1.0 \

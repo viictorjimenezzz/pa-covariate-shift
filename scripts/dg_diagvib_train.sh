@@ -17,10 +17,10 @@ srun python3 src/train.py \
     +callbacks/components@callbacks.posterioragreement.dataset=pa_diagvib_val_modelselection \
     +data/dg/diagvib/modelselection@diagvib_dataset=hue_idval_2,hue_idval_10,hue_oodval_2,hue_oodval_10 \
     experiment=dg/diagvibsix/diagvibsix_lisa \
-    +logger.wandb.name=lisa_10_10ep \
-    model.ppred=1.0\
+    logger.wandb.name=lisa_10_10ep \
+    model.ppred=1.0 \
+    trainer.max_epochs=10 \
     seed=0 \
     trainer=ddp \
-    trainer.max_epochs=10 \
     trainer.deterministic=true \
     +trainer.fast_dev_run=false \
