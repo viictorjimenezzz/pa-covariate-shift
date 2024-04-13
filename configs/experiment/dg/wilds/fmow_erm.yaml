@@ -8,10 +8,12 @@ defaults:
   - /experiment/dg/wilds/wilds.yaml
   - /model/dg@model: erm.yaml
 
-# The original batch size is 32, we will use 16 with 2 gradient accumulation steps
+# The original batch size is 32, we will use 4 with 8 gradient accumulation steps
+data:
+  batch_size: 4
 trainer:
   max_epochs: 60
-  accumulate_grad_batches: 2
+  accumulate_grad_batches: 4 # 8
 
 model:
   optimizer:
@@ -31,6 +33,7 @@ model:
       _target_: torch.optim.lr_scheduler.StepLR
       _partial_: true
       gamma: 0.96
+      step_size: 1
 
 tags: 
   - "dg"

@@ -8,12 +8,13 @@ defaults:
   - /experiment/dg/wilds/wilds.yaml
   - /model/dg@model: erm.yaml
 
-# The original batch size is 72, we will use 18 with 4 gradient accumulation steps
+# The original batch size is 72, we will use 4 with 18 gradient accumulation steps
 data:
-  batch_size: 18
+  batch_size: 1
+  num_workers: 0
 trainer:
   max_epochs: 90
-  accumulate_grad_batches: 4
+  accumulate_grad_batches: 4 # ????????
 
 model:
   optimizer:
@@ -25,15 +26,15 @@ model:
     net: resnet50
     n_classes: ${data.n_classes}
 
-  scheduler:
-    interval: step
-    frequency: 1
+  scheduler: null
+    # interval: step
+    # frequency: 1
 
-    scheduler:
-      _target_: transformers.get_cosine_schedule_with_warmup
-      _partial_: true
-      num_warmup_steps: ${eval:'${trainer.accumulate_grad_batches} * 5415'} # 5415 is the number of warmup steps in the original code
-      num_training_steps: ${eval:'0000 * ${trainer.max_epochs}'} # number_steps * number_of_epochs
+    # scheduler:
+    #   _target_: transformers.get_cosine_schedule_with_warmup
+    #   _partial_: true
+    #   num_warmup_steps: 0
+    #   num_training_steps: ${num_training_steps:${trainer.max_epochs}, ,72} # number_steps * number_of_epochs
 
 tags: 
   - "dg"

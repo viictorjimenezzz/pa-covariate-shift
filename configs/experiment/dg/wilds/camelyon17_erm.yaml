@@ -11,7 +11,7 @@ defaults:
 # Batch size = 32
 trainer:
   accumulate_grad_batches: 2
-  max_epochs: 10
+  max_epochs: 50 # 10 originally
 
 model:
   optimizer:

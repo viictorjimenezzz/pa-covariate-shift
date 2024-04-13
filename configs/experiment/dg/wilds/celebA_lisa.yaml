@@ -10,7 +10,7 @@ defaults:
 
 # The original batch size is 16
 trainer:
-  max_epochs: 50
+  max_epochs: 200 #50 originally
   accumulate_grad_batches: null
 
 model:

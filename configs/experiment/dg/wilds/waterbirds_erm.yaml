@@ -10,7 +10,7 @@ defaults:
 
 # The original batch size is 128, we will use 16 with 8 gradient accumulation steps
 trainer:
-  max_epochs: 300
+  max_epochs: 1000 #300 originally
   accumulate_grad_batches: 8
 
 model:

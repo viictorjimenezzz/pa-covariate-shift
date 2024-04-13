@@ -11,7 +11,7 @@ defaults:
 # Batch size is 32, we will use 16 with 2 gradient accumulation steps
 trainer:
   accumulate_grad_batches: 2
-  max_epochs: 10
+  max_epochs: 50 # 10 originally
 
 model:
   lamb: 1.0
