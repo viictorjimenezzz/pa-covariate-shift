@@ -1,0 +1,12 @@
+_target_: src.data.imdb_datamodule.IMDBDataModule
+tokenizer:
+  _target_: src.data.components.tokenizers.get_tokenizer
+  model: distilbert-base-uncased
+
+n_classes: 2
+n_train: 20000
+n_val: 5000
+n_test: 25000
+batch_size: 64
+num_workers: 0
+seed: ${seed}

@@ -1,0 +1,7 @@
+_target_: src.models.SA.SentimentAnalysisModule
+n_classes: ${data.n_classes}
+optimizer:
+  _target_: torch.optim.Adam
+  _partial_: True
+  lr: 2e-5
+  weight_decay: 0.01

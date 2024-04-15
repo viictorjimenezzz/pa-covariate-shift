@@ -1,3 +1,3 @@
 accuracy:
   _target_: src.callbacks.accuracy.Accuracy_Callback
-  n_classes: ${model.net.n_classes}
+  n_classes: ${model.n_classes}

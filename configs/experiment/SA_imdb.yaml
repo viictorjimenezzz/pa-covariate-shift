@@ -1,0 +1,26 @@
+# @package _global_
+
+defaults:
+  - /data@data: imdb.yaml
+  - /model@model: SA.yaml
+  - /callbacks@callbacks: default.yaml
+
+trainer:
+  max_epochs: 2
+
+logger:
+  wandb:
+    tags: ${tags}
+    entity: malvai
+    project: NLP
+    group: SA
+    save_dir: ${paths.output_dir}/NLP
+   
+task_name: nlp
+checkpoint_metric: acc
+
+tags: 
+  - "nlp"
+  # - "imdb"
+  # - ${tokenizer.model}
+  # - "${classname: ${model._target_}}"
