@@ -1,9 +1,47 @@
 # @package _global_
 
 defaults:
-  - /trainer: ddp.yaml
+  - /model/dg@model: erm.yaml
+  - /data@data: imagenet.yaml
   - override /logger: wandb.yaml
 
-data:
-  _target_: # acabar
-  ...
+trainer:
+  min_epochs: 1
+  max_epochs: 100
+  gradient_clip_val: 0.0
+
+  # multiple_trainloader_mode: ${data.multiple_trainloader_mode}
+  accumulate_grad_batches: null
+  replace_sampler_ddp: true
+
+model:
+  optimizer:
+    _target_: torch.optim.Adam
+    lr: 0.001
+
+  net:
+    pretrained: false
+    net: resnet18
+    n_classes: ${data.n_classes}
+
+  scheduler: null
+
+logger:
+  wandb:
+    tags: ${tags}
+    entity: malvai
+    project: CleanLab # Paper
+    group: debug
+    save_dir: ${paths.output_dir}/cleanlab
+    name: null
+
+tags: 
+  - "cleanlab"
+  - "imagenet"
+  - "erm"
+  - "${model.net.net}"
+  - "${classname: ${model.optimizer._target_}}"
+
+
+task_name: cleanlab_imagenet
+checkpoint_metric: acc

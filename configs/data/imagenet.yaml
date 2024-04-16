@@ -1,0 +1,9 @@
+ 
+_target_: src.data.imagenet_datamodule.ClearlabImageNet
+dataset_dir: /cluster/scratch/vjimenez/cleanlab/
+n_classes: 1000
+corrected: False
+corrected_mislabelled: False
+batch_size: 64
+num_workers: 0
+pin_memory: False
