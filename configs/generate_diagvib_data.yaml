@@ -3,7 +3,7 @@
 defaults:
   - _self_
   - paths: default.yaml
-  - data/dg/diagvib/modelselection/hue_oodval_2.yaml
+  - data/dg/diagvib/modelselection/hue_idval_4.yaml
 
 datasets_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_modelselection/${folder_name}/
 
