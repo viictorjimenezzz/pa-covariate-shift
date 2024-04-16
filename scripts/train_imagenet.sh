@@ -9,13 +9,13 @@
 # activate conda env
 source activate $1
 
-# python3 src/train.py \
-srun python3 src/train.py \
+# srun python3 src/train.py \
+python3 src/train.py \
     --multirun \
     callbacks=default_train_cleanlab \
     experiment=cleanlab/imagenet \
     seed=0 \
-    trainer=gpu \
+    trainer=cpu \
     trainer.max_epochs=1 \
     trainer.deterministic=true \
     +trainer.fast_dev_run=false \

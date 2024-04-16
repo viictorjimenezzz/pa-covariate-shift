@@ -20,6 +20,7 @@ class ImageNetDataset(Dataset):
         super().__init__()
 
         self.dataset_dir = dataset_dir
+        self.label_to_index = {}
         self.index = self._create_index()
 
         self.transform = transforms.Compose([
@@ -27,10 +28,14 @@ class ImageNetDataset(Dataset):
             transforms.ToTensor(),
         ])
 
+    def _extract_label(self, filename: str):
+        return filename.split('/')[0].split(".")[0]
+
     def _tar_filepath_generator(self):
         for root, dirs, files in os.walk(self.dataset_dir):
             for file in files:
                 if file.endswith('.tar'):
+                    self.label_to_index[self._extract_label(file)] = len(self.label_to_index)
                     yield os.path.join(root, file)
 
     def _create_index(self):
@@ -52,7 +57,25 @@ class ImageNetDataset(Dataset):
             image = Image.open(io.BytesIO(file.read())).convert('RGB')
             if self.transform:
                 image = self.transform(image)
-        return image
+        
+        return image, self.label_to_index[self._extract_label(os.path.join(tar_path, member.name))]
+    
+
+class ImageNetDatasetValidation(ImageNetDataset):
+    """
+    Small subclass to make the label depend on the name of the .JPEG file and not the .tar file.
+    """
+
+    def _extract_label(self, filename: str):
+        return filename.split('/')[0].split(".")[0].split("_")[0]
+    
+    def _tar_filepath_generator(self):
+        for root, dirs, files in os.walk(self.dataset_dir):
+            for file in files:
+                if file.endswith('.tar'):
+                    yield os.path.join(root, file)
+                elif file.endswith('.JPEG'):
+                    self.label_to_index[self._extract_label(file)] = len(self.label_to_index)
 
 
 class CorrectedValidationImageNet(Dataset):
@@ -123,7 +146,7 @@ class CorrectedValidationImageNet(Dataset):
         ], dtype=int)
 
         self.dataset = Subset(
-            ImageNetDataset(os.path.join(self.dataset_dir, "val")),
+            ImageNetDatasetValidation(os.path.join(self.dataset_dir, "val")),
             index_corrected
         )
 

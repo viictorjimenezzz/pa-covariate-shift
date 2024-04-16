@@ -10,7 +10,7 @@ from torch.utils.data import Dataset, Subset, DataLoader
 import torch.distributed as dist
 from torch.utils.data.distributed import DistributedSampler
 
-from src.data.components.imagenet_datasets import ImageNetDataset, CorrectedValidationImageNet
+from src.data.components.imagenet_datasets import ImageNetDataset, ImageNetDatasetValidation, CorrectedValidationImageNet
         
 class ClearlabImageNet(LightningDataModule):
     def __init__(
@@ -50,7 +50,7 @@ class ClearlabImageNet(LightningDataModule):
         if self.hparams.corrected:
             return CorrectedValidationImageNet(self.hparams.dataset_dir, self.hparams.corrected_mislabelled)
         else:
-            return ImageNetDataset(
+            return ImageNetDatasetValidation(
                 osp.join(self.hparams.dataset_dir, "val")
             )
 

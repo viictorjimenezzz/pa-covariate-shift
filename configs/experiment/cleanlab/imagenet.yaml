@@ -10,7 +10,7 @@ trainer:
   max_epochs: 100
   gradient_clip_val: 0.0
 
-  # multiple_trainloader_mode: ${data.multiple_trainloader_mode}
+  # multiple_trainloader_mode: max_size_cycle
   accumulate_grad_batches: null
   replace_sampler_ddp: true
 
