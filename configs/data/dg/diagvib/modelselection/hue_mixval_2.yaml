@@ -1,10 +1,10 @@
 # @package _global_
 
 
-folder_name: hue_oodval_4
+folder_name: hue_mixval_2
 filename: env
 
-shape: [0,1,3,9]
+shape: [1,3]
 
 dataset_specifications:
   train:
@@ -20,7 +20,7 @@ dataset_specifications:
     randperm: False
     shape: ${shape}
     envs:
-      - [1,3,0,4,4]
+      - [0,3,0,4,4]
       - [3,3,0,4,4]
 
   test:
