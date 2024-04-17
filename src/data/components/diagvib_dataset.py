@@ -288,3 +288,12 @@ class DiagVib6DatasetPA(TorchDatasetWrapper):
         image = self._normalize(self._to_T(image, torch.float))
         return [image, self.unique_targets.index(target[1])] # we assume the task is the shape
     
+class DiagVib6DatasetPABinary(DiagVib6DatasetPA):
+    """
+    Takes whatever the classes are, and generates a binary classification target.
+    """
+    def __getitem__(self, item):
+        sample = self.dataset.getitem(item)
+        image, target, tag = sample.values()
+        image = self._normalize(self._to_T(image, torch.float))
+        return [image, 2 * target[1] // len(self.unique_targets)] # we assume the task is the shape 

@@ -12,10 +12,9 @@ source activate $1
 srun python3 src/test_modelselection.py \
     --multirun \
     callbacks=default_test_modelselection \
-    +data/dg/diagvib/modelselection@diagvib_dataset=hue_idval_2,hue_idval_10,hue_oodval_2,hue_oodval_10 \
-    experiment=dg/diagvibsix/diagvibsix_lisa \
-    model.ppred=1.0 \
-    experiment_name=lisa_10_10ep \
+    +data/dg/diagvib/modelselection@diagvib_dataset=hue_idval_2,hue_idval_4,hue_oodval_2,hue_oodval_4 \
+    experiment=dg/diagvibsix/diagvibsix_irm \
+    experiment_name=irm \
     checkpoint_metric=acc,logPA,AFR_pred \
     data.envs_index_test=[0],[1],[2],[3],[4] \
     seed=0 \

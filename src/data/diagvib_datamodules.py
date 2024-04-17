@@ -6,7 +6,7 @@ import os.path as osp
 from torch.utils.data import DataLoader
 
 import torch.distributed as dist
-from torch.utils.data import DataLoader
+from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.distributed import DistributedSampler
 from pytorch_lightning import LightningDataModule
 from pytorch_lightning.trainer.supporters import CombinedLoader
@@ -43,6 +43,7 @@ class DiagVibDataModuleMultienv(LightningDataModule):
         envs_index_val: Optional[List[int]] = [0],
         envs_index_test: Optional[List[int]] = [0],
         dataset_dir: str = osp.join(".", "data", "datasets"),
+        dataset_class: Optional[Dataset] = DiagVib6DatasetPA, # passed as object, no instantiate
         disjoint_envs: bool = False,
         train_val_sequential: bool = False,
         mnist_preprocessed_path: str = osp.join(".", "data", "dg", "mnist_processed.npz"),
@@ -81,7 +82,7 @@ class DiagVibDataModuleMultienv(LightningDataModule):
 
                 dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.hparams.dataset_dir, dataset_name='train_' + self.hparams.envs_name + str(index))
                 self.train_dset_list.append(
-                        DiagVib6DatasetPA(
+                        self.hparams.dataset_class(
                             mnist_preprocessed_path = self.hparams.mnist_preprocessed_path,
                             dataset_specs_path=dataset_specs_path,
                             cache_filepath=cache_filepath,
@@ -109,7 +110,7 @@ class DiagVibDataModuleMultienv(LightningDataModule):
                     break
                 else:
                     self.val_dset_list.append(
-                        DiagVib6DatasetPA(
+                        self.hparams.dataset_class(
                             mnist_preprocessed_path = self.hparams.mnist_preprocessed_path,
                             dataset_specs_path=dataset_specs_path,
                             cache_filepath=cache_filepath,
@@ -132,7 +133,7 @@ class DiagVibDataModuleMultienv(LightningDataModule):
 
                 # Apply shift ratio for the test:
                 self.test_dset_list.append(
-                   DiagVib6DatasetPA(
+                   self.hparams.dataset_class(
                             mnist_preprocessed_path = self.hparams.mnist_preprocessed_path,
                             dataset_specs_path=dataset_specs_path,
                             cache_filepath=cache_filepath,
