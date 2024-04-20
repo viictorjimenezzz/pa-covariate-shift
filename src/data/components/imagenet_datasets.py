@@ -28,14 +28,16 @@ class ImageNetDataset(Dataset):
             transforms.ToTensor(),
         ])
 
-    def _extract_label(self, filename: str):
-        return filename.split('/')[0].split(".")[0]
+    def _extract_label(self, filename: str, idx: int):
+        """
+        The training data are renamed with their correct class using the `rename_imagenet.py` and `rename_imagenet.txt` files.
+        """
+        return int(filename.split("/")[-1].split(".")[0])
 
     def _tar_filepath_generator(self):
         for root, dirs, files in os.walk(self.dataset_dir):
             for file in files:
                 if file.endswith('.tar'):
-                    self.label_to_index[self._extract_label(file)] = len(self.label_to_index)
                     yield os.path.join(root, file)
 
     def _create_index(self):
@@ -57,25 +59,32 @@ class ImageNetDataset(Dataset):
             image = Image.open(io.BytesIO(file.read())).convert('RGB')
             if self.transform:
                 image = self.transform(image)
-        
-        return image, self.label_to_index[self._extract_label(os.path.join(tar_path, member.name))]
-    
+        return image, self._extract_label(tar_path, idx)
+
+
 
 class ImageNetDatasetValidation(ImageNetDataset):
     """
     Small subclass to make the label depend on the name of the .JPEG file and not the .tar file.
     """
+    def __init__(self,
+            dataset_dir: str,
+        ):
+        super().__init__(dataset_dir)
 
-    def _extract_label(self, filename: str):
-        return filename.split('/')[0].split(".")[0].split("_")[0]
-    
-    def _tar_filepath_generator(self):
-        for root, dirs, files in os.walk(self.dataset_dir):
-            for file in files:
-                if file.endswith('.tar'):
-                    yield os.path.join(root, file)
-                elif file.endswith('.JPEG'):
-                    self.label_to_index[self._extract_label(file)] = len(self.label_to_index)
+        ground_truth_path = os.path.join(
+            self.dataset_dir,
+            'ILSVRC2012_validation_ground_truth.txt'
+        )
+
+        with open(ground_truth_path, 'r') as file:
+            numbers = [int(line.strip()) for line in file]
+
+        self.label_ground_truth = torch.tensor(numbers, dtype=torch.int) - 1
+        assert len(self) == len(self.label_ground_truth), "The number of images and labels must be the same."
+        
+    def _extract_label(self, filename: str, idx: int):
+        return self.label_ground_truth[idx].item()
 
 
 class CorrectedValidationImageNet(Dataset):
