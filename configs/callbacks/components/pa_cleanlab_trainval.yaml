@@ -1,0 +1,8 @@
+# We turn a (train,val,test)_config into a single environment configuration.
+_target_: pametric.datautils.MultienvDataset
+dset_list:
+  - _target_: src.data.components.imagenet_datasets.ImageNetDatasetValidation # original validation
+    dataset_dir: ${data.dataset_dir}val/
+
+  - _target_: src.data.components.imagenet_datasets.ImageNetDataset # train
+    dataset_dir: ${data.dataset_dir}train/
