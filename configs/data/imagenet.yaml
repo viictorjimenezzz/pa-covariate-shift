@@ -1,6 +1,6 @@
  
 _target_: src.data.imagenet_datamodule.ClearlabImageNet
-dataset_dir: /cluster/scratch/vjimenez/cleanlab/
+dataset_dir: /cluster/scratch/vjimenez/cleanlab/ # must contain train/ and val/ folders.
 n_classes: 1000
 corrected: False
 corrected_mislabelled: False
