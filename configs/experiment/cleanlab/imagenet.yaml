@@ -24,7 +24,17 @@ model:
     net: resnet18
     n_classes: ${data.n_classes}
 
-  scheduler: null
+  scheduler:
+    monitor: val/loss
+    interval: epoch
+    frequency: 1
+  
+    scheduler:
+      _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+      _partial_: true
+      mode: min
+      factor: 0.1
+      patience: 10
 
 logger:
   wandb:
