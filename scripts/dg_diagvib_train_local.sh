@@ -1,6 +1,8 @@
 python3 src/train.py \
     --multirun \
-    callbacks=none \
+    callbacks=default_train_modelselection \
+    +callbacks@callbacks.posterioragreement=pametric \
+    +callbacks/components@callbacks.posterioragreement.dataset=pa_diagvib_val_modelselection \
     +data/dg/diagvib/modelselection@diagvib_dataset=hue_idval_2 \
     experiment=dg/diagvibsix/diagvibsix_erm \
     seed=0 \

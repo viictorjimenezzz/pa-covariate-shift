@@ -12,14 +12,17 @@ source activate $1
 srun python3 src/test_modelselection.py \
     --multirun \
     callbacks=default_test_modelselection \
-    +data/dg/diagvib/modelselection@diagvib_dataset=hue_idval_2,hue_idval_4,hue_oodval_2,hue_oodval_4 \
-    experiment=dg/diagvibsix/diagvibsix_irm \
-    experiment_name=irm \
+    +data/dg/diagvib/modelselection@diagvib_dataset=hue_idval_2 \
+    experiment=dg/diagvibsix/diagvibsix_erm \
+    experiment_name=erm_norm \
     checkpoint_metric=acc,logPA,AFR_pred \
-    data.envs_index_test=[0],[1],[2],[3],[4] \
+    data.envs_index_test=[0],[1] \
     seed=0 \
     trainer=gpu \
     trainer.deterministic=true \
     +trainer.fast_dev_run=false \
     +auxiliary_args.new_id=true \
-    # trainer.limit_test_batches=0.0032 \
+    # trainer.limit_test_batches=0.0313 \
+    # +data/dg/diagvib/modelselection@diagvib_dataset=hue_idval_2,hue_idval_4,hue_oodval_2,hue_oodval_4 \
+    # checkpoint_metric=acc,logPA,AFR_pred \
+    # data.envs_index_test=[0],[1],[2],[3],[4] \
