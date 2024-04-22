@@ -157,7 +157,7 @@ class DatasetCSV_PA(Dataset):
             image_specs, images, env_label = self.draw_mode(mode_spec, 1) # 1 image per mode
             self.images += images
 
-
+    
     def draw_image_spec_from_mode(self, mode_spec):
         """ Draws a single image specification from a mode.
         This function is modified from the original class to account for the iterable structure defined previously.
@@ -221,8 +221,11 @@ class DatasetCSV_PA(Dataset):
             image_spec['objs'].append(obj)
 
         return image_spec, mode_spec
+    
+    def __len__(self):
+        return len(self.permutation)
 
-    def getitem(self, idx):
+    def __getitem__(self, idx):
         idx = self.permutation[idx]
         return {
             'image': self.images[idx],
@@ -283,8 +286,8 @@ class DiagVib6DatasetPA(TorchDatasetWrapper):
             self.mean, self.std = get_per_ch_mean_std(self.dataset.images)
 
     def __getitem__(self, item):
-        sample = self.dataset.getitem(item)
-        image, target, tag = sample.values()
+        sample = self.dataset.__getitem__(item)
+        image, target, _ = sample.values()
         image = self._normalize(self._to_T(image, torch.float))
         return [image, self.unique_targets.index(target[1])] # we assume the task is the shape
     
@@ -293,7 +296,7 @@ class DiagVib6DatasetPABinary(DiagVib6DatasetPA):
     Takes whatever the classes are, and generates a binary classification target.
     """
     def __getitem__(self, item):
-        sample = self.dataset.getitem(item)
-        image, target, tag = sample.values()
+        sample = self.dataset.__getitem__(item)
+        image, target, _ = sample.values()
         image = self._normalize(self._to_T(image, torch.float))
         return [image, 2 * target[1] // len(self.unique_targets)] # we assume the task is the shape 

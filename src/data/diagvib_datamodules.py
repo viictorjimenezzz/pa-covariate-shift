@@ -80,7 +80,8 @@ class DiagVibDataModuleMultienv(LightningDataModule):
                 else:
                     split_numsplit = [env_count, self.hparams.num_envs_train]
 
-                dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.hparams.dataset_dir, dataset_name='train_' + self.hparams.envs_name + str(index))
+                ds_name = 'train_' + self.hparams.envs_name + str(index)
+                dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.hparams.dataset_dir, dataset_name=ds_name)                
                 self.train_dset_list.append(
                         self.hparams.dataset_class(
                             mnist_preprocessed_path = self.hparams.mnist_preprocessed_path,
@@ -88,7 +89,7 @@ class DiagVibDataModuleMultienv(LightningDataModule):
                             cache_filepath=cache_filepath,
                             split_numsplit=split_numsplit,
                             train_val_sequential=self.hparams.train_val_sequential,
-                            t='train'
+                            t='train',
                         )
                 )
                 
@@ -100,7 +101,8 @@ class DiagVibDataModuleMultienv(LightningDataModule):
                 else:
                     split_numsplit = [env_count, self.hparams.num_envs_val]
 
-                dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.hparams.dataset_dir, dataset_name='val_' + self.hparams.envs_name + str(index))
+                ds_name = 'val_' + self.hparams.envs_name + str(index)
+                dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.hparams.dataset_dir, dataset_name=ds_name)
                 if dataset_specs_path == None and not os.path.exists(cache_filepath):
                     """
                     If there is no validation dataset, the datamodule will not yield error.
@@ -116,7 +118,7 @@ class DiagVibDataModuleMultienv(LightningDataModule):
                             cache_filepath=cache_filepath,
                             split_numsplit=split_numsplit,
                             train_val_sequential=self.hparams.train_val_sequential,
-                            t='val'
+                            t='val',
                         )
                     )
 
@@ -129,7 +131,8 @@ class DiagVibDataModuleMultienv(LightningDataModule):
                 else:
                     split_numsplit = [env_count, self.hparams.num_envs_test]
 
-                dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.hparams.dataset_dir, dataset_name='test_' + self.hparams.envs_name + str(index))
+                ds_name = 'test_' + self.hparams.envs_name + str(index)
+                dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.hparams.dataset_dir, dataset_name=ds_name)
 
                 # Apply shift ratio for the test:
                 self.test_dset_list.append(
@@ -139,10 +142,9 @@ class DiagVibDataModuleMultienv(LightningDataModule):
                             cache_filepath=cache_filepath,
                             split_numsplit=split_numsplit,
                             train_val_sequential=self.hparams.train_val_sequential,
-                            t='test'
+                            t='test',
                     )
                 )
-                
             self.test_dset = MultienvDatasetTest(self.test_dset_list)
                 
     def train_dataloader(self):
@@ -157,7 +159,9 @@ class DiagVibDataModuleMultienv(LightningDataModule):
         }
 
     def val_dataloader(self):
-        # CombinedLoader is equivalent to a dictionary of DataLoaders.
+        """
+        CombinedLoader is equivalent to a dictionary of DataLoaders.
+        """
         if len(self.val_dset_list) > 0:
             return CombinedLoader({
                 str(i): DataLoader(

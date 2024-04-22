@@ -4,3 +4,6 @@ defaults:
   - debugging.yaml
   - rich_progress_bar.yaml
   - _self_
+
+
+normalization: null

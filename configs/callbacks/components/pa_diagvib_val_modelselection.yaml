@@ -13,4 +13,3 @@ dset_list:
     mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
     seed: ${seed}
     cache_filepath: ${data.dataset_dir}val_${diagvib_dataset.filename}1.pkl
-    

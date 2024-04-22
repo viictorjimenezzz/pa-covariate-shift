@@ -8,7 +8,7 @@ defaults:
 
   - _self_
 
-
+normalization: null
 posterioragreement:
   pairing_strategy: label
   pairing_csv: null
