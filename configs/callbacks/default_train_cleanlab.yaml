@@ -1,4 +1,5 @@
 defaults:
+  - batch_size_finder.yaml
   - accuracy.yaml
   - rich_progress_bar.yaml
   - model_checkpoint.yaml
