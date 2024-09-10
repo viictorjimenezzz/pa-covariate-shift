@@ -1,11 +1,10 @@
-defaults:
-  - /model/adv/cifar10@_here_
-  - attack: null
+
+classifier: ${model.net}
 
 _target_: src.data.cifar10_datamodules.CIFAR10DataModule
-batch_size: ???
-adversarial_ratio: 1.
-data_dir: ${paths.data_dir}/adv/adv_datasets
+batch_size: 64
+adversarial_ratio: 1.0
+dataset_dir: ${paths.data_dir}/adv/adv_datasets
 cache: True
 verbose: True
 num_workers: 0
@@ -14,3 +13,4 @@ pin_memory: False
 attack:
   _partial_: True
   _target_: src.data.components.adv.get_attack
+  attack_name: ???
