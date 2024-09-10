@@ -1,0 +1,42 @@
+# @package _global_
+
+
+folder_name: CGO_2_pos
+filename: env
+
+shape: [7,4,9]
+# Should be divisible by the number of shapes.
+batch_size: 64 
+dataset_specifications:
+  train:
+    size: null
+    randperm: False # Set to False if we want label correspondence between environments.
+    shape: ${shape}
+    envs: 
+      - [0,0,0,0,0]
+      - [0,0,0,0,0]
+
+  val:
+    size: null
+    randperm: False
+    shape: ${shape}
+    envs:
+      - [0,0,0,0,0]
+      - [0,0,0,0,0]
+
+  test:
+    size: null
+    randperm: False # always False
+    shape: ${shape}
+    envs: # for convenience
+      - [0,0,0,0,0] 
+      - [0,0,0,0,0]
+      - [0,0,0,0,0]
+      - [0,0,0,0,0] 
+      - [0,0,0,0,0]
+      - [0,0,0,0,0]
+
+# Leave here for interpolation convenience
+train_dataset_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_datashift/${diagvib_dataset.folder_name}/
+val_dataset_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_datashift/${diagvib_dataset.folder_name}/
+test_dataset_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_datashift/${diagvib_dataset.folder_name}/

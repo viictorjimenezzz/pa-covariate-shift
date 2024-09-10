@@ -1,0 +1,42 @@
+# @package _global_
+
+
+folder_name: paper
+filename: env
+
+shape: [4,9]
+# Should be divisible by the number of shapes.
+batch_size: 64 
+dataset_specifications:
+  train:
+    size: ${size_train}
+    randperm: False # Set to False if we want label correspondence between environments.
+    shape: ${shape}
+    envs: 
+      - [0,3,0,4,2] # RED, bright, blank, cc, normal
+      - [4,3,0,4,2] # BLUE, bright, blank, cc, normal
+
+  val:
+    size: ${size_val}
+    randperm: False
+    shape: ${shape}
+    envs:
+      - [0,3,0,4,2] # RED, bright, blank, cc, normal
+      - [4,3,0,4,2] # BLUE, bright, blank, cc, normal
+
+  test:
+    size: ${size_test}
+    randperm: False # always False
+    shape: ${shape}
+    envs:
+      - [0,3,0,4,2] # RED, bright, blank, cc, normal 
+      - [4,3,0,4,2] # BLUE, bright, blank, cc, normal
+      - [4,2,0,4,2] # blue, BRIGHTER, blank, cc, normal
+      - [4,2,0,7,2] # blue, brighter, blank, CR, normal
+      - [4,2,0,7,3] # blue, brighter, blank, cr, LARGER
+      - [4,2,1,7,3] # blue, brighter, TILES, cr, larger
+
+# Leave here for interpolation convenience
+train_dataset_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_datashift/paper/
+val_dataset_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_datashift/paper/
+test_dataset_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_datashift/paper/

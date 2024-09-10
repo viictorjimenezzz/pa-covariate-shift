@@ -1,0 +1,47 @@
+# @package _global_
+
+folder_name: _debug
+filename: env
+
+shape: [7,4,9]
+
+# hue, lightness, texture, position, scale
+batch_size: 30
+
+dataset_specifications:
+  train:
+    size: null
+    randperm: False
+    shape: ${diagvib_dataset.shape}
+    envs: 
+      - [0,0,0,0,0]
+      - [0,0,0,0,0]
+
+  val:
+    size: null
+    randperm: False
+    shape: ${diagvib_dataset.shape}
+    envs:
+      - [0,0,0,0,0]
+      - [0,0,0,0,0]
+
+  test:
+    size: null
+    randperm: False
+    shape: ${diagvib_dataset.shape}
+    envs: # for convenience
+      - [0,0,0,0,0] 
+      - [0,0,0,0,0]
+      - [0,0,0,0,0]
+      - [0,0,0,0,0] 
+      - [0,0,0,0,0]
+      - [0,0,0,0,0]
+
+
+# Leave here for interpolation convenience
+train_dataset_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_datashift/${diagvib_dataset.folder_name}/
+val_dataset_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_datashift/${diagvib_dataset.folder_name}/
+test_dataset_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_datashift/${diagvib_dataset.folder_name}/
+
+  
+    
