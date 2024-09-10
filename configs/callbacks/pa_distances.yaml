@@ -1,0 +1,20 @@
+ass:
+  _target_: pametric.lightning.callbacks.ASS_Callback
+  pametric_callback_name: ${auxiliary_args.pametric_callback_name}
+
+# Combines some metrics at the same time to spare memory and time:
+pa_measureoutput:
+  _target_: src.callbacks.pa_distances.PAOutput_Callback
+  pametric_callback_name: ${auxiliary_args.pametric_callback_name}
+
+pa_centroid:
+  _target_: pametric.lightning.callbacks.CentroidDistance_Callback
+  pametric_callback_name: ${auxiliary_args.pametric_callback_name}
+
+pa_fid:
+  _target_: pametric.lightning.callbacks.FrechetInceptionDistance_Callback
+  pametric_callback_name: ${auxiliary_args.pametric_callback_name}
+
+pa_mmd:
+  _target_: pametric.lightning.callbacks.MMD_Callback
+  pametric_callback_name: ${auxiliary_args.pametric_callback_name}
