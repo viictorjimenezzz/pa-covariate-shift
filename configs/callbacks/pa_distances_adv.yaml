@@ -1,0 +1,17 @@
+# Combines some metrics at the same time to spare memory and time:
+pa_measureoutput:
+  _target_: src.callbacks.pa_distances_adv.PAOutput_Callback
+  net_name: ${model.net.model_name}
+
+pa_centroid:
+  _target_: src.callbacks.pa_distances_adv.CentroidDistance_Callback
+  net_name: ${model.net.model_name}
+
+pa_fid:
+  _target_: src.callbacks.pa_distances_adv.FrechetInceptionDistance_Callback
+  net_name: ${model.net.model_name}
+
+pa_mmd:
+  _target_: src.callbacks.pa_distances_adv.MMD_Callback
+  net_name: ${model.net.model_name}
+
