@@ -1,2 +1,2 @@
 attack_name: FMN
-steps: ???
+steps: ${auxiliary_args.steps}

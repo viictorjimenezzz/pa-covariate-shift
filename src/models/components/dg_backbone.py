@@ -17,6 +17,7 @@ class DGBackbone(nn.Module):
         input_channels: int = 3,
     ):
         super(DGBackbone, self).__init__()
+        self.net_name = net
 
         if "resnet" in net:
             if str(18) in net:

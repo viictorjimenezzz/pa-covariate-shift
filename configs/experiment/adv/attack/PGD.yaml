@@ -1,9 +1,0 @@
-defaults:
-  - override /data/adv/attack/PGD
-
-
-hydra:
-  sweeper:
-    params:
-      params:
-        epsilons: 0.0314,0.0627,0.1255
