@@ -1,0 +1,5 @@
+feature_pairing:
+  _target_: src.callbacks.feature_pairing.Pairing_Callback
+  method: CCA # null # NN
+  index: L2
+  nearest: false
