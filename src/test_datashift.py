@@ -48,14 +48,17 @@ def test(cfg: DictConfig) -> Tuple[dict, dict]:
 
     path_ckpt_csv = cfg.paths.log_dir + f"/{csv_name}.csv"
     experiment_df = pd.read_csv(path_ckpt_csv)
+
     selected_ckpt = experiment_df[
-        (experiment_df['experiment_name'] == cfg.experiment_name) & (experiment_df['seed'] == str(cfg.seed))
+        (experiment_df['group'] == cfg.logger.wandb.group) & (experiment_df['experiment_name'] == cfg.experiment_name) & (experiment_df['seed'] == str(cfg.seed)) & (experiment_df['metric'] == str(cfg.checkpoint_metric))
     ]
     assert len(selected_ckpt) == 1, "There are duplicate experiments in the csv file."
-    
-    ckpt_path = selected_ckpt["ckpt_path"].item()
+
+    # Change the name that goes into the logger:
     if 'wandb' in cfg.logger.keys() and cfg.logger['wandb'] != None:
-        cfg.logger.wandb.id = selected_ckpt['experiment_id'].item() # log in the same experiment
+        cfg.logger.wandb.name = f"exp={cfg.experiment_name}_met={cfg.checkpoint_metric}_envs={cfg.data.envs_index_test[0]}&{cfg.data.envs_index_test[1]}_sr={cfg.auxiliary_args.pa_datashift.shift_ratio}"
+
+    ckpt_path = selected_ckpt["ckpt_path"].item()
 
     log.info("Instantiating loggers...")
     logger: List[Logger] = utils.instantiate_loggers(cfg.get("logger"))

@@ -1,14 +1,11 @@
 defaults:
   - accuracy.yaml
-  - debugging.yaml
+  # - pa_distances.yaml
   - rich_progress_bar.yaml
   
-  # PA only for label pairing
-  # - /callbacks@posterioragreement: pametric_label.yaml # PA metric with label pairing 
-
   - _self_
 
 normalization: null
-posterioragreement:
-  pairing_strategy: label
-  pairing_csv: null
+posterioragreement: null
+  # pairing_strategy: label
+  # pairing_csv: null
