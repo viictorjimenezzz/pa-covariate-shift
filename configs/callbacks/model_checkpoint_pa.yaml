@@ -2,7 +2,7 @@
 
 model_checkpoint_PA:
   _target_: pametric.lightning.callbacks.PA_ModelCheckpoint
-  patience: ${percent_integer:20,${trainer.max_epochs}} # 20% of max_epochs
+  patience: 0 #${percent_integer:20,${trainer.max_epochs}} # 20% of max_epochs
   dirpath: ${paths.output_dir}/checkpoints
   filename: pa_epoch_{epoch:03d}
   monitor: PA(0,1)/logPA

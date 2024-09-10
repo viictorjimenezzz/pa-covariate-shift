@@ -1,6 +1,6 @@
 model_checkpoint_AFRpred:
   _target_: pametric.lightning.callbacks.PA_ModelCheckpoint
-  patience: ${callbacks.model_checkpoint_PA.patience}
+  patience: 0 #${callbacks.model_checkpoint_PA.patience}
   dirpath: ${callbacks.model_checkpoint_PA.dirpath}
   filename: afr_epoch_{epoch:03d}
   monitor: PA(0,1)/AFR_pred
