@@ -1,0 +1,24 @@
+defaults:
+  - batch_size_finder.yaml
+  - accuracy.yaml #@1 plus sensitivity, etc...
+  - rich_progress_bar.yaml
+  - model_checkpoint.yaml
+  - model_checkpoint_pa.yaml
+  - model_checkpoint_afr.yaml
+  - _self_
+
+
+accuracy_5:
+  _target_: src.callbacks.accuracy_topk.AccuracyK_Callback
+  n_classes: ${model.net.n_classes}
+  top_k: 5
+
+accuracy_10:
+  _target_: src.callbacks.accuracy_topk.AccuracyK_Callback
+  n_classes: ${model.net.n_classes}
+  top_k: 10
+
+accuracy_100:
+  _target_: src.callbacks.accuracy_topk.AccuracyK_Callback
+  n_classes: ${model.net.n_classes}
+  top_k: 100
