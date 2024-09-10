@@ -14,22 +14,22 @@ model:
     net: resnet18
     n_classes: ${data.n_classes}
 
-  scheduler:
-    monitor: val/loss
-    interval: epoch
-    frequency: 1
+  scheduler: null
+    # monitor: val/loss
+    # interval: epoch
+    # frequency: 1
   
-    scheduler:
-      _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
-      _partial_: true
-      mode: min
-      factor: 0.1
-      patience: 10
+    # scheduler:
+    #   _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+    #   _partial_: true
+    #   mode: min
+    #   factor: 0.1
+    #   patience: 10
 
 tags: 
   - "dg"
   - "diagvibsix"
-  - "${diagvib_folder: ${data.dataset_dir}}"
+  - "${diagvib_folder: ${data.val_dataset_dir}}"
   - "erm"
   - "${model.net.net}"
   - "${classname: ${model.optimizer._target_}}"

@@ -3,9 +3,14 @@
 defaults:
   - _self_
   - paths: default.yaml
-  - data/dg/diagvib/modelselection/hue_oodval_10.yaml
 
-datasets_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_modelselection/${folder_name}/
+  # For datashift:
+  # - data/dg/diagvib/datashift: paper_nonpaired.yaml
+
+  # For model selection:
+  # - data/dg/diagvib/modelselection@dataset_specifications.train: _hue_train_1749.yaml # train
+  # - data/dg/diagvib/modelselection@dataset_specifications.test: _hue_test_1749.yaml # test
+  - data/dg/diagvib/modelselection/pos_oodval_npair.yaml # validation
 
 # Desired sizes of the datasets
 # If the datasets are meant to have unique observations, do not surpass the sizes S_i = min_{shape}(SIZE_i)//num_envs, for i = {train, val, test}
@@ -13,20 +18,25 @@ SIZE_train: [4738, 5393, 4766, 4904, 4673, 4336, 4734, 5012, 4680, 4759]
 SIZE_val: [1185, 1349, 1192, 1227, 1169, 1085, 1184, 1253, 1171, 1190]
 SIZE_test: [980, 1135, 1032, 1010, 982, 892, 958, 1028, 974, 1009]
 
-# Size of each environment
-size_train: ${env_size_mnist:${SIZE_train},${shape},${len:${dataset_specifications.train.envs}}}
-size_val: ${env_size_mnist:${SIZE_val},${shape},${len:${dataset_specifications.val.envs}}}
-size_test: ${env_size_mnist:${SIZE_test},${shape},1} # test environments have always all the samples
+# Size of each validation environment: depends on the case
+# size_val: 5000
+size_val: ${env_size_mnist:${SIZE_val},${shape},${len:${dataset_specifications.val.envs}}} # If val_disjoint_envs = True
+# size_val: ${env_size_mnist:${SIZE_val},${shape},1} # If val_disjoint_envs = False
 
+# Size of each test environment: they have always all the samples
+size_test: ${env_size_mnist:${SIZE_test},${shape},1}
+
+# For paper and paper_nonpaired:
 # size_train: 40000
 # size_val: 20000
 # size_test: 10000
 
 shape: ???
 
-# hue, lightness, texture, position, scale
-dataset_specifications: ???
-
 extras:
   print_config: True
   ignore_warnings: True
+
+
+# hue_zero_npair,hue_idval_npair,hue_mixval_npair,hue_maxmixval_npair,hue_oodval_npair
+# pos_zero_npair,pos_idval_npair,pos_mixval_npair,pos_maxmixval_npair,pos_oodval_npair

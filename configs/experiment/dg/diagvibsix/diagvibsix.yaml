@@ -3,6 +3,11 @@
 defaults:
   - /data/dg@data: diagvib_multienv.yaml
   - /trainer: ddp.yaml
+
+  # Just for hue:
+  # - /data/dg/diagvib/modelselection@diagvib_dataset.dataset_specifications.train: _hue_train.yaml # train
+  # - /data/dg/diagvib/modelselection@diagvib_dataset.dataset_specifications.test: _hue_test.yaml # test
+
   - override /logger: wandb.yaml
 
   # - /data/dg/diagvib/modelselection@data: hue_idval_2.yaml # on the script
@@ -12,7 +17,7 @@ diagvib_dataset: ???
 
 trainer:
   min_epochs: 1
-  max_epochs: 100
+  max_epochs: 200
   gradient_clip_val: 0.0
 
   multiple_trainloader_mode: ${data.multiple_trainloader_mode}
@@ -24,15 +29,23 @@ data:
   # dataset_class:
   #   _target_: hydra.utils.get_class
   #   path: src.data.components.diagvib_dataset.DiagVib6DatasetPABinary
-  dataset_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_modelselection/${diagvib_dataset.folder_name}/
+
+  # Data loaded from different places.
+  train_dataset_dir: ${diagvib_dataset.train_dataset_dir}
+  # Make sure it coincides with the one you are referring to:
+  val_dataset_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_${auxiliary_args.diagvib_task}/${diagvib_dataset.folder_name}/
+  test_dataset_dir: ${diagvib_dataset.test_dataset_dir}
+
   n_classes: ${len:${diagvib_dataset.shape}}
   envs_index_train: ${arange_list:${diagvib_dataset.dataset_specifications.train.envs}}
   envs_index_val: ${arange_list:${diagvib_dataset.dataset_specifications.val.envs}}
   envs_index_test: ${arange_list:${diagvib_dataset.dataset_specifications.test.envs}}
   envs_name: ${diagvib_dataset.filename}
-  disjoint_envs: True
+  train_disjoint_envs: True # because we DONT want them to be sample-corresponding
+  val_disjoint_envs: False # because we want them to be sample-corresponding
   train_val_sequential: False
-  batch_size: 64
+  # The batch size will be divided by the number of val environments to ensure that validation batches are balanced.
+  batch_size: ${diagvib_dataset.batch_size}
   num_workers: 2
   pin_memory: true
     
@@ -40,11 +53,23 @@ logger:
   wandb:
     tags: ${tags}
     entity: malvai
-    project: DiagVib-6 OOD Model Selection # Paper
+    project: ${auxiliary_args.project_name}
     group: ${diagvib_dataset.folder_name}
     save_dir: ${paths.output_dir}/dg
     # For the tests only. Override in script file during training.
-    name: ${ifelse:${experiment_name},""}_test${str:${list_at_idx:${data.envs_index_test},0}}
+    #name: ${ifelse:${experiment_name},""}_${checkpoint_metric}_test${str:${list_at_idx:${data.envs_index_test},1}}_sr=${auxiliary_args.pa_datashift.shift_ratio}
+    
+    # For the experiments:
+    # name: "mod=${classname: ${model._target_}}_opt=${classname: ${model.optimizer._target_}}_lr=${model.optimizer.lr}" # ERM, IRM
+    name: "mod=${classname: ${model._target_}}_ppred=${model.ppred}_opt=${classname: ${model.optimizer._target_}}_lr=${model.optimizer.lr}" # LISA
+
+
 
 task_name: dg_diagvibsix
 checkpoint_metric: acc
+
+
+auxiliary_args:
+  dataconfname: ${diagvib_dataset.folder_name}
+  diagvib_task: modelselection # datashift
+  project_name: DiagVib-6 OOD Model Selection # DiagVib-6 Paper
