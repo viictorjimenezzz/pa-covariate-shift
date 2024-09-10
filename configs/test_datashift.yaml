@@ -36,6 +36,7 @@ logger:
 trainer:
   limit_test_batches: 1.0
   max_epochs: 1
+  inference_mode: false # THIS IS VERY IMPORTANT, BECAUSE PAMETRIC NEEDS GRADIENTS.
 
 # task name, determines output directory path
 task_name: ???
@@ -53,4 +54,5 @@ seed: ???
 
 # additional argumants that might be required for intermediate calculations inside the 
 # configuration files but are not used to initialize any object
-auxiliary_args: null
+auxiliary_args:
+  pametric_callback_name: PA_Callback
