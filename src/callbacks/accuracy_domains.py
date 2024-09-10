@@ -1,6 +1,8 @@
+from typing import Optional
+
+import torch
 from pytorch_lightning.callbacks import Callback
 from torchmetrics import Accuracy
-import torch
 
 class AccuracyDomains_Callback(Callback):
     """
@@ -11,9 +13,10 @@ class AccuracyDomains_Callback(Callback):
     def __init__(
             self,
             n_classes: int,
-            n_domains_train: int,
-            n_domains_val: int,
-            n_domains_test: int
+            top_k: Optional[int] = 1,
+            n_domains_train: Optional[int] = None,
+            n_domains_val: Optional[int] = None,
+            n_domains_test: Optional[int] = None
         ):
         super().__init__()
 
@@ -22,23 +25,26 @@ class AccuracyDomains_Callback(Callback):
         
         _task = "multiclass" if n_classes > 2 else "binary"
 
-        self.train_acc_average = Accuracy(task=_task, num_classes=n_classes, average="macro")
-        self.train_acc = {
-            f'acc_{i}': Accuracy(task=_task, num_classes=n_classes, average="macro") 
-            for i in range(n_domains_train)
-        }
+        if self.n_domains_train is not None:
+            self.train_acc_average = Accuracy(task=_task, num_classes=n_classes, average="macro", top_k=top_k)
+            self.train_acc = {
+                f'acc_{i}': Accuracy(task=_task, num_classes=n_classes, average="macro", top_k=top_k) 
+                for i in range(n_domains_train)
+            }
         
-        self.val_acc_average = Accuracy(task=_task, num_classes=n_classes, average="macro")
-        self.val_acc = {
-            f'acc_{i}': Accuracy(task=_task, num_classes=n_classes, average="macro") 
-            for i in range(n_domains_val)
-        }
+        if self.n_domains_val is not None:
+            self.val_acc_average = Accuracy(task=_task, num_classes=n_classes, average="macro", top_k=top_k)
+            self.val_acc = {
+                f'acc_{i}': Accuracy(task=_task, num_classes=n_classes, average="macro", top_k=top_k) 
+                for i in range(n_domains_val)
+            }
         
-        self.test_acc_average = Accuracy(task=_task, num_classes=n_classes, average="macro")
-        self.test_acc = {
-            f'acc_{i}': Accuracy(task=_task, num_classes=n_classes, average="macro") 
-            for i in range(n_domains_test)
-        }
+        if self.n_domains_test is not None:
+            self.test_acc_average = Accuracy(task=_task, num_classes=n_classes, average="macro", top_k=top_k)
+            self.test_acc = {
+                f'acc_{i}': Accuracy(task=_task, num_classes=n_classes, average="macro", top_k=top_k) 
+                for i in range(n_domains_test)
+            }
 
     def _mask_each_domain(self, batch: dict, env_index: int):
         """Returns a mask for the complete target and preds vectors corresponding to the current domain."""
@@ -56,6 +62,9 @@ class AccuracyDomains_Callback(Callback):
         
 
     def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
+        if self.n_domains_train is None:
+            return
+
         y, preds = outputs["targets"], outputs["preds"]
 
         metrics_dict = {
@@ -75,6 +84,9 @@ class AccuracyDomains_Callback(Callback):
         pl_module.log_dict(metrics_dict, prog_bar=False, on_step=True, on_epoch=True, logger=True, sync_dist=True)
 
     def on_validation_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
+        if self.n_domains_val is None:
+            return
+        
         y, preds = outputs["targets"], outputs["preds"]
 
         metrics_dict = {
@@ -94,6 +106,9 @@ class AccuracyDomains_Callback(Callback):
         pl_module.log_dict(metrics_dict, prog_bar=False, on_step=True, on_epoch=True, logger=True, sync_dist=True)
 
     def on_test_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
+        if self.n_domains_test is None:
+            return
+        
         y, preds = outputs["targets"], outputs["preds"]
         metric_name = trainer.checkpoint_metric
 

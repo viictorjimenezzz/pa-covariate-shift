@@ -1,11 +1,15 @@
 accuracy_domains:
   _target_: src.callbacks.accuracy_domains.AccuracyDomains_Callback
   n_classes: ${model.net.n_classes}
-  # n_domains_train: ${len:'${data.train_config}'}
-  # n_domains_val: ${len:'${data.val_config}'}
-  # n_domains_test: ${len:'${data.test_config}'}
+  top_k: 1
 
-   # For diagvib
+  # For diagvib experiments:
   n_domains_train: ${len:${diagvib_dataset.dataset_specifications.train.envs}}
   n_domains_val: ${len:${diagvib_dataset.dataset_specifications.val.envs}}
   n_domains_test: ${len:${diagvib_dataset.dataset_specifications.test.envs}}
+
+
+  # For WILDS experiments:
+  # n_domains_train: ${len:'${data.train_config}'}
+  # n_domains_val: ${len:'${data.val_config}'}
+  # n_domains_test: ${len:'${data.test_config}'}
