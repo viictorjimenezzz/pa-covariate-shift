@@ -1,3 +1,4 @@
 accuracy:
   _target_: src.callbacks.accuracy.Accuracy_Callback
   n_classes: ${model.net.n_classes}
+  top_k: 1

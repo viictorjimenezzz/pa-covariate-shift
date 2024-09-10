@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pytorch_lightning.callbacks import Callback
 from torchmetrics import Accuracy, F1Score, Recall, Specificity, Precision
 
@@ -5,28 +7,28 @@ class Accuracy_Callback(Callback):
     """
     Computes and logs general accuracy metrics during training and/or testing.
     """
-    def __init__(self, n_classes: int):
+    def __init__(self, n_classes: int, top_k: Optional[int] = 1):
         super().__init__()
 
         self.n_classes = n_classes
         _task = "multiclass" if n_classes > 2 else "binary"
 
         # Training metrics
-        self.train_acc = Accuracy(task=_task, num_classes=self.n_classes, average="macro")
+        self.train_acc = Accuracy(task=_task, num_classes=self.n_classes, average="macro", top_k=top_k)
         self.train_f1 = F1Score(task=_task, num_classes=self.n_classes, average="macro")
         self.train_specificity = Specificity(task=_task, num_classes=self.n_classes, average="macro")
         self.train_sensitivity = Recall(task=_task, num_classes=self.n_classes, average="macro")
         self.train_precision = Precision(task=_task, num_classes=self.n_classes, average="macro")
 
         # Validation metrics
-        self.val_acc = Accuracy(task=_task, num_classes=self.n_classes, average="macro")
+        self.val_acc = Accuracy(task=_task, num_classes=self.n_classes, average="macro", top_k=top_k)
         self.val_f1 = F1Score(task=_task, num_classes=self.n_classes, average="macro")
         self.val_specificity = Specificity(task=_task, num_classes=self.n_classes, average="macro")
         self.val_sensitivity = Recall(task=_task, num_classes=self.n_classes, average="macro")
         self.val_precision = Precision(task=_task, num_classes=self.n_classes, average="macro")
 
         # Test metrics
-        self.test_acc = Accuracy(task=_task, num_classes=self.n_classes, average="macro")
+        self.test_acc = Accuracy(task=_task, num_classes=self.n_classes, average="macro", top_k=top_k)
         self.test_f1 = F1Score(task=_task, num_classes=self.n_classes, average="macro")
         self.test_specificity = Specificity(task=_task, num_classes=self.n_classes, average="macro")
         self.test_sensitivity = Recall(task=_task, num_classes=self.n_classes, average="macro")
