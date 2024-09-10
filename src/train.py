@@ -77,12 +77,74 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
     if logger:
         log.info("Logging hyperparameters!")
         utils.log_hyperparameters(object_dict)
+    
+    if 'resume_training' in cfg.auxiliary_args.keys():
+        if cfg.auxiliary_args.resume_training == True:
+            csv_name = "ckpt_exp"
+            if 'wandb' in cfg.logger.keys():
+                csv_name = cfg.logger.wandb.project
 
+            path_ckpt_csv = cfg.paths.log_dir + f"/{csv_name}.csv"
+            experiment_df = pd.read_csv(path_ckpt_csv)
+            selected_ckpt = experiment_df[
+                (experiment_df['experiment_name'] == cfg.logger.wandb.name) & (experiment_df['metric'] == "last") & (experiment_df['seed'] == str(cfg.seed))
+            ]
+            assert len(selected_ckpt) == 1, "There are duplicate experiments in the csv file."
+            ckpt_path = selected_ckpt["ckpt_path"].item()
+            model = model.load_from_checkpoint(
+                    ckpt_path,
+                    net=hydra.utils.instantiate(cfg.model.net),
+                    loss=hydra.utils.instantiate(cfg.model.loss)
+            )
+    
     # Train model
     log.info("Starting training!")
     trainer.fit(
         model=model, datamodule=datamodule, ckpt_path=cfg.get("ckpt_path")
     )
+
+    # ----------------------------------------------------------------------------------------------
+    # DELETE ONCE THE DATA HAS BEEN STORED FOR ALL CASES.
+    # import pickle
+    # import os
+
+    # RESULTS_DIR = r"/cluster/home/vjimenez/adv_pa_new/results/adv"
+    # # fname = f"PGD_eps={cfg.auxiliary_args.epsilons}_ar=1.0_distributions.pkl"
+    # fname = f"FMN_ar=1.0_distributions.pkl"
+    # file_path = os.path.join(RESULTS_DIR, cfg.model.net.model_name, fname)
+
+    # orig_true_mean = model.stored_orig_true/model.num_orig_true
+    # gibbs_orig_true_mean = model.stored_orig_gibbs_true/model.num_orig_true
+
+    # orig_false_mean = model.stored_orig_false/model.num_orig_false
+    # gibbs_orig_false_mean = model.stored_orig_gibbs_false/model.num_orig_false
+
+    # adv_true_mean = model.stored_adv_true/model.num_adv_true
+    # gibbs_adv_true_mean = model.stored_adv_gibbs_true/model.num_adv_true
+
+    # results = {
+    #     'orig_true_mean': orig_true_mean,
+    #     'orig_true_std': torch.sqrt(model.stored_orig_true_2/model.num_orig_true - orig_true_mean**2),
+    #     'gibbs_orig_true_mean': gibbs_orig_true_mean,
+    #     'gibbs_orig_true_std': torch.sqrt(model.stored_orig_gibbs_true_2/model.num_orig_true - gibbs_orig_true_mean**2),
+
+    #     'orig_false_mean': orig_false_mean,
+    #     'orig_false_std': torch.sqrt(model.stored_orig_false_2/model.num_orig_false - orig_false_mean**2),
+    #     'gibbs_orig_false_mean': gibbs_orig_false_mean,
+    #     'gibbs_orig_false_std': torch.sqrt(model.stored_orig_gibbs_false_2/model.num_orig_false - gibbs_orig_false_mean**2),
+        
+
+    #     'adv_true_mean': adv_true_mean,
+    #     'adv_true_std': torch.sqrt(model.stored_adv_true_2/model.num_adv_true - adv_true_mean**2),
+    #     'gibbs_adv_true_mean': gibbs_adv_true_mean,
+    #     'gibbs_adv_true_std': torch.sqrt(model.stored_adv_gibbs_true_2/model.num_adv_true - gibbs_adv_true_mean**2)
+    # }
+    # with open(file_path, 'wb') as f:
+    #     pickle.dump(results, f)
+
+    # raise NotImplementedError
+    # ----------------------------------------------------------------------------------------------
+
 
     train_metrics = trainer.callback_metrics
     metric_dict = {**train_metrics}
@@ -95,7 +157,7 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
 
     # On rank 0, we log the experiment.
     is_rank_0 = dist.get_rank() == 0 if dist.is_initialized() else True
-    if is_rank_0:
+    if is_rank_0 and trainer.checkpoint_callbacks[0].monitor != None:
         # Multiple checkpointing callbacks possible:
         ckpt_paths = [ckpt_callb.best_model_path for ckpt_callb in trainer.checkpoint_callbacks]
         tracked_metric_ckpt = [ckpt_callb.monitor.split("/")[-1] for ckpt_callb in trainer.checkpoint_callbacks]
