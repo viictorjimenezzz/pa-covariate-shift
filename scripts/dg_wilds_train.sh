@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --ntasks=1
-#SBATCH --ntasks-per-node=1
+#SBATCH --ntasks=4
+#SBATCH --ntasks-per-node=4
 #SBATCH --nodes=1
-#SBATCH --gpus-per-node=1
-#SBATCH --mem-per-cpu=20G
-#SBATCH --time=24:00:00
+#SBATCH --gpus-per-node=4
+#SBATCH --mem-per-cpu=50G
+#SBATCH --time=120:00:00
 
 # activate conda env
 source activate $1
@@ -12,21 +12,24 @@ source activate $1
 # python3 src/train.py \
 srun python3 src/train.py \
     --multirun \
-    callbacks=default_train_modelselection \
-    +callbacks@callbacks.posterioragreement=pametric_nn \
+    callbacks=default_train_modelselection_wilds \
+    +callbacks@callbacks.posterioragreement=pametric_toremove \
+    callbacks.posterioragreement.pa_epochs=1000 \
+    callbacks.posterioragreement.pairing_strategy=label_nn \
     +callbacks/components@callbacks.posterioragreement.dataset=pa_wilds_trainval \
-    experiment=dg/wilds/camelyon17_erm \
-    +data/dg/wilds@data=camelyon17_oodval \
-    +auxiliary_args.dataconfname=camelyon17_oodval \
-    name_logger=to_download \
+    experiment=dg/wilds/camelyon17_irm \
+    name_logger=idtest_irm_labnn \
+    +data/dg/wilds@data=rxrx1_idtest \
+    +auxiliary_args.dataconfname=rxrx1_idtest \
     data.transform.is_training=true \
     seed=0 \
-    trainer=cpu \
+    trainer=ddp \
     trainer.deterministic=true \
-    logger.wandb.group=camelyon17 \
-    trainer.max_epochs=1\
+    # trainer.limit_train_batches=0.00001 \
+    # trainer.limit_val_batches=0.02632 \
     # callbacks.model_checkpoint_PA.patience=2 \
     # +callbacks@callbacks.batch_size_finder=batch_size_finder_lisa \
+    # callbacks.posterioragreement.pa_epochs=1000 \
 
     
 
