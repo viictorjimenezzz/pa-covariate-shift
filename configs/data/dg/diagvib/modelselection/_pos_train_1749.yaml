@@ -1,0 +1,11 @@
+# @package _global_
+
+# Common configuration for the training. It will entail a single dataset to be used in all cases.
+size: 10000
+randperm: False
+shape: [1,7,4,9]
+
+# hue, lightness, texture, position, scale
+envs: 
+  - [2,0,0,8,4] # green, dark, blank, UL, large
+  - [2,0,0,0,4] # green, dark, blank, LR, large

@@ -1,0 +1,16 @@
+# @package _global_
+
+# Common configuration for the test environments 1 - 5. It will entail a single dataset to be used in all cases.
+
+size: ${size_test} # the size allowed by the MNIST samples, so that there is exactly one instance of each sample.
+randperm: False
+shape: [1,7,4,9]
+
+# hue, lightness, texture, position, scale
+envs:
+  - [0,0,0,4,4] # 0: RED, dark, blank, cc, large
+  - [2,0,0,4,4] # 1: GREEN, dark, blank, cc, large
+  - [2,3,0,4,4] # 2: green, BRIGHT, blank, cc, large
+  - [2,3,1,4,4] # 3: green, bright, TILES, cc, large
+  - [2,3,1,0,4] # 4: green, bright, tiles, UL, large
+  - [2,3,1,0,0] # 5: green, bright, tiles, ul, SMALL

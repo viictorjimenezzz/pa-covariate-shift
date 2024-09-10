@@ -1,0 +1,23 @@
+# @package _global_
+
+folder_name: _debug
+filename: env
+
+shape: [1,7] # Should be divisible by the number of shapes.
+
+# hue, lightness, texture, position, scale
+batch_size: 64 
+dataset_specifications:
+  val:
+    size: 128 # easy for PA debugging
+    shape: ${shape}
+    randperm: False
+    envs:
+      - [0,3,0,4,4] # RED, bright, blank, cc, large
+      - [4,3,0,4,4] # BLUE, bright, blank, cc, large
+
+
+# Leave here for interpolation convenience
+train_dataset_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_modelselection/_debug_train/
+val_dataset_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_modelselection/_debug/
+test_dataset_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_modelselection/_hue_test/

@@ -1,0 +1,29 @@
+# @package _global_
+defaults:
+  - /data/dg/diagvib/modelselection@dataset_specifications.train: _hue_train_1749.yaml # train
+  - /data/dg/diagvib/modelselection@dataset_specifications.test: _hue_test_1749.yaml # train
+
+folder_name: hue_oodval
+filename: env
+
+shape: [1,4,7,9] # Should be divisible by the number of shapes.
+
+# hue, lightness, texture, position, scale
+batch_size: 64 
+dataset_specifications:
+  val:
+    size: ${size_val}
+    shape: ${shape}
+    randperm: False
+    envs:
+      - [1,0,0,4,4] # YELLOW, bright, blank, cc, large
+      - [5,0,0,4,4] # MAGENTA, bright, blank, cc, large
+
+
+# Leave here for interpolation convenience
+train_dataset_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_modelselection/_hue_train_1749/
+val_dataset_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_modelselection/${folder_name}/
+test_dataset_dir: ${paths.data_dir}/dg/dg_datasets/diagvib_modelselection/_hue_test_1749/
+
+  
+    
