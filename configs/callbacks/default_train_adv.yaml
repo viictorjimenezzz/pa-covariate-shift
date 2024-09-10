@@ -1,0 +1,27 @@
+defaults:
+  # - accuracy_domains.yaml # Accuracy with domain distinction (for datashift)
+  # - accuracy.yaml # General accuracy metrics to compare with benchmark
+  # - accuracy_domains.yaml
+  # - pa_distances_adv.yaml
+
+  # Same as always:
+  - model_summary.yaml
+  - rich_progress_bar.yaml
+  - _self_
+
+model_summary:
+  max_depth: -1
+
+accuracy:
+  n_classes: 10
+
+accuracy_domains:
+  n_domains_train: 2 # original and attacked
+  n_classes: 10
+  n_domains_val: null
+  n_domains_test: null
+
+# I include it as null here to be able to override it in the script .sh file.
+normalization: null
+posterioragreement: null
+batch_size_finder: null

@@ -1,0 +1,41 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - /data/adv@data: cifar10.yaml
+  - /model/adv@model: adv.yaml
+  - /trainer: ddp.yaml
+  - override /logger: wandb.yaml
+
+seed: ???
+
+trainer:
+  min_epochs: 0
+  max_epochs: 1
+  multiple_trainloader_mode: max_size_cycle
+  accumulate_grad_batches: null
+  replace_sampler_ddp: true
+
+tags: 
+  - "adv"
+  - "cifar10"
+  - "${data.classifier.model_name}"
+  - "${data.attack.attack_name}"
+  - "adam"
+
+logger:
+  wandb:
+    tags: ${tags}
+    entity: malvai
+    project: Adversarial
+    group: ${data.classifier.model_name}
+    save_dir: ${paths.output_dir}/adv
+    name: att=${data.attack.attack_name}_ar=${data.adversarial_ratio}${adv_name:${auxiliary_args.epsilons},${auxiliary_args.steps}}
+
+task_name: adv_cifar10
+
+auxiliary_args:
+  steps: null
+  epsilons: null
