@@ -1,0 +1,43 @@
+# @package _global_
+
+defaults:
+  - /experiment/dg/diagvibsix/diagvibsix.yaml
+  - /model/dg@model: erm.yaml
+
+trainer:
+  max_epochs: 500
+
+model:
+  loss:
+    _target_: src.models.components.flooding.FloodingCrossEntropyLoss
+    flood_level: ???
+  
+  optimizer:
+    _target_: torch.optim.SGD
+    lr: 0.002
+
+  net:
+    pretrained: false
+    net: resnet18
+    n_classes: ${data.n_classes}
+
+  scheduler: null
+
+logger:
+  wandb:
+    tags: ${tags}
+    entity: malvai
+    project: Flooding
+    group: "${model.net.net}_${classname: ${model.optimizer._target_}}"
+    save_dir: ${paths.output_dir}/dg
+    # For the tests only. Override in script file during training.
+    name: "${diagvib_dataset.folder_name}_flood=${model.loss.flood_level}_lr=${model.optimizer.lr}"
+    
+tags: 
+  - "flooding"
+  - "diagvibsix"
+  - "${diagvib_folder: ${data.dataset_dir}}"
+  - "erm"
+  - "${model.net.net}"
+  - "${classname: ${model.optimizer._target_}}"
+
