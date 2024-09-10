@@ -8,7 +8,7 @@ beta0: 1.0
 deltametric: false
 preds_2_factor: 1.0
 pairing_strategy: null #label
-pairing_csv: null #${data.dataset_dir}${data.dataset_name}/${auxiliary_args.dataconfname}_trainval_${callbacks.posterioragreement.pairing_strategy}.csv # null
+pairing_csv: "${data.dataset_dir}/${auxiliary_args.dataconfname}_trainval_${callbacks.posterioragreement.pairing_strategy}.csv" # null
 cuda_devices: 4
 batch_size: ${data.batch_size}
 num_workers: ${data.num_workers}

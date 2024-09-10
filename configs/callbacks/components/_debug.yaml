@@ -1,0 +1,13 @@
+# Use this configuration to do a --multirun for all pairs of shifted environments,
+# which ensures that each testing job will optimize beta for the given pair. See pa_diagvib_paper_eval.yaml to see the difference.
+_target_: pametric.datautils.MultienvDataset
+dset_list:
+  - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
+    mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
+    cache_filepath: ${paths.data_dir}dg/dg_datasets/diagvib_modelselection/_debug/val_env0.pkl
+    seed: ${seed}
+
+  - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
+    mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
+    cache_filepath: ${paths.data_dir}dg/dg_datasets/diagvib_modelselection/_debug/val_env1.pkl
+    seed: ${seed}

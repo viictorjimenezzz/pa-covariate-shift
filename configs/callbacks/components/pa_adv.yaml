@@ -1,0 +1,7 @@
+# All the metrics are important.
+_target_: src.data.cifar10_datamodules.CIFAR10DatasetPA
+classifier: ${data.classifier}
+attack: ${data.attack}
+adversarial_ratio: ${data.adversarial_ratio}
+dataset_dir: ${data.dataset_dir}
+cache: true

@@ -7,9 +7,9 @@ dset_list:
   - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
     mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
     seed: ${seed}
-    cache_filepath: ${data.dataset_dir}val_${diagvib_dataset.filename}0.pkl
+    cache_filepath: ${data.val_dataset_dir}val_${diagvib_dataset.filename}0.pkl
     
   - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
     mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
     seed: ${seed}
-    cache_filepath: ${data.dataset_dir}val_${diagvib_dataset.filename}1.pkl
+    cache_filepath: ${data.val_dataset_dir}val_${diagvib_dataset.filename}1.pkl

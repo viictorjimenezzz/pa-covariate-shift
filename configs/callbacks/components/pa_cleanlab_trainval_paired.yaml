@@ -1,0 +1,3 @@
+_target_: src.data.components.imagenet_datasets.PairedImagenet
+train_dataset_dir: ${data.dataset_dir}val/
+val_dataset_dir: ${data.dataset_dir}train/

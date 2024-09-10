@@ -1,0 +1,10 @@
+# All the metrics are important.
+_target_: pametric.datautils.MultienvDataset
+dset_list:
+  - _target_: src.data.components.imagenet_datasets.CorrectedValidationImageNet
+    dataset_dir: ${data.dataset_dir}/
+    mislabelled: true
+
+  - _target_: src.data.components.imagenet_datasets.CorrectedValidationImageNet
+    dataset_dir: ${data.dataset_dir}/
+    mislabelled: false

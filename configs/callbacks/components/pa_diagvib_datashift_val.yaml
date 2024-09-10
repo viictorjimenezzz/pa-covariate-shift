@@ -4,30 +4,30 @@ _target_: pametric.datautils.MultienvDataset
 dset_list:
   - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
     mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
-    cache_filepath: data/dg/dg_datasets/paper/test_env0.pkl
+    cache_filepath: ${data.test_dataset_dir}test_${diagvib_dataset.filename}0.pkl
     seed: ${seed}
 
   - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
     mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
-    cache_filepath: data/dg/dg_datasets/paper/test_env1.pkl
+    cache_filepath: ${data.test_dataset_dir}test_${diagvib_dataset.filename}1.pkl
     seed: ${seed}
   
   - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
     mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
-    cache_filepath: data/dg/dg_datasets/paper/test_env2.pkl
+    cache_filepath: ${data.test_dataset_dir}test_${diagvib_dataset.filename}2.pkl
     seed: ${seed}
   
   - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
     mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
-    cache_filepath: data/dg/dg_datasets/paper/test_env3.pkl
+    cache_filepath: ${data.test_dataset_dir}test_${diagvib_dataset.filename}3.pkl
     seed: ${seed}
   
   - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
     mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
-    cache_filepath: data/dg/dg_datasets/paper/test_env4.pkl
+    cache_filepath: ${data.test_dataset_dir}test_${diagvib_dataset.filename}4.pkl
     seed: ${seed}
   
   - _target_: src.data.components.diagvib_dataset.DiagVib6DatasetPA
     mnist_preprocessed_path: ${paths.data_dir}/dg/mnist_processed.npz
-    cache_filepath: data/dg/dg_datasets/paper/test_env5.pkl
+    cache_filepath: ${data.test_dataset_dir}test_${diagvib_dataset.filename}5.pkl
     seed: ${seed}
