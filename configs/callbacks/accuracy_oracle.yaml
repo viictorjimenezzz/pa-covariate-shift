@@ -1,0 +1,13 @@
+accuracy_oracle:
+  _target_: src.callbacks.accuracy_oracle.AccuracyOracle_Callback
+  n_classes: ${model.net.n_classes}
+  top_k: 1
+
+
+  # For diagvib experiments:
+  n_domains_test: ${len:${diagvib_dataset.dataset_specifications.test.envs}}
+  envs_index_test: ${arange_list:${diagvib_dataset.dataset_specifications.test.envs}}
+
+  # For WILDS experiments:
+  # n_domains_test: ${len:${data.test_config}}
+  # envs_index_test: ${arange_list:${data.test_config}}
