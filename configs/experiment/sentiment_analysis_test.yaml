@@ -1,0 +1,51 @@
+# @package _global_
+
+defaults:
+  - /data@data: imdb.yaml
+  - /model@model: sentiment_analysis.yaml
+
+  # Add pametric
+  - /callbacks@callbacks.posterioragreement: pametric.yaml
+  - /callbacks/components@callbacks.posterioragreement.dataset: pa_imdb.yaml
+
+  - override /callbacks@callbacks: sentiment_analysis.yaml
+  - override /logger: wandb.yaml
+
+trainer:
+  max_epochs: 2
+
+data:
+  batch_size: 16
+  num_workers: 0
+
+logger:
+  wandb:
+    tags: ${tags}
+    entity: malvai
+    project: NLP
+    group: sentiment_analysis
+    save_dir: ${paths.output_dir}/NLP
+    name: imdb_att=${callbacks.posterioragreement.dataset.perturbation}_pow=${callbacks.posterioragreement.dataset.intensity}
+   
+task_name: nlp
+checkpoint_metric: acc
+
+callbacks:
+  posterioragreement:
+    pa_epochs: 1000
+    cuda_devices: 1
+    batch_size: "${intdiv: ${data.batch_size}, 2}"
+    collate_fn:
+      _target_: hydra.utils.get_method # to avoid instantiation of a callable
+      path: src.data.components.tokenizers.collate_fn_nlp
+    dataset:
+      perturbation: levenshtein
+      intensity: 20
+
+
+tags: 
+  - "nlp"
+  - "imdb"
+  - "${classname: ${model.optimizer._target_}}"
+  - "${classname: ${model._target_}}"
+  - "${callbacks.posterioragreement.dataset.perturbation}"

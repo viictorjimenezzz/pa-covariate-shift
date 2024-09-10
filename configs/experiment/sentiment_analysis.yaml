@@ -1,0 +1,31 @@
+# @package _global_
+
+defaults:
+  - /data@data: imdb.yaml
+  - /model@model: sentiment_analysis.yaml
+  - override /callbacks@callbacks: sentiment_analysis.yaml
+  - override /logger: wandb.yaml
+
+data:
+  batch_size: 16
+  
+trainer:
+  max_epochs: 2
+
+logger:
+  wandb:
+    tags: ${tags}
+    entity: malvai
+    project: NLP
+    group: sentiment_analysis
+    save_dir: ${paths.output_dir}/NLP
+    name: imdb
+   
+task_name: nlp
+checkpoint_metric: acc
+
+tags: 
+  - "nlp"
+  - "imdb"
+  - "${classname: ${model.optimizer._target_}}"
+  - "${classname: ${model._target_}}"
