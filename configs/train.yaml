@@ -50,4 +50,6 @@ seed: ???
 
 # additional argumants that might be required for intermediate calculations inside the 
 # configuration files but are not used to initialize any object
-auxiliary_args: null
+auxiliary_args:
+  resume_training: false
+  pametric_callback_name: PA_Callback
