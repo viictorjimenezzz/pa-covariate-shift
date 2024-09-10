@@ -1,10 +1,9 @@
 defaults:
-  # - accuracy_domains.yaml # Accuracy with domain distinction (for datashift)
   - accuracy.yaml # General accuracy metrics to compare with benchmark
-  # - accuracy_domains.yaml
-  - accuracy_oracle.yaml # For the test set
-  - pa_distances.yaml
-  - pa_pca.yaml
+  - accuracy_domains_remove.yaml
+  - accuracy_oracle_remove.yaml # For the test set
+
+  # No need to do it, but still do it (same as with diagvib)
   - model_checkpoint_pa.yaml # max{logPA} checkpoiting
   - model_checkpoint_afr.yaml # max{AFR pred} checkpoiting
   - model_checkpoint.yaml # max{val/acc} checkpoiting
@@ -22,3 +21,13 @@ normalization: null
 posterioragreement: null
 batch_size_finder: null
 feature_pairing: null
+
+# Instad of importing pa_distances.yaml, I only select some of them:
+# pa_measureoutput:
+#   _target_: src.callbacks.pa_distances.PAOutput_Callback
+#   pametric_callback_name: ${auxiliary_args.pametric_callback_name}
+
+# pa_centroid:
+#   _target_: pametric.lightning.callbacks.CentroidDistance_Callback
+#   pametric_callback_name: ${auxiliary_args.pametric_callback_name}
+
