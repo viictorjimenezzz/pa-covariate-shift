@@ -18,7 +18,7 @@ trainer:
 
 data:
   # dataset_dir: ${paths.data_dir}/dg/dg_datasets/wilds/
-  dataset_dir: /cluster/scratch/vjimenez/wilds/
+  dataset_dir: /cluster/scratch/vjimenez/wilds/${data.dataset_name}
   batch_size: 16
   num_workers: 1
   pin_memory: true
@@ -29,7 +29,7 @@ logger:
     tags: ${tags}
     entity: malvai
     project: WILDS - PA OOD Model Selection
-    group: group-name
+    group: ${data.dataset_name}
     save_dir: ${paths.output_dir}/dg
     name: ${name_logger}
 

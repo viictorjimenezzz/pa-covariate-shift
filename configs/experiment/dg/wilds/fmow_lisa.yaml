@@ -10,10 +10,10 @@ defaults:
 
 # The original batch size is 32, we will use 4 with 8 gradient accumulation steps
 data:
-  batch_size: 4
+  batch_size: 2
 trainer:
   max_epochs: 60 # 5 originally
-  accumulate_grad_batches: 8
+  accumulate_grad_batches: 16
 
 model:
   ppred: 1.0
