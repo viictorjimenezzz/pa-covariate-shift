@@ -1,0 +1,11 @@
+# pa_pca_tsne:
+#   _target_: src.callbacks.pa_distances.BidimensionalEmbeddingsPlot_Callback
+#   on_epochs: [0, 10, 20, 30, 40, 49]
+#   tsne: false
+#   pametric_callback_name: ${auxiliary_args.pametric_callback_name}
+
+pa_pca:
+  _target_: src.callbacks.pa_pca.PCA_Callback
+  # on_epochs: [0, 2, 4, 6, 8, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 99]
+  on_epochs: [0, 1, 2, 4, 6, 8, 10]
+  plot: true
