@@ -69,8 +69,7 @@ def check_conditions(dataset_specs_path, cache_path):
     else:
         is_pkl = False
         cache_exists = False
-    
-    
+
     # If only a CSV or YML file is provided
     if dataset_exists and (is_csv or is_yml) and not cache_exists:
         if is_pkl:
@@ -247,6 +246,7 @@ class DiagVib6DatasetPA(TorchDatasetWrapper):
                  mean: Optional[List[float]] = None, 
                  std: Optional[List[float]] = None):
         
+
         # Check if the input files are valid
         is_csv = check_conditions(dataset_specs_path, cache_filepath)
         
@@ -268,8 +268,8 @@ class DiagVib6DatasetPA(TorchDatasetWrapper):
                     dataset_spec=load_yaml(dataset_specs_path), 
                     mnist_preprocessed_path=mnist_preprocessed_path,
                     cache_path=None,
-                    split_numsplit=split_numsplit,
-                    seed=seed)
+                    seed=seed + split_numsplit[0]  # to make them different
+                )
 
             # Save dataset object to cache if cache_path is provided
             if cache_filepath is not None:
@@ -285,8 +285,8 @@ class DiagVib6DatasetPA(TorchDatasetWrapper):
         if self.normalization == 'z-score' and (self.mean is None or self.std is None):
             self.mean, self.std = get_per_ch_mean_std(self.dataset.images)
 
-    def __getitem__(self, item):
-        sample = self.dataset.__getitem__(item)
+    def __getitem__(self, idx: int):
+        sample = self.dataset.__getitem__(idx)
         image, target, _ = sample.values()
         image = self._normalize(self._to_T(image, torch.float))
         return [image, self.unique_targets.index(target[1])] # we assume the task is the shape
@@ -295,8 +295,8 @@ class DiagVib6DatasetPABinary(DiagVib6DatasetPA):
     """
     Takes whatever the classes are, and generates a binary classification target.
     """
-    def __getitem__(self, item):
-        sample = self.dataset.__getitem__(item)
+    def __getitem__(self, idx: int):
+        sample = self.dataset.__getitem__(idx)
         image, target, _ = sample.values()
         image = self._normalize(self._to_T(image, torch.float))
         return [image, 2 * target[1] // len(self.unique_targets)] # we assume the task is the shape 

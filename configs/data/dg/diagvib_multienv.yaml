@@ -2,13 +2,16 @@ _target_: src.data.diagvib_datamodules.DiagVibDataModuleMultienv
 
 n_classes: 10
 envs_name: ??? # env
-disjoint_envs: ??? # False
+train_disjoint_envs: ??? # True
+val_disjoint_envs: ??? # False
 train_val_sequential: ??? # False
 
 dataset_class:
   _target_: hydra.utils.get_class
   path: src.data.components.diagvib_dataset.DiagVib6DatasetPA
-dataset_dir: ${paths.data_dir}/dg/dg_datasets/
+train_dataset_dir: ${paths.data_dir}/dg/dg_datasets/
+val_dataset_dir: ${paths.data_dir}/dg/dg_datasets/
+test_dataset_dir: ${paths.data_dir}/dg/dg_datasets/
 mnist_preprocessed_path : ${paths.data_dir}/dg/mnist_processed.npz
 
 batch_size: ???

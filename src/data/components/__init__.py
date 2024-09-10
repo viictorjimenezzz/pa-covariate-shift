@@ -113,3 +113,19 @@ class LogitsDataset(Dataset):
         When I request several items, I prefer to get a tensor for each dataset.
         """
         return [tuple([self.logits[i][indices], self.y[indices]]) for i in range(self.num_envs)]
+    
+
+from torch.utils.data import TensorDataset
+def _concat_MultienvDataset(multienvdset_list: List[MultienvDataset]) -> MultienvDataset:
+    new_ds_list = []
+    for ds in multienvdset_list:
+        x, y = [], [] 
+        for x_tens, y_tens in ds.__getitems__(range(len(ds))):
+            x.append(x_tens); y.append(y_tens)
+        new_ds_list.append(
+            TensorDataset(
+                torch.cat(x), torch.cat(y)
+            )
+        )
+
+    return new_ds_list

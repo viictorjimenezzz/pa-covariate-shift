@@ -23,17 +23,7 @@ class DiagVibDataModuleMultienv(LightningDataModule):
     Information about the format of the dataset configuration files can be found in the DiagVib6Dataset class.
 
     Args:
-        num_envs: Number of environments that will be used.
-        envs_index: Stem name of the environment. The .pkl or .csv/.yml files must be named "train_{envs_name}{num_env}" (and "val_{envs_name}{num_env}"), where num_env=range(num_envs).
-        shift_ratio: Ratio of samples to be shifted from the first to the second environment.
-        dataset_dir: Path to the directory containing the dataset configuration files or the cache.
-        disjoint_envs: Boolean indicating whether the environments are generated from disjoint sample sets or not.
-        train_val_sequential (bool): Boolean to indicate whether train/val datasets will be formed by taking a different sample each time. If the number of requested images for a class is smaller than the total number of images for that class, data in the same epoch will be non-repetitive. Test datasets are built this way by default.
-        mnist_preprocessed_path: Path to the preprocessed MNIST dataset. If not available, it will be generated there.
-        collate_fn: Collate function to be used by the DataLoader. Each collate function adapts the output for a specific model.
-        batch_size: Batch size.
-        num_workers: Number of workers.
-        pin_memory: Whether to pin memory.
+
     """
     def __init__(
         self,
@@ -42,9 +32,12 @@ class DiagVibDataModuleMultienv(LightningDataModule):
         envs_index_train: Optional[List[int]] = [0],
         envs_index_val: Optional[List[int]] = [0],
         envs_index_test: Optional[List[int]] = [0],
-        dataset_dir: str = osp.join(".", "data", "datasets"),
+        train_dataset_dir: str = osp.join(".", "data", "datasets"),
+        val_dataset_dir: str = osp.join(".", "data", "datasets"),
+        test_dataset_dir: str = osp.join(".", "data", "datasets"),
         dataset_class: Optional[Dataset] = DiagVib6DatasetPA, # passed as object, no instantiate
-        disjoint_envs: bool = False,
+        train_disjoint_envs: bool = True,
+        val_disjoint_envs: bool = False,
         train_val_sequential: bool = False,
         mnist_preprocessed_path: str = osp.join(".", "data", "dg", "mnist_processed.npz"),
         batch_size: Optional[int] = 64,
@@ -75,13 +68,13 @@ class DiagVibDataModuleMultienv(LightningDataModule):
             self.train_dset_list = []
             for env_count in range(self.hparams.num_envs_train):
                 index = self.hparams.envs_index_train[env_count]
-                if not self.hparams.disjoint_envs:
+                if not self.hparams.train_disjoint_envs:
                     split_numsplit = [0,1]
                 else:
                     split_numsplit = [env_count, self.hparams.num_envs_train]
 
                 ds_name = 'train_' + self.hparams.envs_name + str(index)
-                dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.hparams.dataset_dir, dataset_name=ds_name)                
+                dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.hparams.train_dataset_dir, dataset_name=ds_name)                
                 self.train_dset_list.append(
                         self.hparams.dataset_class(
                             mnist_preprocessed_path = self.hparams.mnist_preprocessed_path,
@@ -96,13 +89,13 @@ class DiagVibDataModuleMultienv(LightningDataModule):
             self.val_dset_list = []
             for env_count in range(self.hparams.num_envs_val):
                 index = self.hparams.envs_index_val[env_count]
-                if not self.hparams.disjoint_envs:
+                if not self.hparams.val_disjoint_envs:
                     split_numsplit = [0,1]
                 else:
                     split_numsplit = [env_count, self.hparams.num_envs_val]
 
                 ds_name = 'val_' + self.hparams.envs_name + str(index)
-                dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.hparams.dataset_dir, dataset_name=ds_name)
+                dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.hparams.val_dataset_dir, dataset_name=ds_name)
                 if dataset_specs_path == None and not os.path.exists(cache_filepath):
                     """
                     If there is no validation dataset, the datamodule will not yield error.
@@ -126,13 +119,14 @@ class DiagVibDataModuleMultienv(LightningDataModule):
             self.test_dset_list = []
             for env_count in range(self.hparams.num_envs_test):
                 index = self.hparams.envs_index_test[env_count]
-                if not self.hparams.disjoint_envs:
-                    split_numsplit = [0,1]
-                else:
-                    split_numsplit = [env_count, self.hparams.num_envs_test]
+                
+                # Test environments always non-disjoint because we don't test them at the same time.
+                # Metrics are provided for each of them, and we want each of them to have exactly the same
+                # instantiations, with different shift.
+                split_numsplit = [0, 1]
 
                 ds_name = 'test_' + self.hparams.envs_name + str(index)
-                dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.hparams.dataset_dir, dataset_name=ds_name)
+                dataset_specs_path, cache_filepath = select_dataset_spec(dataset_dir=self.hparams.test_dataset_dir, dataset_name=ds_name)
 
                 # Apply shift ratio for the test:
                 self.test_dset_list.append(

@@ -15,11 +15,19 @@ def MultiEnv_collate_fn(batch: List):
         ...
     """
 
+    def _stack_y(batch, env):
+        try:
+            return torch.tensor([b[env][1] for b in batch])
+        except:
+            return torch.cat([b[env][1] for b in batch])
+
+
     batch_dict = {}
     for env in batch[0]:
+        import ipdb; ipdb.set_trace()
         batch_dict[env] = [
             torch.stack([b[env][0] for b in batch]),
-            torch.tensor([b[env][1] for b in batch]),
+            _stack_y(batch, env),
         ]
 
     return batch_dict
