@@ -143,6 +143,12 @@ dmypy.json
 *.h5
 *.tar
 *.tar.gz
+*.png
+*.pdf
+*.csv
+
+# W&B artifacts
+/src/plot/dg/artifacts/
 
 # Lightning-Hydra-Template
 configs/local/default.yaml
