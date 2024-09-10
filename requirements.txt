@@ -1,5 +1,5 @@
 pametric @ git+https://github.com/viictorjimenezzz/pa-metric.git@main
-diagvibsix @ git+https://github.com/viictorjimenezzz/diagvibsix.git@59cb3760c097a1068621c015e688543d2c854f98
+diagvibsix @ git+https://github.com/viictorjimenezzz/diagvibsix.git@librarization
 aiohttp==3.8.5
 aiosignal==1.3.1
 alembic==1.11.1
