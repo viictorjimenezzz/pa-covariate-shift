@@ -12,11 +12,11 @@ source activate $1
 srun python3 src/test_modelselection.py \
     --multirun \
     callbacks=default_test_modelselection \
-    +data/dg/diagvib/modelselection@diagvib_dataset=hue_idval_2 \
-    experiment=dg/diagvibsix/diagvibsix_erm \
-    experiment_name=erm_norm \
+    +data/dg/diagvib/modelselection@diagvib_dataset=hue_idval_10 \
+    experiment=dg/diagvibsix/diagvibsix_irm \
+    experiment_name=irm,irm_nn \
     checkpoint_metric=acc,logPA,AFR_pred \
-    data.envs_index_test=[0],[1] \
+    data.envs_index_test=[0],[1],[2],[3],[4] \
     seed=0 \
     trainer=gpu \
     trainer.deterministic=true \

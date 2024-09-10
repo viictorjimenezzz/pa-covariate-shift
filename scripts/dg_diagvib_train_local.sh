@@ -1,13 +1,24 @@
 python3 src/train.py \
     --multirun \
-    callbacks=default_train_modelselection \
+    callbacks=_debug \
     +callbacks@callbacks.posterioragreement=pametric \
     +callbacks/components@callbacks.posterioragreement.dataset=pa_diagvib_val_modelselection \
-    +data/dg/diagvib/modelselection@diagvib_dataset=hue_idval_2 \
+    +data/dg/diagvib/modelselection@diagvib_dataset=_debug \
+    +data/dg/diagvib/modelselection@diagvib_dataset.dataset_specifications.train=_debug_train \
+    +data/dg/diagvib/modelselection@diagvib_dataset.dataset_specifications.test=_hue_test_1749 \
+    auxiliary_args.diagvib_task=modelselection \
+    model.optimizer._target_=torch.optim.Adam \
     experiment=dg/diagvibsix/diagvibsix_erm \
+    model.optimizer.lr=0.01 \
+    data.num_workers=0 \
     seed=0 \
     trainer=cpu \
-    trainer.max_epochs=1 \
     trainer.deterministic=true \
-    +trainer.fast_dev_run=false \
-    logger.wandb=null
+    trainer.max_epochs=51 \
+    logger.wandb.group=plots \
+    logger.wandb.name=erm_adam_01 \
+    # logger.wandb=null \
+    # +trainer.fast_dev_run=true \
+        # logger.wandb=null \
+    # +data/dg/diagvib/modelselection@diagvib_dataset=hue_idval_2,hue_oodval_2,hue_idval_4,hue_oodval_4 \
+    #  data/dg/diagvib/modelselection@diagvib_dataset.dataset_specifications.train=_debug_train \
