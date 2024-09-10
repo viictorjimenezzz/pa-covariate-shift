@@ -77,8 +77,16 @@ class IRM(LightningModule):
             "preds": torch.cat(preds, dim=0)
         }
     
+    def _extract_test_batch(self, batch: tuple):
+        try: 
+            (x, y), domain_tag = batch
+            return (x, y), domain_tag
+        except:
+            x, y = batch
+            return (x, y), 0
+    
     def test_step(self, batch: dict, batch_idx: int):
-        (x, y), domain_tag = batch
+        (x, y), domain_tag = self._extract_test_batch(batch)
 
         garbage_collection_cuda()
         logits = self.model(x)

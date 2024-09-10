@@ -32,6 +32,17 @@ class ERM(LightningModule):
             return torch.cat([batch[env][0] for env in batch.keys()], dim=0), torch.cat([batch[env][1] for env in batch.keys()])
         else:
             return batch
+        
+    def _extract_test_batch(self, batch: tuple):
+        """
+        ERM is also used to train ImageNet and other datasets without domain_tag.
+        """
+        try: 
+            (x, y), domain_tag = batch
+            return (x, y), domain_tag
+        except:
+            x, y = batch
+            return (x, y), 0
     
     def training_step(self, batch: Union[dict, tuple], batch_idx: int):
         x, y = self._extract_batch(batch)
@@ -58,7 +69,7 @@ class ERM(LightningModule):
         }
 
     def test_step(self, batch: tuple, batch_idx: int):
-        (x, y), domain_tag = batch
+        (x, y), domain_tag = self._extract_test_batch(batch)
 
         garbage_collection_cuda()
         logits = self.model(x)

@@ -18,6 +18,45 @@ class LISA(ERM):
     It could be a problem if B_env1 and B_env2 do not share a single observation with the same label.
     So far, batch_size=64 does not seem to be a problem if samples are permuted randomly before going into batches.
 
+    Implements selective augmentation on top of ERM.
+    
+    This implementation of LISA assumes no prior pairing of the data. Working with multiple environments and unbalanced
+    datasets may bias the training towards the most represented categories. To avoid this, it is recommended that the
+    true batch size is set to:
+
+    B_true = B_LISA * D
+
+    where B_LISA is the batch size proposed by the LISA source code.
+
+    That is because of the disparity of the expected augmented batch length between a pre-paired dataset and a non
+    paired dataset. Here is a sketch of the intuition:
+
+    Let B be the incognito batch size of each dataset.
+    Let D be the number of datasets/environments and C the number of classes.
+    Let P_ij = P(y=i|e=j) be the prevalence of label i in dataset associated with environment j.
+    Let E(y=i|e=j) = B*P_ij be the expected number of observations of label i in a batch of environment j.
+    Let L_{y=i} be the length of the matched samples for all batch environments of label y=i, 
+    and L_{e=j} be the length of matched samples for all labels in batch environment j.
+    Let I be the length of the selective augmentation batch.
+
+    - When s == 0 (LISA-D): same domain, different label
+        L_{e=j} = C * B_LISA * min{P_ij, i=1,...,C}
+        I = sum_{j=1,...,D} L_{e=j} = C * B_LISA * sum_{j=1,...,D} min{P_ij; i = 1,...,C} =
+          = sum_{i=1,...,C} L_{y=i} = C * B_LISA * sum_{i=1,...,C} sum_{j=1,...,D} min{P_ij; i=1,...,C}
+
+        This implies:
+        sum_{j=1,...,D} min{P_ij; i = 1,...,C} = sum_{i=1,...,C} sum_{j=1,...,D} min{P_ij; i=1,...,C}
+
+        But it's important to note that:
+        L_{y=i|e=j} = B_LISA * min{P_ij, i=1,...,C} => L_{y=i} = B_LISA * sum_{j=1,...,D} min{P_ij; i=1,...,C}
+
+    - When s == 1 (LISA-L): same label, different domain
+        L_{y=i} = D * B_LISA * min{P_ij, j=1,...,D}
+        I = sum_{i=1,...,C} L_{y=i} = D * B_LISA * sum_{i=1,...,C} min{P_ij; j = 1,...,D}
+
+        In this case:
+        L_{y=i|e=j} = B_LISA * min{P_ij, j=1,...,D} => L_{e=j} = B_LISA * sum_{i=1,...,C} min{P_ij; j=1,...,D}
+
     Args:
         n_classes: Number of classes.
         net: Network to be trained.
@@ -185,7 +224,7 @@ class LISA(ERM):
             
         # build datasets to be mixed
         B1, B2, domain_tag = [], [], []
-        if int(s.item()) == 1: # LISA-L
+        if int(s.item()) == 1: # LISA-D
             # group data by label
             for label in y.unique():
                 mask = y.eq(label)
@@ -195,7 +234,7 @@ class LISA(ERM):
                 B2.append(all_inds[mask][B2_lab])
                 domain_tag += [envs_int[mask][B1_lab], envs_int[mask][B2_lab]]
 
-        else: # LISA-D
+        else: # LISA-L
             # group data by environment
             for env in envs_int.unique():
                 mask = envs_int.eq(env)
