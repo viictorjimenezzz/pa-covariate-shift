@@ -3,8 +3,8 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=1
-#SBATCH --mem-per-cpu=30G
-#SBATCH --time=24:00:00
+#SBATCH --mem-per-cpu=80G
+#SBATCH --time=4:00:00
 
 # activate conda env
 source activate $1
@@ -12,28 +12,21 @@ source activate $1
 # python3 src/test_datashift.py \
 srun python3 src/test_datashift.py \
     --multirun \
-    callbacks=default_test_datashift \
-    +callbacks@callbacks.posterioragreement=pametric \
-    +callbacks/components@callbacks.posterioragreement.dataset=pa_diagvib_datashift_test \
-    callbacks.posterioragreement.pairing_strategy=null \
-    +auxiliary_args.pa_datashift.shift_ratio=0.2,0.6,1.0 \
+    callbacks=posteriors \
+    callbacks.posteriors.optimal_beta=5.687 \
     auxiliary_args.project_name="DiagVib-6 Paper" \
     auxiliary_args.diagvib_task=datashift \
     +data/dg/diagvib/datashift@diagvib_dataset=paper_nonpaired \
     experiment=dg/diagvibsix/diagvibsix_lisa \
-    model.ppred=1.0 \
     experiment_name=lisa_10 \
     checkpoint_metric=acc \
-    data.envs_index_test=[0,1],[0,2],[0,3],[0,4],[0,5] \
+    data.envs_index_test=[0,0],[0,1],[0,2],[0,3],[0,4],[0,5] \
     seed=0 \
     trainer=gpu \
-    trainer.deterministic=true \
     +trainer.fast_dev_run=false \
-    # logger.wandb.group=paper_original
+    logger.wandb=null
 
-    # checkpoint_metric=acc,logPA,AFR_pred \
-    # data.envs_index_test=[0,1],[0,2],[0,3],[0,4],[0,5] \
-    # +auxiliary_args.pa_datashift.shift_ratio=0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0 \
+    # data.envs_index_test=[0,0],[0,1],[0,2],[0,3],[0,4],[0,5] \
 
     # trainer.limit_test_batches=0.003195 \
     # data.num_workers=0 \

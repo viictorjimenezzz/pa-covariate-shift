@@ -3,8 +3,8 @@
 #SBATCH --ntasks-per-node=4
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=4
-#SBATCH --mem-per-cpu=50G
-#SBATCH --time=24:00:00
+#SBATCH --mem-per-cpu=80G
+#SBATCH --time=120:00:00
 
 # activate conda env
 source activate $1
@@ -18,9 +18,10 @@ srun python3 src/train.py \
     +callbacks@callbacks.posterioragreement=pametric \
     +callbacks/components@callbacks.posterioragreement.dataset=pa_diagvib_datashift_val \
     callbacks.posterioragreement.pa_epochs=1000 \
-    +data/dg/diagvib/datashift@diagvib_dataset=ZGO_hue_3 \
-    experiment=dg/diagvibsix/diagvibsix_erm \
-    logger.wandb.name=erm_adam_001 \
+    +data/dg/diagvib/datashift@diagvib_dataset=paper_nonpaired \
+    experiment=dg/diagvibsix/diagvibsix_lisa \
+    model.ppred=0.75 \
+    logger.wandb.name=lisa_075 \
     trainer.max_epochs=100 \
     model.optimizer._target_=torch.optim.Adam \
     model.optimizer.lr=0.001 \

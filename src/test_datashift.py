@@ -45,12 +45,16 @@ def test(cfg: DictConfig) -> Tuple[dict, dict]:
     csv_name = "ckpt_exp"
     if 'wandb' in cfg.logger.keys() and cfg.logger['wandb'] != None:
         csv_name = cfg.logger.wandb.project
+        group = cfg.logger.wandb.group
+    else:
+        csv_name = cfg.auxiliary_args.project_name
+        group = cfg.diagvib_dataset.folder_name
 
     path_ckpt_csv = cfg.paths.log_dir + f"/{csv_name}.csv"
     experiment_df = pd.read_csv(path_ckpt_csv)
 
     selected_ckpt = experiment_df[
-        (experiment_df['group'] == cfg.logger.wandb.group) & (experiment_df['experiment_name'] == cfg.experiment_name) & (experiment_df['seed'] == str(cfg.seed)) & (experiment_df['metric'] == str(cfg.checkpoint_metric))
+        (experiment_df['group'] == group) & (experiment_df['experiment_name'] == cfg.experiment_name) & (experiment_df['seed'] == str(cfg.seed)) & (experiment_df['metric'] == str(cfg.checkpoint_metric))
     ]
     assert len(selected_ckpt) == 1, "There are duplicate experiments in the csv file."
 

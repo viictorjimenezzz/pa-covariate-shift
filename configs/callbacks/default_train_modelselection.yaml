@@ -3,11 +3,11 @@ defaults:
   - accuracy.yaml # General accuracy metrics to compare with benchmark
   # - accuracy_domains.yaml
   - accuracy_oracle.yaml # For the test set
-  - pa_distances.yaml
-  - pa_pca.yaml
-  - model_checkpoint_pa.yaml # max{logPA} checkpoiting
-  - model_checkpoint_afr.yaml # max{AFR pred} checkpoiting
-  - model_checkpoint.yaml # max{val/acc} checkpoiting
+  # - pa_distances.yaml
+  # - pa_pca.yaml
+  # - model_checkpoint_pa.yaml # max{logPA} checkpoiting
+  # - model_checkpoint_afr.yaml # max{AFR pred} checkpoiting
+  # - model_checkpoint.yaml # max{val/acc} checkpoiting
 
   # Same as always:
   - model_summary.yaml

@@ -10,10 +10,11 @@ defaults:
 
 # The original batch size is 32, we will use 4 with 8 gradient accumulation steps
 data:
-  batch_size: 2
+  batch_size: 32 # Original batch size is 32
 trainer:
   max_epochs: 60
-  accumulate_grad_batches: 16 # 8
+  accumulate_grad_batches: null # 8
+  precision: 16-true
 
 model:
   optimizer:

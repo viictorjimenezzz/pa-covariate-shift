@@ -84,3 +84,47 @@ class AccuracyOracle_Callback(Callback):
             for batch_idx, batch in enumerate(dl):
                 metrics_dict = self._every_test_batch(pl_module, batch, batch_idx)
                 pl_module.log_dict(metrics_dict, prog_bar=False, on_step=True, on_epoch=True, logger=True, sync_dist=False)
+
+
+class AccuracyOracle_Remove(Callback):
+    def __init__(
+            self,
+            n_classes: int,
+            top_k: Optional[int] = 1
+        ):
+        super().__init__()
+        self.n_classes = n_classes
+        _task = "multiclass" if n_classes > 2 else "binary"
+        self.test_acc = Accuracy(task=_task, num_classes=n_classes, average="macro", top_k=top_k)
+
+    def setup(self, trainer: Trainer, pl_module: LightningModule, stage: str) -> None:
+        """
+        Generate test datasets.
+        """
+        if stage == "test":
+            return
+        trainer.datamodule.setup("test")
+
+    def _every_test_batch(self, pl_module: LightningModule, batch: dict, batch_idx: int):
+        """
+        Copied from AccuracyDomains_Callback.
+        """
+        # I move the data to the right device
+        (x, y), _ = pl_module._extract_test_batch(batch) 
+        batch = (x.to(pl_module.device), y.to(pl_module.device))
+
+        # Now I call the test step of the original model
+        outputs = pl_module.test_step(batch, batch_idx)
+        y, preds = outputs["targets"], outputs["preds"]
+
+        metrics_dict = {}
+        metrics_dict['oracle/acc'] = self.test_acc.to(pl_module.device)(preds, y)
+        return metrics_dict
+
+    def on_validation_batch_start(self, trainer: Trainer, pl_module: LightningModule, batch, batch_idx, dataloader_idx):
+        if batch_idx == 0:
+            pl_module.model.eval()
+            dl = trainer.datamodule.test_dataloader()
+            for batch_idx, batch in enumerate(dl):
+                metrics_dict = self._every_test_batch(pl_module, batch, batch_idx)
+                pl_module.log_dict(metrics_dict, prog_bar=False, on_step=True, on_epoch=True, logger=True, sync_dist=False)

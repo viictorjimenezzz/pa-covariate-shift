@@ -17,10 +17,10 @@ srun python3 src/train.py \
     callbacks.posterioragreement.pa_epochs=1000 \
     callbacks.posterioragreement.pairing_strategy=label_nn \
     +callbacks/components@callbacks.posterioragreement.dataset=pa_wilds_trainval \
-    experiment=dg/wilds/camelyon17_irm \
-    name_logger=idtest_irm_labnn \
-    +data/dg/wilds@data=rxrx1_idtest \
-    +auxiliary_args.dataconfname=rxrx1_idtest \
+    experiment=dg/wilds/fmow_erm \
+    name_logger=erm_labnn \
+    +data/dg/wilds@data=fmow_idtest \
+    +auxiliary_args.dataconfname=fmow_idtest \
     data.transform.is_training=true \
     seed=0 \
     trainer=ddp \
