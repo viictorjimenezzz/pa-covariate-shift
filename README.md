@@ -1,6 +1,6 @@
 <div align="center">
 
-# Posterior Agreement for Model Robustness Assessment in Covariate Shift Scenarios
+# Improved robustness of deep learning models through posterior agreement based model selection
 
 [![python](https://img.shields.io/badge/-Python3.9.9-blue?logo=python&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![pytorch](https://img.shields.io/badge/PyTorch_1.10.0-ee4c2c?logo=pytorch&logoColor=white)](https://pytorch.org/get-started/locally/)
