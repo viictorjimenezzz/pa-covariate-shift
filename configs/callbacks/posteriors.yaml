@@ -1,5 +1,13 @@
+# posteriors:
+#   _target_: src.callbacks.posteriors.Posterior_Callback
+#   n_classes: ${data.n_classes}
+#   optimal_beta: ???
+#   algorithm_name: ${classname:'${model._target_}'}
+#   dataset_name: ${diagvib_dataset.folder_name}_${list_at_idx:${data.envs_index_test},1}
+
+
 posteriors:
-  _target_: src.callbacks.posteriors.Posterior_Callback
+  _target_: src.callbacks.posteriors.PosteriorViolin_Callback
   n_classes: ${data.n_classes}
   optimal_beta: ???
   algorithm_name: ${classname:'${model._target_}'}

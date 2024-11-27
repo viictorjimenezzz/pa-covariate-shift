@@ -132,7 +132,6 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
     #     'orig_false_std': torch.sqrt(model.stored_orig_false_2/model.num_orig_false - orig_false_mean**2),
     #     'gibbs_orig_false_mean': gibbs_orig_false_mean,
     #     'gibbs_orig_false_std': torch.sqrt(model.stored_orig_gibbs_false_2/model.num_orig_false - gibbs_orig_false_mean**2),
-        
 
     #     'adv_true_mean': adv_true_mean,
     #     'adv_true_std': torch.sqrt(model.stored_adv_true_2/model.num_adv_true - adv_true_mean**2),
@@ -142,7 +141,31 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
     # with open(file_path, 'wb') as f:
     #     pickle.dump(results, f)
 
-    # raise NotImplementedError
+    """
+    New version. Instead of storing the mean, we will store the whole distribution:
+    """
+
+    import pickle
+    import os
+
+    RESULTS_DIR = r"/cluster/home/vjimenez/adv_pa_new/results/adv"
+    fname = f"PGD_eps={cfg.auxiliary_args.epsilons}_ar=1.0_histogram.pkl"
+    # fname = f"FMN_ar=1.0_histogram.pkl"
+    file_path = os.path.join(RESULTS_DIR, cfg.model.net.model_name, fname)
+    results = {
+        'stored_orig_true': model.stored_orig_true,
+        'stored_orig_gibbs_true': model.stored_orig_gibbs_true,
+
+        'stored_orig_false': model.stored_orig_false,
+        'stored_orig_gibbs_false': model.stored_orig_gibbs_false,
+
+        'stored_adv_true': model.stored_adv_true,
+        'stored_adv_gibbs_true': model.stored_adv_gibbs_true
+    }
+    with open(file_path, 'wb') as f:
+        pickle.dump(results, f)
+
+    raise NotImplementedError
     # ----------------------------------------------------------------------------------------------
 
 

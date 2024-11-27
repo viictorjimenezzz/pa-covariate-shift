@@ -13,12 +13,12 @@ source activate $1
 srun python3 src/test_datashift.py \
     --multirun \
     callbacks=posteriors \
-    callbacks.posteriors.optimal_beta=5.687 \
+    callbacks.posteriors.optimal_beta=2.303 \
     auxiliary_args.project_name="DiagVib-6 Paper" \
     auxiliary_args.diagvib_task=datashift \
     +data/dg/diagvib/datashift@diagvib_dataset=paper_nonpaired \
-    experiment=dg/diagvibsix/diagvibsix_lisa \
-    experiment_name=lisa_10 \
+    experiment=dg/diagvibsix/diagvibsix_erm \
+    experiment_name=erm_001 \
     checkpoint_metric=acc \
     data.envs_index_test=[0,0],[0,1],[0,2],[0,3],[0,4],[0,5] \
     seed=0 \

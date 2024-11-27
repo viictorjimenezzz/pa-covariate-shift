@@ -4,11 +4,11 @@
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=1
 #SBATCH --mem-per-cpu=30G
-#SBATCH --time=24:00:00
+#SBATCH --time=4:00:00
 
-# python3 src/train_remove.py \
-srun python3 src/train_remove.py \
-    --multirun \
+# srun python3 src/train_remove.py \
+python3 src/train_remove.py \
+    --cfg=job \
     callbacks=default_train_adv \
     +callbacks@callbacks.posterioragreement=pametric \
     +callbacks/components@callbacks.posterioragreement.dataset=pa_adv \
@@ -16,9 +16,10 @@ srun python3 src/train_remove.py \
     callbacks.posterioragreement.pairing_csv=null \
     callbacks.posterioragreement.pa_epochs=500 \
     experiment=adv/eval_adv \
-    +model/adv/classifier@model.net=weak,wong2020,wang2023,robust,addepalli2021,bpda \
-    +data/adv/attack@data.attack=FMN \
+    +model/adv/classifier@model.net=weak \
+    +data/adv/attack@data.attack=PGD \
     auxiliary_args.steps=1000 \
+    auxiliary_args.epsilons=0.0314 \
     data.adversarial_ratio=1.0 \
     seed=0 \
     trainer=gpu \
@@ -26,6 +27,7 @@ srun python3 src/train_remove.py \
     +trainer.fast_dev_run=false \
     trainer.min_epochs=1 \
     logger.wandb=null \
+    # model.beta_to_plot=0.7896 \
     # logger.wandb.group=fivehundred_epochs\
     # auxiliary_args.epsilons=0.0314,0.0627,0.1255 \
 

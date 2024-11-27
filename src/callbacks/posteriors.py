@@ -61,3 +61,55 @@ class Posterior_Callback(Callback):
         with open(file_path, 'wb') as f:
             pickle.dump(results, f)
 
+
+class PosteriorViolin_Callback(Callback):
+    """
+    Stores the posterior distribution over a test dataset, so that it can be plotted with a violin.
+    """
+    def __init__(
+            self,
+            n_classes: int,
+            optimal_beta: int,
+            algorithm_name: str,
+            dataset_name: str
+        ):
+        super().__init__()
+        self.algorithm_name, self.dataset_name = algorithm_name, dataset_name
+
+        self.optimal_beta = optimal_beta
+        self.stored_x, self.stored_x_gibbs = torch.zeros(0).cpu(), torch.zeros(0).cpu()
+
+    @staticmethod
+    def softmax(logits):
+        return F.softmax(logits, dim=-1)
+    
+    @staticmethod
+    def gibbs(logits, beta):
+        return F.softmax(logits*beta, dim=-1)
+
+    def on_test_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
+        logits = outputs["logits"].detach().cpu()
+
+        self.stored_x = torch.cat([
+            self.stored_x, 
+            self.softmax(logits).sort(dim=-1, descending=True)[0]
+        ])
+        self.stored_x_gibbs = torch.cat([
+            self.stored_x_gibbs,
+            self.gibbs(logits, self.optimal_beta).sort(dim=-1, descending=True)[0]
+        ])
+
+        
+    def on_test_epoch_end(self, trainer, pl_module):
+        """
+        Store the posteriors in a file.
+        """
+
+        results = {
+            'stored_x': self.stored_x,
+            'stored_x_gibbs': self.stored_x_gibbs,
+        }
+
+        file_path = rf"/cluster/home/vjimenez/adv_pa_new/results/posteriors/{self.dataset_name}_{self.algorithm_name}_histogram.pkl"
+        with open(file_path, 'wb') as f:
+            pickle.dump(results, f)

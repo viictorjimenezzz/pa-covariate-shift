@@ -46,15 +46,25 @@ class AdvModule(ERM):
 
         self.save_hyperparameters(ignore=["net", "loss"])
 
-        self.num_orig_true, self.num_orig_false = 0, 0
-        self.stored_orig_true, self.stored_orig_true_2 = torch.zeros(10).cpu(), torch.zeros(10).cpu()
-        self.stored_orig_gibbs_true, self.stored_orig_gibbs_true_2 = torch.zeros(10).cpu(), torch.zeros(10).cpu()
-        self.stored_orig_false, self.stored_orig_false_2 = torch.zeros(10).cpu(), torch.zeros(10).cpu()
-        self.stored_orig_gibbs_false, self.stored_orig_gibbs_false_2 = torch.zeros(10).cpu(), torch.zeros(10).cpu()
+        # For the _compute_distributions():
+        # self.num_orig_true, self.num_orig_false = 0, 0
+        # self.stored_orig_true, self.stored_orig_true_2 = torch.zeros(10).cpu(), torch.zeros(10).cpu()
+        # self.stored_orig_gibbs_true, self.stored_orig_gibbs_true_2 = torch.zeros(10).cpu(), torch.zeros(10).cpu()
+        # self.stored_orig_false, self.stored_orig_false_2 = torch.zeros(10).cpu(), torch.zeros(10).cpu()
+        # self.stored_orig_gibbs_false, self.stored_orig_gibbs_false_2 = torch.zeros(10).cpu(), torch.zeros(10).cpu()
 
-        self.num_adv_true = 0
-        self.stored_adv_true, self.stored_adv_true_2 = torch.zeros(10).cpu(), torch.zeros(10).cpu()
-        self.stored_adv_gibbs_true, self.stored_adv_gibbs_true_2 = torch.zeros(10).cpu(), torch.zeros(10).cpu()
+        # self.num_adv_true = 0
+        # self.stored_adv_true, self.stored_adv_true_2 = torch.zeros(10).cpu(), torch.zeros(10).cpu()
+        # self.stored_adv_gibbs_true, self.stored_adv_gibbs_true_2 = torch.zeros(10).cpu(), torch.zeros(10).cpu()
+
+        # For the _compute_histograms():
+        self.stored_orig_true, self.stored_orig_false, self.stored_adv_true = torch.zeros(0).cpu(), torch.zeros(0).cpu(), torch.zeros(0).cpu()
+        self.stored_orig_gibbs_true, self.stored_orig_gibbs_false, self.stored_adv_gibbs_true = torch.zeros(0).cpu(), torch.zeros(0).cpu(), torch.zeros(0).cpu()
+
+        # For the _compute_histograms_posteriors():
+        # self.stored_x, self.stored_x_gibbs = torch.zeros(0).cpu(), torch.zeros(0).cpu()
+        # self.stored_xprime, self.stored_xprime_gibbs = torch.zeros(0).cpu(), torch.zeros(0).cpu()
+
 
     @staticmethod
     def softmax(logits):
@@ -65,65 +75,6 @@ class AdvModule(ERM):
         return F.softmax(logits*beta, dim=-1)
     
     def _compute_distributions(self, out: dict):
-        # FOR THE PLOT -------------------------------------------------------------------------------
-
-        """
-        Addepalli2021, 
-        PGD, 0.0314
-            ar=0.1 >> beta=15.885943
-            ar=0.5 >> beta=15.893476
-            ar=1.0 >> beta=15.890465.
-        PGD, 0.1255
-            ar=0.5 >> beta=15.697365
-        FMN, ar=1.0 >> beta=6.081631.
-
-        Wang, et al.,
-        PGD, 0.0314
-            ar=0.1 >> beta=11.257099
-            ar=0.5 >> beta=11.259317
-            ar=1.0 >> beta=11.244336.
-        PGD, 0.1255
-            ar=0.5 >> beta=10.858996
-        FMN, ar=1.0 >> beta=2.537294.
-
-        Standard,
-        PGD, 0.0314
-            ar=0.1 >> beta=1.806318
-            ar=0.5 >> beta=0.994757
-            ar=1.0 >> beta=0.789602.
-        PGD,, 0.1255
-            ar=0.5 >> beta=0.377333
-        FMN, ar=1.0 >> beta=0.655061.
-
-        BPDA,
-        PGD, 0.0314
-            ar=0.1 >> beta=37.9277
-            ar=0.5 >> beta=36.926743
-            ar=1.0 >> beta=35.480820.
-        PGD, 0.1255
-            ar=0.5 >> beta=34.347984
-        FMN, ar=1.0 >> beta=19.843315.
-
-        Engstrom,
-        PGD, 0.0314
-            ar=0.1 >> beta=15.787772
-            ar=0.5 >> beta=15.694523
-            ar=1.0 >> beta=15.63269.
-        PGD, 0.1255
-            ar=0.5 >> beta=14.017195
-        FMN, ar=1.0 >> beta=2.594392.
-
-        Wong,
-        PGD, 0.0314
-            ar=0.1 >> beta=15.57553
-            ar=0.5 >> beta=15.540545
-            ar=1.0 >> beta=15.460098.
-        PGD, 0.1255
-            ar=0.5 >> beta=13.769010
-        FMN, ar=1.0 >> beta=4.596598
-        """
-        # --------------------------------------------------------------------------------------------
-    
         beta_opt = self.beta_to_plot
 
         mask_acc = (out["preds"][:64] == out["targets"][:64]).cpu()
@@ -173,12 +124,132 @@ class AdvModule(ERM):
         del mask_true, logits_true
 
         return
+
+    def _compute_histograms(self, out: dict):
+        beta_opt = self.beta_to_plot
+
+        mask_acc = (out["preds"][:64] == out["targets"][:64]).cpu()
+        mask_true = torch.cat([
+            mask_acc,
+            torch.full((64,), False, dtype=torch.bool),
+        ])
+        mask_false = torch.cat([
+            ~mask_acc,
+            torch.full((64,), False, dtype=torch.bool),
+        ])
+
+        logits_true = out["logits"][mask_true, :].detach().cpu()
+        print("LOG:", self.softmax(logits_true).sort(dim=-1, descending=True)[0].size())
+        self.stored_orig_true = torch.cat([
+            self.stored_orig_true,
+            self.softmax(logits_true).sort(dim=-1, descending=True)[0]
+        ])
+        self.stored_orig_gibbs_true = torch.cat([
+            self.stored_orig_gibbs_true,
+            self.gibbs(logits_true, beta_opt).sort(dim=-1, descending=True)[0]
+        ])
+        
+        
+        logits_false = out["logits"][mask_false, :].detach().cpu()
+        self.stored_orig_false = torch.cat([
+            self.stored_orig_false,
+            self.softmax(logits_false).sort(dim=-1, descending=True)[0]
+        ])
+        self.stored_orig_gibbs_false = torch.cat([
+            self.stored_orig_gibbs_false,
+            self.gibbs(logits_false, beta_opt).sort(dim=-1, descending=True)[0]
+        ])
+        del mask_true, mask_false, logits_true, logits_false
+
+
+        mask_adv = (out["preds"][:64] != out["preds"][64:]).cpu()
+        mask_true = torch.cat([
+            torch.full((64,), False, dtype=torch.bool),
+            mask_acc*mask_adv
+        ])
+
+        logits_true = out["logits"][mask_true, :].detach().cpu()
+        self.stored_adv_true = torch.cat([
+            self.stored_adv_true,
+            self.softmax(logits_true).sort(dim=-1, descending=True)[0]
+        ])
+        self.stored_adv_gibbs_true = torch.cat([
+            self.stored_adv_gibbs_true,
+            self.gibbs(logits_true, beta_opt).sort(dim=-1, descending=True)[0]
+        ])
+        del mask_true, logits_true
+
+    def _compute_histograms_posteriors(self, out: dict):
+        """
+        We will store all values of x' and x''.
+        """
+        beta_opt = self.beta_to_plot
+
+        logits_x = out["logits"][:64, :].detach().cpu()
+        self.stored_x = torch.cat([
+            self.stored_x,
+            self.softmax(logits_x).sort(dim=-1, descending=True)[0]
+        ])
+        self.stored_x_gibbs = torch.cat([
+            self.stored_x_gibbs,
+            self.gibbs(logits_x, beta_opt).sort(dim=-1, descending=True)[0]
+        ])
+
+        logits_xprime = out["logits"][64:, :].detach().cpu()
+        self.stored_xprime = torch.cat([
+            self.stored_xprime,
+            self.softmax(logits_xprime).sort(dim=-1, descending=True)[0]
+        ])
+        self.stored_xprime_gibbs = torch.cat([
+            self.stored_xprime_gibbs,
+            self.gibbs(logits_xprime, beta_opt).sort(dim=-1, descending=True)[0]
+        ])
+
+    def _compute_histograms_posteriors_2(self, out: dict):
+        """
+        We will only store values for the samples that succeed at misleading the model, before and after the attack.
+        """
+        beta_opt = self.beta_to_plot
+
+        mask_misleading = (out["preds"][:64] != out["preds"][64:]).cpu()
+        mask_x = torch.cat([
+            mask_misleading,
+            torch.full((64,), False, dtype=torch.bool),
+        ])
+        y_true = out["targets"][mask_x].detach().cpu()
+
+        logits_x = out["logits"][mask_x, :].detach().cpu()
+        self.stored_x = torch.cat([
+            self.stored_x,
+            self.softmax(logits_x).gather(1, y_true.unsqueeze(1)).squeeze(1)
+        ])
+        self.stored_x_gibbs = torch.cat([
+            self.stored_x_gibbs,
+            self.gibbs(logits_x, beta_opt).gather(1, y_true.unsqueeze(1)).squeeze(1)
+        ])
+
+        mask_xprime = torch.cat([
+            torch.full((64,), False, dtype=torch.bool),
+            mask_misleading
+        ])
+        logits_xprime = out["logits"][mask_xprime, :].detach().cpu()
+        self.stored_xprime = torch.cat([
+            self.stored_xprime,
+            self.softmax(logits_xprime).gather(1, y_true.unsqueeze(1)).squeeze(1)
+        ])
+        self.stored_xprime_gibbs = torch.cat([
+            self.stored_xprime_gibbs,
+            self.gibbs(logits_xprime, beta_opt).gather(1, y_true.unsqueeze(1)).squeeze(1)
+        ])
     
     def training_step(self, batch: Union[dict, tuple], batch_idx: int):
         out = super().training_step(batch, batch_idx)
 
         try:
-            self._compute_distributions(out)
+            # self._compute_distributions(out)
+            self._compute_histograms(out)
+            # self._compute_histograms_posteriors(out)
+            # self._compute_histograms_posteriors_2(out)
         except:
             print(f"\nError found at batch {batch_idx}")
         
