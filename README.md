@@ -123,7 +123,7 @@ You can obtain the desired metrics on the shifted test environments by running
 The required parameters are:
 - `experiment`: model to test (see options at `configs/experiment/dg/diagvibsix/`)
 - `model.ppred`: adjusting the $p_{\text{sel}}$ parameter for LISA.
-- `auxiliary_args.pa_datashift.shift_ratio`: $\operatorname{SR}$ values (results reported for `0.2`-`1.0`)
+- `auxiliary_args.pa_datashift.shift_ratio`: $SR$ values (results reported for `0.2`-`1.0`)
 - `data.envs_index_test`: pairs of test environments (results reported for `[0,1]`-`[0,5]`)
 
 ## Model selection
