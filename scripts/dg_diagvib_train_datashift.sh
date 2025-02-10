@@ -12,7 +12,7 @@ source activate $1
 # python3 src/train.py \
 srun python3 src/train.py \
     --multirun \
-    callbacks=default_train_datashift_remove \
+    callbacks=default_train_datashift \
     auxiliary_args.diagvib_task=datashift \
     auxiliary_args.project_name="DiagVib-6 Paper" \
     +callbacks@callbacks.posterioragreement=pametric \
@@ -21,14 +21,13 @@ srun python3 src/train.py \
     +data/dg/diagvib/datashift@diagvib_dataset=paper_nonpaired \
     experiment=dg/diagvibsix/diagvibsix_lisa \
     model.ppred=0.75 \
-    logger.wandb.name=lisa_075 \
-    trainer.max_epochs=100 \
     model.optimizer._target_=torch.optim.Adam \
     model.optimizer.lr=0.001 \
     seed=0 \
     trainer=ddp \
     trainer.deterministic=true \
     +trainer.fast_dev_run=false \
+    logger.wandb.name=lisa_075 \
     # data.batch_size=16 \
 
     # model.ppred=0.4 \
