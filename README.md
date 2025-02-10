@@ -1,6 +1,6 @@
 <div align="center">
 
-# Improved robustness of deep learning models through posterior agreement based model selection
+# Rethinking Robustness in Machine Learning: A Posterior Agreement Approach
 
 [![python](https://img.shields.io/badge/-Python3.9.9-blue?logo=python&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![pytorch](https://img.shields.io/badge/PyTorch_1.10.0-ee4c2c?logo=pytorch&logoColor=white)](https://pytorch.org/get-started/locally/)
@@ -26,63 +26,147 @@ Made with the [<kbd>lightning-hydra-template</kbd>](https://github.com/ashleve/l
 
 <br>
 
-## Before you start
-Before running the scripts you need to create a `data`, `logs` and `outputs` folder.
+## Table of Contents
+- [Setup](#setup)
+- [Algorithm Selection](#algorithm-selection)
+  - [Adversarial Setting](#adversarial-setting)
+  - [Out-of-distribution setting](#out-of-distribution-setting)
+- [Model Selection](#model-selection)
+- [Algorithm Selection](#algorithm-selection)
+- [Other Experiments](#other-experiments)
+- [Additional Parameters](#additional-parameters)
 
-- Create a `.env` file to define the environment variables. Set up the 
-following three directory paths
-    - `DATA_DIR`: where the datasets and trained models will be stored
-    - `LOGS_DIR`: where the logs of the training will be stored
-    - `OUTPUTS_DIR`: where the command line outputs will be stored
-- Create the three data folders according to the variables you have set up, or
-run the `./scripts/create_soft_links.sh` to directly create soft links to the 
-specified directory paths (useful if you want to store the data in remote
-locations)
 
-## Adversarial Learning
+## Setup
+
+- Before running the scripts you need to create a `data`, `logs`, `outputs` and `results` folder. The repository structure should be as follows: 
+
+```
+pa-covariate-shift/
+├── configs/                # Containing YAML configuration files
+├── data/                   # Containing datasets and model checkpoints
+├── logs/                   # Containing the logs of each execution
+├── outputs/                # Containing the command output of each execution
+├── results/                # Containing figures and tables resulting from the experiments
+├── scripts/                # Containing pre-built scripts
+├── src/                    # Containing the source code
+|   ├── callbacks/          # Containing Callback implementations
+|   ├── data/               # Containing LightningDataModule implementations
+|   ├── models/             # Containing LightningModule implementations
+|   ├── plot/               # Containing python scripts to generate plots
+|   └── utils/              # Containing useful methods
+├── tests/                  # Containing pre-built sanity checks
+├── requirements.txt        # Containing python dependencies
+└── README.md               # This file
+```
+
+- Create a `.env` file to define the environment variables.
+
+```
+PROJECT_ROOT="."
+RES_DIR = # set to the desired location
+DATA_DIR = "${RES_DIR}/data"
+LOG_DIR = "${RES_DIR}/logs"
+OUTPUT_DIR = "${RES_DIR}/outputs"
+```
+
+- Create the three data folders according to the `RES_DIR` variable you have set up, or run the `./scripts/create_soft_links.sh` to directly create soft links to the specified directory paths (useful if you want to store the data in remote
+locations).
+
+## Algorithm selection
+
+We compared the robustness assessment capabilities of PA and accuracy-based metrics in the covariate shift setting. Adversarially-attacked and domain-shifted samples were generated under different conditions, namely varying the nature of the shift, its magnitude, and the proportion of affected samples.
+
+### Adversarial setting
+
 To create the adversarial datasets you can run
 ```bash
-python src/generate_adv_data.py experiment=adv/generate_adv_data <option>=<value> ...
+./scripts/generate_adv_data.sh <option>=<value>
 ```
 
-To replicate the adversarial experiments you can run
+To replicate the experiments you can run
 ```bash
-python src/train_pa.py experiment=adv/optimize_beta <option>=<value> ...
+./scripts/adv_eval.sh --<config>=<value>
 ```
 
-The additional parameters for both scripts are:
-- `model/adv/classifier@data.classifier`: the attacked model (`weak`, or
-`roubst`) 
-- `data/adv/attack@data.attack`: the attack (`PGD`, `FMN`)
-- `data.attack.steps`: the attack number of steps (tested with `1000`)  
-- `data.attack.batch_size`: the attack batch size (tested with `1000`)
-- `data.attack.epsilons`: the attack power (only for PGD, tested with
+The required parameters for both scripts are:
+- `model/adv/classifier@model.net`: the attacked model (see options at `configs/model/adv/classifier/`) 
+- `data/adv/attack@data.attack`: the attack (see options at `configs/data/adv/attack/`)
+- `auxiliary_args.steps`: the attack number of steps (tested with `1000`)  
+- `auxiliary_args.epsilons`: the attack power (only for PGD, tested with
 `0.0314`, `0.0627` and `0.1255`)
+- `data.batch_size`: the attack batch size (tested with `1000`)
 - `data.adversarial_ratio`: the attack adversarial ratio, in $[0, 1]$ 
+- `callbacks.posterioragreement.pa_epochs`: PA optimization epochs (tested with `500`).
+
+### Out-of-distribution setting
+
+To create the DiagVib-6 shifted datasets you can run
+```bash
+./scripts/generate_diagvib_data.sh
+```
+
+Make sure to uncomment the `datashift` configuration imports. To replicate the experiments you can train the models by running
+```bash
+./scripts/dg_diagvib_train_datashift.sh --<config>=<value>
+```
+
+The required parameters are:
+- `experiment`: model to train (see options at `configs/experiment/dg/diagvibsix/`)
+- `model.ppred`: adjusting the $p_{\text{sel}}$ parameter for LISA.
+
+You can obtain the desired metrics on the shifted test environments by running
+```bash
+./scripts/dg_diagvib_test_datashift.sh --<config>=<value>
+```
+
+The required parameters are:
+- `experiment`: model to test (see options at `configs/experiment/dg/diagvibsix/`)
+- `model.ppred`: adjusting the $p_{\text{sel}}$ parameter for LISA.
+- `auxiliary_args.pa_datashift.shift_ratio`: $\operatorname{SR}$ values (results reported for `0.2`-`1.0`)
+- `data.envs_index_test`: pairs of test environments (results reported for `[0,1]`-`[0,5]`)
+
+## Model selection
+
+In-distribution model selection experiments with specific shortcut opportunity configurations were conducted with specific settings of the DiagVib-6 data. To generate the data, you can run
+
+```bash
+./scripts/generate_diagvib_data.sh
+```
+
+Make sure to uncomment the `model selection configuration imports.
+
+## Other experiments
+
+- To reproduce the synthetic experiment with Bernoullie samples (Figure 1), you can run
+```bash
+python ./src/artificial_pipeline.py
+```
+
+- To reproduce results on the IMDB classification experiment (Appendix C), you can finetune the classifier for the task with
+
+```bash
+./scripts/sa_imdb.sh
+```
+
+You can obtain the reported results by running
+```bash
+./scripts/sa_imdb_test.sh
+```
+
+The required parameters are:
+- `callbacks.posterioragreement.dataset.perturbation`: type of perturbation (see options)
+- `callbacks.posterioragreement.dataset.intensity`: attack power $W$ (results reported for `0`-`8`)
+
+- To reproduce the robustness - feature alignment experiments (Appendix E) you can include the `+callbacks=pa_pca` configuration to the out-of-distribution experiments.
+
+## Additional parameters
+### Debugging parameters
+
 - `trainer`: (optional) set it to `cpu` in order to disable GPU usage (for debugging)
 - `logger`: (optional) set it to `None` to disable W&B logging
 
-
-## Domain Generalization
-
-To replicate the adversarial experiments you can run
-```bash
-python src/train_pa.py experiment=adv/optimize_beta <option>=<val> ...
-```
-
-The additional parameters are:
-
-- `data.dg.ds1_env`: the first dataset to compare with. Set it to `test0`
-- `data.dg.ds2_env`: the other environments to compare with (`test0`, `test1`, `test2`, `test3`, `test4`, `test5`)
-- `data.dg.shift_ratio`: the shift ratio, in $[0, 1]$
-- `model.dg.classifier.exp_name`: the DG model (`diagvib_weak`,
-`diagvib_robust`)
-
-## Debugging parameters
-- `trainer`: (optional) set it to `cpu` in order to disable GPU usage
-- `logger`: (optional) set it to `None` to disable the default (W&B) logging
-
-## Multiple experiments
+### Multiple experiments
 You can run multiple experiments by defining more values for one parameter,
 separated by a comma (e.g., `data.attack.epsilons=0.0314,0.0627,0.1255`) and by
 adding the option `--multirun`
