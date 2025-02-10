@@ -138,7 +138,7 @@ Make sure to uncomment the `model selection configuration imports.
 
 ## Other experiments
 
-- To reproduce the synthetic experiment with Bernoullie samples (Figure 1), you can run
+- To reproduce the synthetic experiment with Bernoulli samples (Figure 1), you can run
 ```bash
 python ./src/artificial_pipeline.py
 ```
