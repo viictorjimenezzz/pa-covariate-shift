@@ -12,7 +12,7 @@ if [ "$attack" = "FMN" ]; then
         log_file="script_${device}.log"
         CUDA_VISIBLE_DEVICES=$device python src/generate_adv_data.py \
             experiment=adv/generate_adv_data \
-            model/adv/classifier@data.classifier=$model \
+            model/adv/classifier@model.net=$model \
             data/adv/attack@data.attack=$attack \
             data.attack.steps=1000 \
             data.batch_size=1000 \
@@ -26,7 +26,7 @@ else
             log_file="script_${device}.log"
             CUDA_VISIBLE_DEVICES=$device python src/generate_adv_data.py \
                 experiment=adv/generate_adv_data \
-                model/adv/classifier@data.classifier=$model \
+                model/adv/classifier@model.net=$model \
                 data/adv/attack@data.attack=$attack \
                 data.attack.epsilons=$epsilon \
                 data.attack.steps=1000 \
