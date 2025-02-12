@@ -6,21 +6,9 @@
 [![pytorch](https://img.shields.io/badge/PyTorch_1.10.0-ee4c2c?logo=pytorch&logoColor=white)](https://pytorch.org/get-started/locally/)
 [![lightning](https://img.shields.io/badge/-Lightning_1.9.1-792ee5?logo=pytorchlightning&logoColor=white)](https://pytorchlightning.ai/)
 [![hydra](https://img.shields.io/badge/Config-Hydra_1.3.1-89b8cd)](https://hydra.cc/)
-<!-- [![tests](https://github.com/ashleve/lightning-hydra-template/actions/workflows/test.yml/badge.svg)](https://github.com/ashleve/lightning-hydra-template/actions/workflows/test.yml) -->
-<!-- [![code-quality](https://github.com/ashleve/lightning-hydra-template/actions/workflows/code-quality-main.yaml/badge.svg)](https://github.com/ashleve/lightning-hydra-template/actions/workflows/code-quality-main.yaml) -->
-<!-- [![codecov](https://codecov.io/gh/ashleve/lightning-hydra-template/branch/main/graph/badge.svg)](https://codecov.io/gh/ashleve/lightning-hydra-template) <br> -->
 [![license](https://img.shields.io/badge/License-MIT-green.svg?labelColor=gray)](https://github.com/ashleve/lightning-hydra-template#license)
-[![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/ashleve/lightning-hydra-template/pulls)
-<!-- [![contributors](https://img.shields.io/github/contributors/aretor/adv_pa_new.svg)](https://github.com/aretor/adv_pa_new/graphs/contributors) -->
-
-<!--
-Code for replicating the experiments in the paper: *"J. B. Carvalho,
-A. Torcinovich, A. E. Cinà, L. Schönherr, J. M. Buhmann, Posterior Agreement
-for Model Robustness Assessment in Covariate Shift Scenarios"*.
--->
 
 Made with the [<kbd>lightning-hydra-template</kbd>](https://github.com/ashleve/lightning-hydra-template)
-
 
 </div>
 
