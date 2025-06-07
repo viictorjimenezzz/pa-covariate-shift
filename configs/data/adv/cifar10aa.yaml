@@ -1,0 +1,17 @@
+_target_: src.data.cifar10aa.CIFAR10DataModuleAA
+norm: Linf
+attack: apgd-ce
+eps: 0.0314
+version: standard
+batch_size: 64
+adversarial_ratio: 1.0
+small_magnitude_first: false
+dataset_dir: ${paths.data_dir}/adv/${data._name_}/${data.norm}/data
+cache: true
+verbose: true
+num_workers: 0
+pin_memory: False
+
+# Extra:
+_name_: cifar10
+n_classes: 10

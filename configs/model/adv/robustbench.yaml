@@ -1,0 +1,5 @@
+_target_: robustbench.load_model
+model_name: ???
+dataset: ${data._name_}
+model_dir: ${paths.data_dir}/adv
+threat_model: ${data.norm}

@@ -1,0 +1,2 @@
+_target_: src.callbacks.afr.AFR_Callback
+n_classes: ${data.n_classes}

@@ -1,0 +1,34 @@
+# @package _global_
+
+defaults:
+  - /data/adv@data: cifar10aa
+  - /model/adv@model: robustbench
+
+   # Add AFR callback:
+  - /callbacks@callbacks.afr: afr
+
+  - override /trainer: cpu
+  - override /logger: wandb
+  - override /callbacks: default_train_adv
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+task_name: adversarial
+experiment_name: cifar10aa
+tags: ["example"]
+seed: 12345
+
+
+# For CIFAR10:
+data:
+  attack: apgd-ce
+  norm: Linf
+  eps: 0.0314
+
+algorithm:
+  model: 
+    model_name: Standard
+    # model_name: Addepalli2021Towards_RN18
+
+tuner: null
