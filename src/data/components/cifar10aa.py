@@ -55,17 +55,9 @@ class AdversarialCIFAR10DatasetAA(TensorDataset):
             X_tensor = X_tensor.to(self.device)
             Y_tensor = Y_tensor.to(self.device)
             
-            # Create forward pass function for AutoAttack
-            def forward_pass(x):
-                # self.model.eval()
-                # with torch.no_grad():
-                #     return self.model(x)
-                
-                return self.model(x)
-            
             # Initialize AutoAttack
             adversary = AutoAttack(
-                forward_pass, 
+                self.model.forward, 
                 norm=norm, 
                 eps=eps, 
                 version=version, 
