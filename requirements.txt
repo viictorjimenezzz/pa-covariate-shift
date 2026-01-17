@@ -37,7 +37,7 @@ foolbox==3.3.3
 frozenlist==1.4.0
 fsspec==2023.6.0
 geotorch==0.3.0
-gevent==23.7.0
+gevent==24.2.1
 gitdb==4.0.10
 GitPython==3.1.32
 greenlet==2.0.2
